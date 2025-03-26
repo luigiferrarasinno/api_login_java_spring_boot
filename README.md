@@ -97,7 +97,7 @@ A API permite as seguintes operações:
 
 1. **Clonar o Repositório**:
    ```bash
-   git clone https://github.com/usuario/projeto-api.git
+   git clone [https://github.com/usuario/projeto-api.git](https://github.com/luigiferrarasinno/api_login_java_spring_boot.git)
    cd projeto-api
    ```
 
