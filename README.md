@@ -2,7 +2,7 @@
 
 # **API de Usuários - Sistema de Login e Cadastro**
 
-Esta é uma API simples para gerenciar usuários, incluindo funcionalidades de login, cadastro de contas, alteração de senha, deleção de conta e visualização de todos os usuários. A API foi construída com **Spring Boot** e utiliza um banco de dados H2 (embutido).
+Esta API foi construída com **Spring Boot** e oferece funcionalidades para gerenciar usuários, incluindo login, cadastro, alteração de senha, deleção de conta e visualização de todos os usuários. A API usa um banco de dados H2 embutido e foi estruturada com camadas **Controller**, **Service** e **DAO**.
 
 ## **Funcionalidades**
 A API permite as seguintes operações:
@@ -12,6 +12,14 @@ A API permite as seguintes operações:
 3. **Alterar Senha**: Alterar a senha de um usuário.
 4. **Deletar Conta**: Excluir um usuário do sistema.
 5. **Listar Usuários**: Retornar todos os usuários cadastrados.
+
+## **Estrutura da API**
+
+A aplicação foi estruturada de forma modular, dividida nas seguintes camadas:
+
+- **Controller**: Responsável por expor os endpoints HTTP.
+- **Service**: Contém a lógica de negócios, realizando validações e manipulando dados.
+- **DAO (Data Access Object)**: Responsável pela comunicação direta com o banco de dados (usando o repositório do Spring Data JPA).
 
 ## **Endpoints da API**
 
@@ -97,7 +105,7 @@ A API permite as seguintes operações:
 
 1. **Clonar o Repositório**:
    ```bash
-   git clone [https://github.com/usuario/projeto-api.git](https://github.com/luigiferrarasinno/api_login_java_spring_boot.git)
+   git clone https://github.com/luigiferrarasinno/api_login_java_spring_boot.git
    cd projeto-api
    ```
 
@@ -130,7 +138,7 @@ Ao rodar a aplicação pela primeira vez, será criado automaticamente um usuár
 ---
 
 ## **Conclusão**
-Essa API oferece funcionalidades básicas de autenticação e gerenciamento de usuários, com endpoints para login, criação de conta, alteração de senha, exclusão de conta e listagem de usuários. Ela pode ser expandida facilmente para atender a requisitos mais complexos.
+Essa API oferece funcionalidades básicas de autenticação e gerenciamento de usuários, com endpoints para login, criação de conta, alteração de senha, exclusão de conta e listagem de usuários. A arquitetura foi organizada usando as camadas **Controller**, **Service** e **DAO**, o que torna o código mais limpo, modular e fácil de manter.
 
 Se você tiver dúvidas ou sugestões, sinta-se à vontade para contribuir ou abrir um problema no repositório!
 

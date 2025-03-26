@@ -1,0 +1,37 @@
+package com.example.demo.dao;
+
+import com.example.demo.model.Usuario;
+import com.example.demo.repository.UsuarioRepository;
+import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+
+@Component
+public class UsuarioDAO {
+
+    private final UsuarioRepository usuarioRepository;
+
+    public UsuarioDAO(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
+    }
+
+    public Optional<Usuario> findByNomeUsuario(String nomeUsuario) {
+        return usuarioRepository.findByNomeUsuario(nomeUsuario);
+    }
+
+    public Usuario save(Usuario usuario) {
+        return usuarioRepository.save(usuario);
+    }
+
+    public void deleteById(Long id) {
+        usuarioRepository.deleteById(id);
+    }
+
+    public boolean existsById(Long id) {
+        return usuarioRepository.existsById(id);
+    }
+
+    public Iterable<Usuario> findAll() {
+        return usuarioRepository.findAll();
+    }
+}
