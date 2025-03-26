@@ -142,5 +142,4 @@ Ao rodar a aplicação pela primeira vez, será criado automaticamente um usuár
 ## **Conclusão**
 Essa API oferece funcionalidades básicas de autenticação e gerenciamento de usuários, com endpoints para login, criação de conta, alteração de senha, exclusão de conta e listagem de usuários. A arquitetura foi organizada usando as camadas **Controller**, **Service** e **DAO**, o que torna o código mais limpo, modular e fácil de manter.
 
-Se você tiver dúvidas ou sugestões, sinta-se à vontade para contribuir ou abrir um problema no repositório!
 
