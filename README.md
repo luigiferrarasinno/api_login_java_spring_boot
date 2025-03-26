@@ -108,9 +108,8 @@ A aplicação foi estruturada de forma modular, dividida nas seguintes camadas:
     }
   ]
   ```
- ou
  
-  `404 Not Found`: `"Usuário não encontrado!"`
+  - `404 Not Found`: `"Usuário não encontrado!"`
 
 ---
 
