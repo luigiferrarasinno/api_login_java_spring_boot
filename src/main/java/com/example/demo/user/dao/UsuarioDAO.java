@@ -1,7 +1,7 @@
-package com.example.demo.dao;
+package com.example.demo.user.dao;
 
-import com.example.demo.model.Usuario;
-import com.example.demo.repository.UsuarioRepository;
+import com.example.demo.user.model.Usuario;
+import com.example.demo.user.repository.UsuarioRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;

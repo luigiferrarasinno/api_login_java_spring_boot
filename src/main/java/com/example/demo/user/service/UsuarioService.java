@@ -1,7 +1,7 @@
-package com.example.demo.service;
+package com.example.demo.user.service;
 
-import com.example.demo.dao.UsuarioDAO;
-import com.example.demo.model.Usuario;
+import com.example.demo.user.dao.UsuarioDAO;
+import com.example.demo.user.model.Usuario;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
