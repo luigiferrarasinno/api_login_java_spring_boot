@@ -34,4 +34,10 @@ public class UsuarioDAO {
     public Iterable<Usuario> findAll() {
         return usuarioRepository.findAll();
     }
+
+    public Optional<Usuario> findbyid(Long id) {
+        return usuarioRepository.findById(id);
+    }
+
+
 }

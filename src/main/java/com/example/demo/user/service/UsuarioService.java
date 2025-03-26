@@ -56,4 +56,15 @@ public class UsuarioService {
     public Iterable<Usuario> listarUsuarios() {
         return usuarioDAO.findAll();
     }
+
+    //mostrar informações do usuário pelo id
+    public Usuario buscarUsuario(Long id) {
+    Optional<Usuario> usuarioExistente = usuarioDAO.findbyid(id);
+    if (usuarioExistente.isPresent()) {
+        return usuarioExistente.get();  // Retorna o objeto Usuario
+    } else {
+        throw new RuntimeException("Usuário não encontrado!"); // Exceção personalizada
+    }
+}
+
 }

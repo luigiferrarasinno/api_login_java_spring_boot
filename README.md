@@ -12,6 +12,7 @@ A API permite as seguintes operações:
 3. **Alterar Senha**: Alterar a senha de um usuário.
 4. **Deletar Conta**: Excluir um usuário do sistema.
 5. **Listar Usuários**: Retornar todos os usuários cadastrados.
+6. **ver usuario pelo id**: retorna os dados de um unico usuario pelo id.
 
 ## **Estrutura da API**
 
@@ -92,6 +93,22 @@ A aplicação foi estruturada de forma modular, dividida nas seguintes camadas:
     }
   ]
   ```
+
+### **6. Ver usuario pelo id**
+- **URL**: `/usuarios/{id}`
+- **Método**: `GET`
+- **Descrição**: Retorna todos os dados de um unico usuario pelo id.
+- **Resposta**:
+  ```json
+  [
+    {
+      "id": 1,
+      "nomeUsuario": "usuarioTeste",
+      "senha": "senha1234"
+    }
+  ]
+  ```
+  `404 Not Found`: `"Usuário não encontrado!"`
 
 ---
 

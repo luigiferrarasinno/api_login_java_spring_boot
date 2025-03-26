@@ -2,6 +2,9 @@ package com.example.demo.user.controller;
 
 import com.example.demo.user.model.Usuario;
 import com.example.demo.user.service.UsuarioService;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -42,5 +45,16 @@ public class UsuarioController {
     @GetMapping
     public Iterable<Usuario> listarUsuarios() {
         return usuarioService.listarUsuarios();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> buscarUsuario(@PathVariable Long id) {
+        try {
+            Usuario usuario = usuarioService.buscarUsuario(id);  // Chama o serviço para buscar o usuário
+            return ResponseEntity.ok(usuario);  // Retorna o usuário com status 200 OK
+        } catch (RuntimeException e) {
+            // Retorna 404 com a mensagem "Usuário não encontrado"
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado!");
+        }
     }
 }
