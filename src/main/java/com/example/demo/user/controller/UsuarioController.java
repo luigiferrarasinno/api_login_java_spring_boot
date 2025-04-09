@@ -1,5 +1,6 @@
 package com.example.demo.user.controller;
 
+import com.example.demo.user.dto.UsuarioDTO;
 import com.example.demo.user.model.Usuario;
 import com.example.demo.user.service.UsuarioService;
 
@@ -17,18 +18,20 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    // Endpoint para login
     @PostMapping("/login")
-    public String login(@RequestBody Usuario usuario) {
-        return usuarioService.login(usuario.getNomeUsuario(), usuario.getSenha());
+    public String login(@RequestBody UsuarioDTO usuarioDTO) {
+        return usuarioService.login(usuarioDTO.getNomeUsuario(), usuarioDTO.getSenha());
     }
 
     // Endpoint para criar uma nova conta
     @PostMapping("/criar")
-    public String criarConta(@RequestBody Usuario usuario) {
+    public String criarConta(@RequestBody UsuarioDTO usuarioDTO) {
+        Usuario usuario = new Usuario();
+        usuario.setNomeUsuario(usuarioDTO.getNomeUsuario());
+        usuario.setSenha(usuarioDTO.getSenha());
         return usuarioService.criarConta(usuario);
     }
-
+    
     // Endpoint para alterar a senha
     @PutMapping("/alterar-senha")
     public String alterarSenha(@RequestParam String nomeUsuario, @RequestParam String novaSenha) {
