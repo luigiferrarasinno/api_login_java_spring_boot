@@ -35,13 +35,12 @@ public class UsuarioController {
         return usuarioService.criarConta(usuario);
     }
     
-    // Endpoint para alterar a senha
     @PutMapping("/alterar-senha")
-    @PreAuthorize("#nomeUsuario == authentication.name or hasAuthority('ROLE_ADMIN')")
-    public String alterarSenha(@RequestParam String nomeUsuario, @RequestParam String novaSenha) {
-        return usuarioService.alterarSenha(nomeUsuario, novaSenha);
+    @PreAuthorize("#usuarioDTO.nomeUsuario == authentication.name or hasAuthority('ROLE_ADMIN')")
+    public String alterarSenha(@RequestBody UsuarioDTO usuarioDTO) {
+        return usuarioService.alterarSenha(usuarioDTO.getNomeUsuario(), usuarioDTO.getSenha());
     }
-
+    
     // Endpoint para deletar conta
     @DeleteMapping("/{id}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#id, authentication.name)")
