@@ -50,11 +50,10 @@ A API diferencia dois tipos de usuários:
 | `POST /usuarios/login`        | ✅                   | ✅                   |
 | `POST /usuarios/criar`        | ✅                   | ✅                   |
 | `PUT /usuarios/alterar-senha` | ✅ (dono da conta)   | ✅                   |
-| `DELETE /usuarios/{id}`       | ✅ (dono da conta)   | ✅ (⚠️ ver observação) |
+| `DELETE /usuarios/{id}`       | ✅ (dono da conta)   | ✅                   |
 | `GET /usuarios`               | ❌                   | ✅                   |
 | `GET /usuarios/{id}`          | ✅ (dono da conta)   | ✅                   |
 
-> ❗ **Observação:** Atualmente, o admin **não consegue deletar contas de outros usuários**, mas isso pode ser ajustado facilmente no método de verificação de acesso.
 
 ---
 
