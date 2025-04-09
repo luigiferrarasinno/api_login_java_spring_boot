@@ -3,7 +3,7 @@ package com.example.demo.user.service;
 import com.example.demo.user.dao.UsuarioDAO;
 import com.example.demo.user.model.Usuario;
 import org.springframework.stereotype.Service;
-
+import com.example.demo.security.JwtUtil; 
 import java.util.Optional;
 
 @Service
@@ -16,11 +16,13 @@ public class UsuarioService {
     }
 
     public String login(String nomeUsuario, String senha) {
-        Optional<Usuario> usuarioExistente = usuarioDAO.findByNomeUsuario(nomeUsuario);
-        if (usuarioExistente.isPresent() && usuarioExistente.get().getSenha().equals(senha)) {
-            return "Login bem-sucedido!";
+        Optional<Usuario> usuario = usuarioDAO.findByNomeUsuario(nomeUsuario);
+    
+        if (usuario.isPresent() && usuario.get().getSenha().equals(senha)) {
+            // Se usuário e senha batem, gerar token JWT
+            return JwtUtil.gerarToken(nomeUsuario);
         } else {
-            return "Usuário ou senha inválidos!";
+            throw new RuntimeException("Usuário ou senha inválidos!");
         }
     }
 
