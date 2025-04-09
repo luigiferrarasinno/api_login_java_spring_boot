@@ -29,3 +29,9 @@ public class AdminInitializer {
     }
 }
 
+// pra criar e logar na conta pelo postman que é por onde eu testo precisa de um json tipo assim em raw no body da requisção , anotação para eu não esquecer dps
+//{
+ // "nomeUsuario": "novoUsuario1",
+ // "senha": "novaSenha1"
+//}
+
