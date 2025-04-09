@@ -1,11 +1,11 @@
+//  (entrada de dados)
 package com.example.demo.user.dto;
 
 public class UsuarioDTO {
     private String nomeUsuario;
     private String senha;
 
-    public UsuarioDTO() {
-    }
+    public UsuarioDTO() {}
 
     public UsuarioDTO(String nomeUsuario, String senha) {
         this.nomeUsuario = nomeUsuario;
