@@ -22,9 +22,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**").disable())
+            .headers(headers -> headers.frameOptions().disable()) // Habilita o uso do H2 Console
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/usuarios/login", "/usuarios/criar").permitAll()
+            .requestMatchers("/usuarios/login", "/usuarios/criar", "/h2-console/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(usuarioDAO), UsernamePasswordAuthenticationFilter.class);
@@ -37,3 +38,7 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 }
+
+//p n esquecer
+//http://localhost:8080/swagger-ui/index.html
+//http://localhost:8080/h2-console/login.jsp?jsessionid=428ae249ba30e7a7e0ac245afc66f3b2
