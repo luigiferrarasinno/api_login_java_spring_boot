@@ -7,7 +7,7 @@ import java.util.Date;
 
 public class JwtUtil {
 
-    //private static final String SECRET = "meuSegredoJWT123"; // segredo usado para assinar o token
+    //private static final String SECRET = "meuSegredoJWT123";
     private static final String SECRET = "esperoquefuncioneJWT123"; // segredo usado para assinar o token
     private static final long EXPIRATION_TIME = 86400000; // 1 dia em milissegundos
 
