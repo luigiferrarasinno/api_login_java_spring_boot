@@ -9,7 +9,7 @@ public class JwtUtil {
 
     //private static final String SECRET = "meuSegredoJWT123";
     private static final String SECRET = "esperoquefuncioneJWT123"; // segredo usado para assinar o token
-    private static final long EXPIRATION_TIME = 86400000; // 1 dia em milissegundos
+    private static final long EXPIRATION_TIME = 86400000; // 1 dia em milissegundos, pq por algum motivo quem fez esse ngc decidiu que tinha que colocar o tempo em milesegundos ao inves de minutos
 
     // Gerar token com nome do usuário
     public static String gerarToken(String nomeUsuario) {
