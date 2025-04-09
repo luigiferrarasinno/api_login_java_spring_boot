@@ -22,7 +22,8 @@ A aplicação foi estruturada de forma modular, dividida nas seguintes camadas:
 - **Service**: Contém a lógica de negócios, realizando validações e manipulando dados.
 - **DAO (Data Access Object)**: Responsável pela comunicação direta com o banco de dados (usando o repositório do Spring Data JPA).
 - **Repository**: Interface que conecta ao banco de dados (usando Spring Data JPA).
-- **Model**: Responsável pela criação da classe usuario 
+- **Model**: Responsável pela criação da classe usuario
+- **Dto**: responsavel por assegurar que dados não serão vazados.
 
 ## **Endpoints da API**
 
