@@ -15,6 +15,17 @@ public class UsuarioService {
         this.usuarioDAO = usuarioDAO;
     }
 
+    public boolean isOwnerOrAdmin(Long id, String nomeUsuarioAuth) {
+        Optional<Usuario> usuarioAuth = usuarioDAO.findByNomeUsuario(nomeUsuarioAuth);
+        Optional<Usuario> usuarioTarget = usuarioDAO.findbyid(id);
+    
+        if (usuarioAuth.isEmpty() || usuarioTarget.isEmpty()) return false;
+    
+        return usuarioAuth.get().getRole().equals("ROLE_ADMIN") ||
+               usuarioAuth.get().getId().equals(usuarioTarget.get().getId());
+    }
+    
+
     public String login(String nomeUsuario, String senha) {
         Optional<Usuario> usuario = usuarioDAO.findByNomeUsuario(nomeUsuario);
     

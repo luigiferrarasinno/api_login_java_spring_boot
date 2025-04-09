@@ -1,9 +1,14 @@
 package com.example.demo.security;
 
+import com.example.demo.user.dao.UsuarioDAO;
+import com.example.demo.user.model.Usuario;
+import com.example.demo.security.JwtUtil;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -13,12 +18,17 @@ import java.util.Collections;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private final UsuarioDAO usuarioDAO;
+
+    public JwtAuthenticationFilter(UsuarioDAO usuarioDAO) {
+        this.usuarioDAO = usuarioDAO;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // Pega o header Authorization
         String header = request.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {
@@ -26,13 +36,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             try {
                 String username = JwtUtil.validarToken(token);
+                Usuario usuario = usuarioDAO.findByNomeUsuario(username).orElse(null);
 
-                if (username != null) {
-                    // Cria a autenticação manualmente
-                    UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
-
-                    // Seta a autenticação no contexto de segurança
+                if (usuario != null) {
+                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                        usuario.getNomeUsuario(),
+                        null,
+                        Collections.singleton(() -> usuario.getRole())
+                    );
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
 
@@ -42,7 +53,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // Continua o fluxo da requisição
         filterChain.doFilter(request, response);
     }
 }
