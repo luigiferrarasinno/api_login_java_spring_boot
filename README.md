@@ -275,13 +275,49 @@ http://localhost:8080/h2-console
 
 ## 📦 Exemplo de uso com Postman
 
-1. Faça `POST /usuarios/login` com email e senha  
-2. Copie o token da resposta  
-3. Nas requisições protegidas, adicione o header:
+1. **Crie uma conta** usando o endpoint:  
+   ```
+   POST /usuarios/criar
+   ```
+   Corpo da requisição (JSON):
+   ```json
+   {
+     "nomeUsuario": "joao",
+     "email": "joao@email.com",
+     "senha": "senha123"
+   }
+   ```
 
-```
-Authorization: Bearer <seu_token>
-```
+2. **Faça login** para obter o token:  
+   ```
+   POST /usuarios/login
+   ```
+   Corpo:
+   ```json
+   {
+     "email": "joao@email.com",
+     "senha": "senha123"
+   }
+   ```
+
+3. **Copie o token** JWT da resposta. Exemplo:
+   ```json
+   {
+     "token": "eyJhbGciOiJIUzI1NiIsInR5..."
+   }
+   ```
+
+4. Para testar endpoints protegidos no **Postman**:
+
+   - Vá até a **aba Authorization**
+   - Em **Type**, selecione **Bearer Token**
+   - No campo **Token**, cole o token recebido
+   - O Postman automaticamente adicionará o header:
+     ```
+     Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5...
+     ```
+
+
 
 ---
 
