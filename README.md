@@ -1,7 +1,7 @@
 
 # 🛡️ API de Autenticação com Spring Boot e JWT
 
-Esta é uma API de autenticação e gerenciamento de usuários desenvolvida com **Java 17** e **Spring Boot 3.2.2**, utilizando autenticação via **JWT (JSON Web Token)**. A API possui controle de acesso baseado em **roles** (`USER` e `ADMIN`) e protege os endpoints adequadamente.
+Esta é uma API de autenticação e gerenciamento de usuários desenvolvida com **Java 17** e **Spring Boot 3.2.2**, utilizando autenticação via **JWT (JSON Web Token)**. A API possui controle de acesso baseado em **roles** (`USER` e `ADMIN`) e protege os endpoints adequadamente. A autenticação é feita por **email e senha**.
 
 ---
 
@@ -19,8 +19,8 @@ src
                 ├── dto/               # Objetos de transferência de dados (entrada/saída)
                 ├── exception/         # Tratamento global de erros e exceções personalizadas
                 ├── init/              # Inicializador com criação do usuário admin
-                ├── model/             # Entidades JPA (User e Role)
-                ├── repository/        # Interfaces para acesso ao banco (UserRepository, RoleRepository)
+                ├── model/             # Entidades JPA (Usuario e Role)
+                ├── repository/        # Interfaces para acesso ao banco
                 └── service/           # Lógica de negócio (cadastro, login, exclusão, etc.)
 ```
 
@@ -45,8 +45,8 @@ src
 
 ### Pré-requisitos
 
-- Java 17 instalado
-- Maven instalado
+- Java 17 instalado  
+- Maven instalado  
 - IDE de sua preferência (VS Code, IntelliJ...)
 
 ### Passos
@@ -56,13 +56,13 @@ git clone https://github.com/luigiferrarasinno/api_login_java_spring_boot.git
 cd api_login_java_spring_boot
 ```
 
-- Execute a aplicação com `./mvn spring-boot:run` ou através da sua IDE.
+- Execute a aplicação com `./mvn spring-boot:run` ou através da sua IDE.  
 - A API sobe na porta padrão: `http://localhost:8080`
 
 > ⚠️ Um usuário **ADMIN** será criado automaticamente:
 
 ```
-Usuário: admin
+Email: admin@email.com
 Senha: admin123
 ```
 
@@ -70,11 +70,11 @@ Senha: admin123
 
 ## 🛠️ Tecnologias Utilizadas
 
-- Java 17
-- Spring Boot 3.2.2
-- Spring Security
-- JWT (JSON Web Token)
-- H2 Database (em memória)
+- Java 17  
+- Spring Boot 3.2.2  
+- Spring Security  
+- JWT (JSON Web Token)  
+- H2 Database (em memória)  
 - Maven
 
 ---
@@ -91,13 +91,14 @@ Senha: admin123
 ```json
 {
   "nomeUsuario": "joao",
+  "email": "joao@email.com",
   "senha": "senha123"
 }
 ```
 
 #### Resposta:
 
-- **201 Created**: Usuário criado com sucesso
+- **201 Created**: Usuário criado com sucesso  
 - **400 Bad Request**: Usuário já existe ou dados inválidos
 
 ---
@@ -111,7 +112,7 @@ Senha: admin123
 
 ```json
 {
-  "nomeUsuario": "joao",
+  "email": "joao@email.com",
   "senha": "senha123"
 }
 ```
@@ -124,7 +125,7 @@ Senha: admin123
 }
 ```
 
-- **200 OK**: Token JWT válido
+- **200 OK**: Token JWT válido  
 - **401 Unauthorized**: Credenciais inválidas
 
 ---
@@ -132,21 +133,21 @@ Senha: admin123
 ### 3. Alterar Senha
 
 **PUT** `/usuarios/alterar-senha`  
-**Acesso**: Protegido (USER ou ADMIN)
+**Acesso**: Protegido (o próprio usuário ou admin)
 
 #### Requisição:
 
 ```json
 {
-  "senhaAtual": "senha123",
-  "novaSenha": "novaSenha456"
+  "email": "joao@email.com",
+  "senha": "novaSenha456"
 }
 ```
 
 #### Resposta:
 
-- **200 OK**: Senha alterada com sucesso
-- **400 Bad Request**: Senha atual incorreta
+- **200 OK**: Senha alterada com sucesso  
+- **403 Forbidden**: Tentativa de alterar senha de outro usuário
 
 ---
 
@@ -159,7 +160,7 @@ Senha: admin123
 
 #### Resposta:
 
-- **200 OK**: Usuário deletado
+- **200 OK**: Usuário deletado  
 - **403 Forbidden**: Tentativa de deletar outro usuário sem permissão
 
 ---
@@ -175,11 +176,15 @@ Senha: admin123
 [
   {
     "id": 1,
-    "nomeUsuario": "admin"
+    "nomeUsuario": "admin",
+    "email": "admin@email.com",
+    "ativo": true
   },
   {
     "id": 2,
-    "nomeUsuario": "joao"
+    "nomeUsuario": "joao",
+    "email": "joao@email.com",
+    "ativo": true
   }
 ]
 ```
@@ -198,7 +203,27 @@ Senha: admin123
 ```json
 {
   "id": 2,
-  "nomeUsuario": "joao"
+  "nomeUsuario": "joao",
+  "email": "joao@email.com",
+  "ativo": true
+}
+```
+
+---
+
+### 7. Alternar Status de Atividade
+
+**PUT** `/usuarios/{id}`  
+**Acesso**:
+- USER: pode alterar apenas o próprio status  
+- ADMIN: pode alterar qualquer usuário
+
+#### Resposta:
+
+```json
+{
+  "mensagem": "Status de atividade atualizado com sucesso!",
+  "ativo": false
 }
 ```
 
@@ -214,13 +239,14 @@ Senha: admin123
 | `/usuarios/{id}` (DELETE) | ✅ (próprio)    | ✅             |
 | `/usuarios` (GET)         | ❌              | ✅             |
 | `/usuarios/{id}` (GET)    | ✅ (próprio)    | ✅             |
+| `/usuarios/{id}` (PUT)    | ✅ (próprio)    | ✅             |
 
 ---
 
 ## 📦 Exemplo de uso com Postman
 
-1. Faça `POST /usuarios/login` com nome e senha
-2. Copie o token da resposta
+1. Faça `POST /usuarios/login` com email e senha  
+2. Copie o token da resposta  
 3. Nas requisições protegidas, adicione o header:
 
 ```
@@ -247,3 +273,4 @@ A API retorna erros em formato padronizado:
 
 Desenvolvido por [Luigi Ferrara Sinno](https://github.com/luigiferrarasinno)  
 GitHub: [api_login_java_spring_boot](https://github.com/luigiferrarasinno/api_login_java_spring_boot.git)
+
