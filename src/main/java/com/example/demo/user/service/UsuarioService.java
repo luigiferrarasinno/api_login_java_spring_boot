@@ -17,13 +17,22 @@ public class UsuarioService {
 
     public boolean isOwnerOrAdmin(Long id, String nomeUsuarioAuth) {
         Optional<Usuario> usuarioAuth = usuarioDAO.findByNomeUsuario(nomeUsuarioAuth);
+    
+        if (usuarioAuth.isEmpty()) return false; // Se o usuário autenticado não existir, acesso negado
+    
+        Usuario usuarioLogado = usuarioAuth.get();
+    
+        if (usuarioLogado.getRole().equals("ROLE_ADMIN")) {
+            return true; // Admin pode acessar qualquer coisa, mesmo que o usuário alvo não exista
+        }
+    
         Optional<Usuario> usuarioTarget = usuarioDAO.findbyid(id);
     
-        if (usuarioAuth.isEmpty() || usuarioTarget.isEmpty()) return false;
-    
-        return usuarioAuth.get().getRole().equals("ROLE_ADMIN") ||
-               usuarioAuth.get().getId().equals(usuarioTarget.get().getId());
+        return usuarioTarget.isPresent() &&
+               usuarioLogado.getId().equals(usuarioTarget.get().getId());
     }
+    
+    
     
 
     public String login(String nomeUsuario, String senha) {
@@ -42,6 +51,7 @@ public class UsuarioService {
             return "Nome de usuário já existe!";
         }
         usuarioDAO.save(usuario);
+        usuario.setUserIsActive(true);
         return "Conta criada com sucesso!";
     }
 
@@ -78,6 +88,18 @@ public class UsuarioService {
     } else {
         throw new RuntimeException("Usuário não encontrado!"); // Exceção personalizada
     }
-}
+    }
 
+    public Usuario alternarStatusUsuario(Long id) {
+        Optional<Usuario> usuarioOpt = usuarioDAO.findbyid(id);
+        if (usuarioOpt.isEmpty()) {
+            throw new RuntimeException("Usuário não encontrado!");
+        }
+    
+        Usuario usuario = usuarioOpt.get();
+        usuario.setUserIsActive(!usuario.isUserIsActive()); // alterna true/false
+        return usuarioDAO.save(usuario);
+    }
+    
+    
 }

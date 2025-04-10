@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import java.util.Map;
 //import java.util.stream.StreamSupport;
 //import java.util.List;
 //import java.util.stream.Collectors;
@@ -75,4 +76,24 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado!");
         }
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("@usuarioService.isOwnerOrAdmin(#id, authentication.name)")
+    public ResponseEntity<Object> alternarStatusUsuario(@PathVariable Long id) {
+        try {
+            Usuario usuarioAtualizado = usuarioService.alternarStatusUsuario(id);
+            return ResponseEntity.ok().body(
+                Map.of(
+                    "mensagem", "Status de atividade atualizado com sucesso!",
+                    "ativo", usuarioAtualizado.isUserIsActive()
+                )
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                Map.of("erro", e.getMessage())
+            );
+        }
+    }
+    
+
 }

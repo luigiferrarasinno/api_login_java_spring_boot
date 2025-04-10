@@ -10,7 +10,8 @@ public class Usuario {
 
     private String nomeUsuario;
     private String senha;
-
+    
+    private boolean userIsActive = true;
     private String role = "ROLE_USER"; // pode ser "USER" ou "ADMIN", melhor deixar role pq no mercado pedem isso ent é tipo boas praticas
 
     // Getters e Setters
@@ -44,5 +45,13 @@ public class Usuario {
 
     public void setRole(String role) {
         this.role = role;
+    }
+    
+    public boolean isUserIsActive() {
+        return userIsActive;
+    }
+
+    public void setUserIsActive(boolean userIsActive) {
+        this.userIsActive = userIsActive;
     }
 }
