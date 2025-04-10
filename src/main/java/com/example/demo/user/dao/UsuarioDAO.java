@@ -39,5 +39,10 @@ public class UsuarioDAO {
         return usuarioRepository.findById(id);
     }
 
+    public Optional<Usuario> findByEmail(String email) {
+        return usuarioRepository.findByEmail(email);
+    }
+    
+
 
 }

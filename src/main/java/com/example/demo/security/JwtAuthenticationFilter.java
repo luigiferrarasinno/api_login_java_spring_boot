@@ -36,14 +36,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             try {
                 String username = JwtUtil.validarToken(token);
-                Usuario usuario = usuarioDAO.findByNomeUsuario(username).orElse(null);
+                Usuario usuario = usuarioDAO.findByEmail(username).orElse(null);
+
 
                 if (usuario != null) {
                     UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        usuario.getNomeUsuario(),
-                        null,
-                        Collections.singleton(() -> usuario.getRole())
-                    );
+                    usuario.getEmail(),
+                    null,
+                    Collections.singleton(() -> usuario.getRole())
+                );
+
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
 

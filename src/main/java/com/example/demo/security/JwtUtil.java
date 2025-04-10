@@ -10,13 +10,13 @@ public class JwtUtil {
     private static final String SECRET = "esperoquefuncioneJWT123"; // segredo usado para assinar o token
     private static final long EXPIRATION_TIME = 86400000; // 1 dia em milissegundos, pq por algum motivo quem fez esse ngc decidiu que tinha que colocar o tempo em milesegundos ao inves de minutos
 
-    // Gerar token com nome do usuário
-    public static String gerarToken(String nomeUsuario) {
+    public static String gerarToken(String email) {
         return JWT.create()
-                .withSubject(nomeUsuario) // quem é o dono do token
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // validade
-                .sign(Algorithm.HMAC256(SECRET)); // assinatura
+                .withSubject(email)
+                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .sign(Algorithm.HMAC256(SECRET));
     }
+    
 
     // Validar token e retornar o nome do usuário
     public static String validarToken(String token) {

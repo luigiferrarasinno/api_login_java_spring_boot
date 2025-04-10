@@ -4,12 +4,14 @@ package com.example.demo.user.dto;
 public class UsuarioDTO {
     private String nomeUsuario;
     private String senha;
+    private String email;
 
     public UsuarioDTO() {}
 
-    public UsuarioDTO(String nomeUsuario, String senha) {
+    public UsuarioDTO(String nomeUsuario, String senha, String email) {
         this.nomeUsuario = nomeUsuario;
         this.senha = senha;
+        this.email = email;
     }
 
     public String getNomeUsuario() {
@@ -26,5 +28,13 @@ public class UsuarioDTO {
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

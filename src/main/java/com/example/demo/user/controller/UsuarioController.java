@@ -26,7 +26,7 @@ public class UsuarioController {
 
     @PostMapping("/login")
     public String login(@RequestBody UsuarioDTO usuarioDTO) {
-        return usuarioService.login(usuarioDTO.getNomeUsuario(), usuarioDTO.getSenha());
+        return usuarioService.login(usuarioDTO.getEmail(), usuarioDTO.getSenha());
     }
 
     @PostMapping("/criar")
@@ -34,14 +34,18 @@ public class UsuarioController {
         Usuario usuario = new Usuario();
         usuario.setNomeUsuario(usuarioDTO.getNomeUsuario());
         usuario.setSenha(usuarioDTO.getSenha());
+        usuario.setEmail(usuarioDTO.getEmail());
         return usuarioService.criarConta(usuario);
     }
 
     @PutMapping("/alterar-senha")
-    @PreAuthorize("#usuarioDTO.nomeUsuario == authentication.name or hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("#usuarioDTO.email == authentication.name or hasAuthority('ROLE_ADMIN')")
     public String alterarSenha(@RequestBody UsuarioDTO usuarioDTO) {
-        return usuarioService.alterarSenha(usuarioDTO.getNomeUsuario(), usuarioDTO.getSenha());
+        return usuarioService.alterarSenha(usuarioDTO.getEmail(), usuarioDTO.getSenha());
     }
+    
+    
+    
 
     @DeleteMapping("/{id}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#id, authentication.name)")

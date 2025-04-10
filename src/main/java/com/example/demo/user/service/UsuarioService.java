@@ -19,7 +19,7 @@ public class UsuarioService {
     }
 
     public boolean isOwnerOrAdmin(Long id, String nomeUsuarioAuth) {
-        Optional<Usuario> usuarioAuth = usuarioDAO.findByNomeUsuario(nomeUsuarioAuth);
+        Optional<Usuario> usuarioAuth = usuarioDAO.findByEmail(nomeUsuarioAuth);
     
         if (usuarioAuth.isEmpty()) return false; // Se o usuário autenticado não existir, acesso negado
     
@@ -38,15 +38,16 @@ public class UsuarioService {
     
     
 
-    public String login(String nomeUsuario, String senha) {
-        Optional<Usuario> usuario = usuarioDAO.findByNomeUsuario(nomeUsuario);
+    public String login(String email, String senha) {
+        Optional<Usuario> usuario = usuarioDAO.findByEmail(email);
     
         if (usuario.isPresent() && passwordEncoder.matches(senha, usuario.get().getSenha())) {
-            return JwtUtil.gerarToken(nomeUsuario);
+            return JwtUtil.gerarToken(email); // token com base no email
         } else {
-            throw new RuntimeException("Usuário ou senha inválidos!");
+            throw new RuntimeException("Email ou senha inválidos!");
         }
     }
+    
     
 
     public String criarConta(Usuario usuario) {
@@ -59,17 +60,18 @@ public class UsuarioService {
         return "Conta criada com sucesso!";
     }
 
-    public String alterarSenha(String nomeUsuario, String novaSenha) {
-        Optional<Usuario> usuarioExistente = usuarioDAO.findByNomeUsuario(nomeUsuario);
+    public String alterarSenha(String email, String novaSenha) {
+        Optional<Usuario> usuarioExistente = usuarioDAO.findByEmail(email);
         if (usuarioExistente.isPresent()) {
             Usuario usuario = usuarioExistente.get();
-            usuario.setSenha(passwordEncoder.encode(novaSenha)); // <- Criptografa nova senha
+            usuario.setSenha(passwordEncoder.encode(novaSenha));
             usuarioDAO.save(usuario);
             return "Senha alterada com sucesso!";
         } else {
             return "Usuário não encontrado!";
         }
     }
+    
     
 
     public String deletarConta(Long id) {
@@ -105,6 +107,10 @@ public class UsuarioService {
         usuario.setUserIsActive(!usuario.isUserIsActive()); // alterna true/false
         return usuarioDAO.save(usuario);
     }
-    
+
+    public Usuario buscarPorEmail(String email) {
+        return usuarioDAO.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o email: " + email));
+    }
     
 }

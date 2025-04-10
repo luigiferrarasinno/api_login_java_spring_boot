@@ -19,17 +19,19 @@ public class AdminInitializer {
 
     //Usuário: admin
     //Senha: admin123
+    //Email: admin@admin.com
     @PostConstruct
     public void criarAdmin() {
         String nomeAdmin = "admin";
         if (usuarioDAO.findByNomeUsuario(nomeAdmin).isEmpty()) {
             Usuario admin = new Usuario();
             admin.setNomeUsuario(nomeAdmin);
+            admin.setEmail("admin@admin.com"); // 
             admin.setSenha(passwordEncoder.encode("admin123")); 
             admin.setRole("ROLE_ADMIN");
             admin.setUserIsActive(true);
             usuarioDAO.save(admin);
-            System.out.println("Usuário ADMIN criado: admin/admin123");
+            System.out.println("Usuário ADMIN criado: admin@admin.com / admin123");
         }
     }
 }
