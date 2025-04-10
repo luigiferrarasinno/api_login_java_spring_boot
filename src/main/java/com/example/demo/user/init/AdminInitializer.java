@@ -3,14 +3,18 @@ package com.example.demo.user.init;
 import com.example.demo.user.dao.UsuarioDAO;
 import com.example.demo.user.model.Usuario;
 import jakarta.annotation.PostConstruct;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AdminInitializer {
-    private final UsuarioDAO usuarioDAO;
 
-    public AdminInitializer(UsuarioDAO usuarioDAO) {
+    private final UsuarioDAO usuarioDAO;
+    private final BCryptPasswordEncoder passwordEncoder;
+
+    public AdminInitializer(UsuarioDAO usuarioDAO, BCryptPasswordEncoder passwordEncoder) {
         this.usuarioDAO = usuarioDAO;
+        this.passwordEncoder = passwordEncoder;
     }
 
     //Usuário: admin
@@ -21,17 +25,11 @@ public class AdminInitializer {
         if (usuarioDAO.findByNomeUsuario(nomeAdmin).isEmpty()) {
             Usuario admin = new Usuario();
             admin.setNomeUsuario(nomeAdmin);
-            admin.setSenha("admin123"); // uma senha generica que eu fiz para adm 
+            admin.setSenha(passwordEncoder.encode("admin123")); 
             admin.setRole("ROLE_ADMIN");
+            admin.setUserIsActive(true);
             usuarioDAO.save(admin);
             System.out.println("Usuário ADMIN criado: admin/admin123");
         }
     }
 }
-
-// pra criar , atualizar e logar na conta pelo postman que é por onde eu testo precisa de um json tipo assim em raw no body da requisção , anotação para eu não esquecer dps
-//{
- // "nomeUsuario": "novoUsuario1",
- // "senha": "novaSenha1"
-//}
-

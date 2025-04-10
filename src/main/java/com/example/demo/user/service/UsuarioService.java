@@ -5,14 +5,17 @@ import com.example.demo.user.model.Usuario;
 import org.springframework.stereotype.Service;
 import com.example.demo.security.JwtUtil; 
 import java.util.Optional;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Service
 public class UsuarioService {
 
     private final UsuarioDAO usuarioDAO;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioDAO usuarioDAO) {
+    public UsuarioService(UsuarioDAO usuarioDAO, BCryptPasswordEncoder passwordEncoder) {
         this.usuarioDAO = usuarioDAO;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public boolean isOwnerOrAdmin(Long id, String nomeUsuarioAuth) {
@@ -38,18 +41,19 @@ public class UsuarioService {
     public String login(String nomeUsuario, String senha) {
         Optional<Usuario> usuario = usuarioDAO.findByNomeUsuario(nomeUsuario);
     
-        if (usuario.isPresent() && usuario.get().getSenha().equals(senha)) {
-            // Se usuário e senha batem, gerar token JWT
+        if (usuario.isPresent() && passwordEncoder.matches(senha, usuario.get().getSenha())) {
             return JwtUtil.gerarToken(nomeUsuario);
         } else {
             throw new RuntimeException("Usuário ou senha inválidos!");
         }
     }
+    
 
     public String criarConta(Usuario usuario) {
         if (usuarioDAO.findByNomeUsuario(usuario.getNomeUsuario()).isPresent()) {
             return "Nome de usuário já existe!";
         }
+        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         usuarioDAO.save(usuario);
         usuario.setUserIsActive(true);
         return "Conta criada com sucesso!";
@@ -59,13 +63,14 @@ public class UsuarioService {
         Optional<Usuario> usuarioExistente = usuarioDAO.findByNomeUsuario(nomeUsuario);
         if (usuarioExistente.isPresent()) {
             Usuario usuario = usuarioExistente.get();
-            usuario.setSenha(novaSenha);
+            usuario.setSenha(passwordEncoder.encode(novaSenha)); // <- Criptografa nova senha
             usuarioDAO.save(usuario);
             return "Senha alterada com sucesso!";
         } else {
             return "Usuário não encontrado!";
         }
     }
+    
 
     public String deletarConta(Long id) {
         if (usuarioDAO.existsById(id)) {
