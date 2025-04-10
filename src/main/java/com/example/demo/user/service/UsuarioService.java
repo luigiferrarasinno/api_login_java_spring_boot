@@ -51,14 +51,26 @@ public class UsuarioService {
     
 
     public String criarConta(Usuario usuario) {
-        if (usuarioDAO.findByNomeUsuario(usuario.getNomeUsuario()).isPresent()) {
-            return "Nome de usuário já existe!";
+        String email = usuario.getEmail();
+    
+        // Validação simples de e-mail
+        if (email == null || !email.contains("@") || email.length() < 5 || email.indexOf("@") == email.length() - 1) {
+            return "Email inválido! Informe um email com '@' e ao menos 5 caracteres.";
         }
+    
+        // Verifica se já existe um usuário com esse e-mail
+        if (usuarioDAO.findByEmail(email).isPresent()) {
+            return "Email já cadastrado!";
+        }
+    
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-        usuarioDAO.save(usuario);
         usuario.setUserIsActive(true);
+        usuarioDAO.save(usuario);
+    
         return "Conta criada com sucesso!";
     }
+    
+    
 
     public String alterarSenha(String email, String novaSenha) {
         Optional<Usuario> usuarioExistente = usuarioDAO.findByEmail(email);

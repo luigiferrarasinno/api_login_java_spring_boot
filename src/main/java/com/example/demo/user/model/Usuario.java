@@ -7,11 +7,11 @@ import jakarta.validation.constraints.NotBlank;
 @Entity
 public class Usuario {
     @Id
+    @Column(unique = true)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
-    @Column(unique = true)
     private String nomeUsuario;
 
     @NotBlank
