@@ -68,6 +68,36 @@ Senha: admin123
 
 ---
 
+## 📚 Documentação e Ferramentas
+
+### 🧪 Swagger (Documentação Interativa da API)
+
+Acesse o Swagger UI para testar os endpoints diretamente pelo navegador:
+
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
+---
+
+### 🛢️ Console do Banco de Dados H2
+
+A API utiliza o banco em memória H2. Acesse pelo navegador em:
+
+```
+http://localhost:8080/h2-console
+```
+
+**Credenciais de Acesso:**
+
+- **JDBC URL:** `jdbc:h2:mem:fellerdb`
+- **Username:** `Admin`
+- **Password:** `Fiap123`
+
+> 💡 Dica: após logar no H2 Console, use `SELECT * FROM USUARIO;` para visualizar os dados.
+
+---
+
 ## 🛠️ Tecnologias Utilizadas
 
 - Java 17  
@@ -75,9 +105,9 @@ Senha: admin123
 - Spring Security  
 - JWT (JSON Web Token)  
 - H2 Database (em memória)  
-- Maven
+- Maven  
+- Swagger (OpenAPI)
 
----
 
 ## 🔐 Endpoints da API
 
