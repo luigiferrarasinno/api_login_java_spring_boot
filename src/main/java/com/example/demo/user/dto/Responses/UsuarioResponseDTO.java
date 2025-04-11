@@ -1,5 +1,5 @@
 // (saída de dados)
-package com.example.demo.user.dto;
+package com.example.demo.user.dto.Responses;
 
 import com.example.demo.user.model.Usuario;
 
@@ -15,7 +15,9 @@ public class UsuarioResponseDTO {
         this.email = usuario.getEmail();
         this.role = usuario.getRole();
     }
+    
 
+    
     public Long getId() {
         return id;
     }

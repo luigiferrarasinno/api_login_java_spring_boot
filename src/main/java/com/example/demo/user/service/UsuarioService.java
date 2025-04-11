@@ -1,6 +1,7 @@
 package com.example.demo.user.service;
 
 import com.example.demo.user.dao.UsuarioDAO;
+import com.example.demo.user.dto.Responses.LoginResponseDTO;
 import com.example.demo.user.model.Usuario;
 import org.springframework.stereotype.Service;
 import com.example.demo.security.JwtUtil; 
@@ -38,15 +39,18 @@ public class UsuarioService {
     
     
 
-    public String login(String email, String senha) {
-        Optional<Usuario> usuario = usuarioDAO.findByEmail(email);
-    
-        if (usuario.isPresent() && passwordEncoder.matches(senha, usuario.get().getSenha())) {
-            return JwtUtil.gerarToken(email); // token com base no email
-        } else {
-            throw new RuntimeException("Email ou senha inválidos!");
-        }
+    public LoginResponseDTO login(String email, String senha) {
+    Optional<Usuario> usuario = usuarioDAO.findByEmail(email);
+
+    if (usuario.isPresent() && passwordEncoder.matches(senha, usuario.get().getSenha())) {
+        Long userId = usuario.get().getId();
+        String token = JwtUtil.gerarToken(email);
+        return new LoginResponseDTO(token, userId);
+    } else {
+        throw new RuntimeException("Email ou senha inválidos!");
     }
+}
+
     
     
 

@@ -1,7 +1,9 @@
 package com.example.demo.user.controller;
 
 import com.example.demo.user.dto.UsuarioDTO;
-import com.example.demo.user.dto.UsuarioResponseDTO;
+import com.example.demo.user.dto.Responses.LoginResponseDTO;
+import com.example.demo.user.dto.Responses.StatusAtivoResponseDTO;
+import com.example.demo.user.dto.Responses.UsuarioResponseDTO;
 import com.example.demo.user.model.Usuario;
 import com.example.demo.user.service.UsuarioService;
 
@@ -24,8 +26,8 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    @PostMapping("/login")
-    public String login(@RequestBody UsuarioDTO usuarioDTO) {
+   @PostMapping("/login")
+    public LoginResponseDTO login(@RequestBody UsuarioDTO usuarioDTO) {
         return usuarioService.login(usuarioDTO.getEmail(), usuarioDTO.getSenha());
     }
 
@@ -86,18 +88,17 @@ public class UsuarioController {
     public ResponseEntity<Object> alternarStatusUsuario(@PathVariable Long id) {
         try {
             Usuario usuarioAtualizado = usuarioService.alternarStatusUsuario(id);
-            return ResponseEntity.ok().body(
-                Map.of(
-                    "mensagem", "Status de atividade atualizado com sucesso!",
-                    "ativo", usuarioAtualizado.isUserIsActive()
-                )
+            StatusAtivoResponseDTO responseDTO = new StatusAtivoResponseDTO(
+                "Status de atividade atualizado com sucesso!",
+                usuarioAtualizado.isUserIsActive()
             );
+            return ResponseEntity.ok(responseDTO);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                Map.of("erro", e.getMessage())
-            );
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body(Map.of("erro", e.getMessage()));
         }
     }
+
     
 
 }

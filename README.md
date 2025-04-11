@@ -151,7 +151,8 @@ http://localhost:8080/h2-console
 
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5..."
+    "token": "um token",
+    "userId": "id do usuario"
 }
 ```
 
