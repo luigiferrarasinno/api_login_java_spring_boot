@@ -15,6 +15,9 @@ public class Usuario {
     private String nomeUsuario;
 
     @NotBlank
+    private String tipo_de_investidor="nenhum por enquanto";
+
+    @NotBlank
     private String dt_nascimento;
 
     @NotBlank
@@ -81,7 +84,7 @@ public class Usuario {
         this.role = role;
     }
 
-     public String getDt_nascimento() {
+    public String getDt_nascimento() {
         return dt_nascimento;
     }
 
@@ -89,11 +92,19 @@ public class Usuario {
         this.dt_nascimento = dt_nascimento;
     }
 
-     public String  getCpf() {
+    public String  getCpf() {
         return cpf;
     }
 
     public void setCpf(String  cpf) {
         this.cpf = cpf;
+    }
+
+    public String  tipo_de_investidor() {
+        return tipo_de_investidor;
+    }
+
+    public void tipo_de_investidor(String  tipo_de_investidor) {
+        this.tipo_de_investidor = tipo_de_investidor;
     }
 }
