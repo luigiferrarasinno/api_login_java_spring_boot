@@ -3,6 +3,9 @@ package com.example.demo.user.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import java.time.LocalDate;
+import jakarta.persistence.*;
+
 
 @Entity
 public class Usuario {
@@ -18,13 +21,13 @@ public class Usuario {
     private String tipo_de_investidor="nenhum por enquanto";
 
     @NotBlank
-    private String dt_nascimento;
+    private LocalDate dt_nascimento;
 
     @NotBlank
     private String senha;
 
-    @NotBlank
-    private String  cpf;
+    @Column(unique = true)
+    private Long cpf;
 
     @NotBlank
     @Email
@@ -84,27 +87,25 @@ public class Usuario {
         this.role = role;
     }
 
-    public String getDt_nascimento() {
+    public LocalDate getDt_nascimento() {
         return dt_nascimento;
     }
-
-    public void setDt_nascimento(String dt_nascimento) {
+    
+    public void setDt_nascimento(LocalDate dt_nascimento) {
         this.dt_nascimento = dt_nascimento;
     }
-
-    public String  getCpf() {
+    
+    public Long getCpf() {
         return cpf;
     }
-
-    public void setCpf(String  cpf) {
+    
+    public void setCpf(Long cpf) {
         this.cpf = cpf;
     }
-
-    public String  tipo_de_investidor() {
+    public String getTipo_de_investidor() {
         return tipo_de_investidor;
     }
-
-    public void tipo_de_investidor(String  tipo_de_investidor) {
+    public void setTipo_de_investidor(String tipo_de_investidor) {
         this.tipo_de_investidor = tipo_de_investidor;
-    }
+    }    
 }

@@ -15,10 +15,6 @@ public class UsuarioDAO {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public Optional<Usuario> findByNomeUsuario(String nomeUsuario) {
-        return usuarioRepository.findByNomeUsuario(nomeUsuario);
-    }
-
     public Usuario save(Usuario usuario) {
         return usuarioRepository.save(usuario);
     }
@@ -43,6 +39,8 @@ public class UsuarioDAO {
         return usuarioRepository.findByEmail(email);
     }
     
-
+    public Optional<Usuario> findByCpf(Long cpf) {
+        return usuarioRepository.findByCpf(cpf);
+    }
 
 }

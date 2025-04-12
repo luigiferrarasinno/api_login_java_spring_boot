@@ -4,7 +4,9 @@ import com.example.demo.user.dao.UsuarioDAO;
 import com.example.demo.user.dto.Responses.LoginResponseDTO;
 import com.example.demo.user.model.Usuario;
 import org.springframework.stereotype.Service;
-import com.example.demo.security.JwtUtil; 
+import com.example.demo.security.JwtUtil;
+
+import java.time.LocalDate;
 import java.util.Optional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -49,30 +51,79 @@ public class UsuarioService {
     } else {
         throw new RuntimeException("Email ou senha inválidos!");
     }
-}
+    }
 
+
+    // Método para validar CPF
+    // O CPF deve ter 11 dígitos e não pode conter todos os dígitos iguais (ex: 111.111.111-11)
+
+    private boolean isCpfValido(Long cpf) {
+        if (cpf == null) return false;
+        String cpfStr = String.format("%011d", cpf); // completa com zeros à esquerda se necessário
     
+        if (cpfStr.matches("(\\d)\\1{10}")) return false; // rejeita CPFs com todos os dígitos iguais
     
+        int soma = 0, resto;
+        for (int i = 1; i <= 9; i++) {
+            soma += Integer.parseInt(cpfStr.substring(i - 1, i)) * (11 - i);
+        }
+        resto = (soma * 10) % 11;
+        if ((resto == 10) || (resto == 11)) resto = 0;
+        if (resto != Integer.parseInt(cpfStr.substring(9, 10))) return false;
+    
+        soma = 0;
+        for (int i = 1; i <= 10; i++) {
+            soma += Integer.parseInt(cpfStr.substring(i - 1, i)) * (12 - i);
+        }
+        resto = (soma * 10) % 11;
+        if ((resto == 10) || (resto == 11)) resto = 0;
+        return resto == Integer.parseInt(cpfStr.substring(10));
+    }
+
+    // Método para verificar se o usuário tem mais de 18 anos
+    // O método verifica se a data de nascimento é válida e se o usuário tem pelo menos 18 anos
+    
+    private boolean temMaisDe18Anos(LocalDate nascimento) {
+        if (nascimento == null) return false;
+        LocalDate hoje = LocalDate.now();
+        return nascimento.plusYears(18).isBefore(hoje) || nascimento.plusYears(18).isEqual(hoje);
+    }
+    
+    // Método para criar uma nova conta de usuário  
+
 
     public String criarConta(Usuario usuario) {
-        String email = usuario.getEmail();
-    
-        // Validação simples de e-mail
-        if (email == null || !email.contains("@") || email.length() < 5 || email.indexOf("@") == email.length() - 1) {
-            return "Email inválido! Informe um email com '@' e ao menos 5 caracteres.";
-        }
-    
-        // Verifica se já existe um usuário com esse e-mail
-        if (usuarioDAO.findByEmail(email).isPresent()) {
-            return "Email já cadastrado!";
-        }
-    
-        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-        usuario.setUserIsActive(true);
-        usuarioDAO.save(usuario);
-    
-        return "Conta criada com sucesso!";
+    String email = usuario.getEmail();
+    Long cpf = usuario.getCpf();
+    LocalDate nascimento = usuario.getDt_nascimento();
+
+    // Validação simples de e-mail
+    if (email == null || !email.contains("@") || email.length() < 5 || email.indexOf("@") == email.length() - 1) {
+        return "Email inválido! Informe um email com '@' e ao menos 5 caracteres.";
     }
+
+    // Validação do CPF
+    if (!isCpfValido(cpf)) {
+        return "CPF inválido! Verifique se o número está correto.";
+    }
+
+    // Verificação de idade
+    if (!temMaisDe18Anos(nascimento)) {
+        return "Você precisa ter pelo menos 18 anos para criar uma conta.";
+    }
+
+    // Verifica se já existe um usuário com esse e-mail
+    if (usuarioDAO.findByEmail(email).isPresent()) {
+        return "Email já cadastrado!";
+    }
+
+    usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+    usuario.setUserIsActive(true);
+    usuarioDAO.save(usuario);
+
+    return "Conta criada com sucesso!";
+    }
+
     
     
 

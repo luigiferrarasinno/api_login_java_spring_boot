@@ -3,6 +3,9 @@ package com.example.demo.user.init;
 import com.example.demo.user.dao.UsuarioDAO;
 import com.example.demo.user.model.Usuario;
 import jakarta.annotation.PostConstruct;
+
+import java.time.LocalDate;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -23,15 +26,23 @@ public class AdminInitializer {
     @PostConstruct
     public void criarAdmin() {
         String nomeAdmin = "admin";
-        if (usuarioDAO.findByNomeUsuario(nomeAdmin).isEmpty()) {
+        String emailAdmin = "admin@admin.com";
+
+        if (usuarioDAO.findByEmail(emailAdmin).isEmpty()) {
             Usuario admin = new Usuario();
             admin.setNomeUsuario(nomeAdmin);
-            admin.setEmail("admin@admin.com"); // 
-            admin.setSenha(passwordEncoder.encode("admin123")); 
+            admin.setEmail(emailAdmin);
+            admin.setSenha(passwordEncoder.encode("admin123"));
             admin.setRole("ROLE_ADMIN");
             admin.setUserIsActive(true);
+
+            // Campos adicionados
+            admin.setCpf(99999999999L); // CPF fictício válido (não será verificado aqui)
+            admin.setDt_nascimento(LocalDate.of(1990, 1, 1)); // Data de nascimento padrão
+
             usuarioDAO.save(admin);
             System.out.println("Usuário ADMIN criado: admin@admin.com / admin123");
         }
     }
+
 }
