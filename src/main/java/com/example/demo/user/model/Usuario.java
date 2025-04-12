@@ -15,7 +15,13 @@ public class Usuario {
     private String nomeUsuario;
 
     @NotBlank
+    private String dt_nascimento;
+
+    @NotBlank
     private String senha;
+
+    @NotBlank
+    private String  cpf;
 
     @NotBlank
     @Email
@@ -73,5 +79,21 @@ public class Usuario {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+     public String getDt_nascimento() {
+        return dt_nascimento;
+    }
+
+    public void setDt_nascimento(String dt_nascimento) {
+        this.dt_nascimento = dt_nascimento;
+    }
+
+     public String  getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String  cpf) {
+        this.cpf = cpf;
     }
 }

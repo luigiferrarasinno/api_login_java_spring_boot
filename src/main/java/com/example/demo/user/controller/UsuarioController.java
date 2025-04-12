@@ -37,6 +37,8 @@ public class UsuarioController {
         usuario.setNomeUsuario(usuarioDTO.getNomeUsuario());
         usuario.setSenha(usuarioDTO.getSenha());
         usuario.setEmail(usuarioDTO.getEmail());
+        usuario.setDt_nascimento(usuarioDTO.getDt_nascimento());
+        usuario.setCpf(usuarioDTO.getCpf());
         return usuarioService.criarConta(usuario);
     }
 
