@@ -93,35 +93,35 @@ public class UsuarioService {
 
 
     public String criarConta(Usuario usuario) {
-    String email = usuario.getEmail();
-    Long cpf = usuario.getCpf();
-    LocalDate nascimento = usuario.getDt_nascimento();
+        String email = usuario.getEmail();
+        Long cpf = usuario.getCpf();
+        LocalDate nascimento = usuario.getDt_nascimento();
 
-    // Validação simples de e-mail
-    if (email == null || !email.contains("@") || email.length() < 5 || email.indexOf("@") == email.length() - 1) {
-        return "Email inválido! Informe um email com '@' e ao menos 5 caracteres.";
-    }
+        // Validação simples de e-mail
+        if (email == null || !email.contains("@") || email.length() < 5 || email.indexOf("@") == email.length() - 1) {
+            return "Email inválido! Informe um email com '@' e ao menos 5 caracteres.";
+        }
 
-    // Validação do CPF
-    if (!isCpfValido(cpf)) {
-        return "CPF inválido! Verifique se o número está correto.";
-    }
+        // Validação do CPF
+        if (!isCpfValido(cpf)) {
+            return "CPF inválido! Verifique se o número está correto.";
+        }
 
-    // Verificação de idade
-    if (!temMaisDe18Anos(nascimento)) {
-        return "Você precisa ter pelo menos 18 anos para criar uma conta.";
-    }
+        // Verificação de idade
+        if (!temMaisDe18Anos(nascimento)) {
+            return "Você precisa ter pelo menos 18 anos para criar uma conta.";
+        }
 
-    // Verifica se já existe um usuário com esse e-mail
-    if (usuarioDAO.findByEmail(email).isPresent()) {
-        return "Email já cadastrado!";
-    }
+        // Verifica se já existe um usuário com esse e-mail
+        if (usuarioDAO.findByEmail(email).isPresent()) {
+            return "Email já cadastrado!";
+        }
 
-    usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-    usuario.setUserIsActive(true);
-    usuarioDAO.save(usuario);
+        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+        usuario.setUserIsActive(true);
+        usuarioDAO.save(usuario);
 
-    return "Conta criada com sucesso!";
+        return "Conta criada com sucesso!";
     }
 
     

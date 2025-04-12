@@ -57,16 +57,7 @@ public class UsuarioController {
         return usuarioService.deletarConta(id);
     }
 
-      //@GetMapping
-    //@PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    //public List<UsuarioResponseDTO> listarUsuarios() {
-     //   Iterable<Usuario> usuarios = usuarioService.listarUsuarios();
-
-        //return StreamSupport.stream(usuarios.spliterator(), false)
-      //          .map(UsuarioResponseDTO::new)
-      //          .collect(Collectors.toList());
-   // }
-
+    
     // Endpoint para listar todos os usuários
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -100,7 +91,5 @@ public class UsuarioController {
                                 .body(Map.of("erro", e.getMessage()));
         }
     }
-
-    
 
 }

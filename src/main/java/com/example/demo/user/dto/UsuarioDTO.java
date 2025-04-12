@@ -20,10 +20,12 @@ public class UsuarioDTO {
 
     public UsuarioDTO() {}
 
-    public UsuarioDTO(String nomeUsuario, String senha, String email) {
+    public UsuarioDTO(String nomeUsuario, String senha, String email, LocalDate dt_nascimento, Long cpf) {
         this.nomeUsuario = nomeUsuario;
         this.senha = senha;
         this.email = email;
+        this.dt_nascimento = dt_nascimento;
+        this.cpf = cpf;
     }
 
     public String getNomeUsuario() {
