@@ -35,6 +35,8 @@ public class AdminInitializer {
             admin.setSenha(passwordEncoder.encode("admin123"));
             admin.setRole("ROLE_ADMIN");
             admin.setUserIsActive(true);
+            admin.setUser_permissions(null);
+            admin.setTipo_de_investidor(null); // Tipo de investidor padrão
 
             // Campos adicionados
             admin.setCpf(99999999999L); // CPF fictício válido (não será verificado aqui)

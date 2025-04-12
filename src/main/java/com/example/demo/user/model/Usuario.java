@@ -36,6 +36,8 @@ public class Usuario {
 
     private boolean userIsActive = true;
 
+    private String user_permissions="nenhuma por enquanto";
+
     private String role = "ROLE_USER"; // Pode ser "USER" ou "ADMIN"
 
     // Getters e Setters
@@ -108,4 +110,10 @@ public class Usuario {
     public void setTipo_de_investidor(String tipo_de_investidor) {
         this.tipo_de_investidor = tipo_de_investidor;
     }    
+    public String getUser_permissions() {
+        return user_permissions;
+    }
+    public void setUser_permissions(String user_permissions) {
+        this.user_permissions = user_permissions;
+    }
 }

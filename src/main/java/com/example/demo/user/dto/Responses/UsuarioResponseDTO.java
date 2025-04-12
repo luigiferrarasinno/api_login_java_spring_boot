@@ -12,6 +12,7 @@ public class UsuarioResponseDTO {
     private LocalDate dt_nascimento;
     private String tipo_de_investidor = "nenhum por enquanto";
     private boolean userIsActive = true;
+    private String user_permissions = "nenhuma por enquanto";
 
 
     public UsuarioResponseDTO(Usuario usuario) {
@@ -21,6 +22,9 @@ public class UsuarioResponseDTO {
         this.role = usuario.getRole();
         this.cpf = usuario.getCpf();
         this.dt_nascimento = usuario.getDt_nascimento();
+        this.tipo_de_investidor = usuario.getTipo_de_investidor();
+        this.userIsActive = usuario.isUserIsActive();
+        this.user_permissions = usuario.getUser_permissions();
     }
 
     public Long getId() {
@@ -49,13 +53,13 @@ public class UsuarioResponseDTO {
     public String getTipo_de_investidor() {
         return tipo_de_investidor;
     }
-    public void setTipo_de_investidor(String tipo_de_investidor) {
-        this.tipo_de_investidor = tipo_de_investidor;
-    }
+  
     public boolean isUserIsActive() {
         return userIsActive;
     }
-    public void setUserIsActive(boolean userIsActive) {
-        this.userIsActive = userIsActive;
+   
+    public String getUser_permissions() {
+        return user_permissions;
     }
+   
 }

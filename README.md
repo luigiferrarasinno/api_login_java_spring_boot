@@ -120,9 +120,11 @@ http://localhost:8080/h2-console
 
 ```json
 {
-  "nomeUsuario": "joao",
-  "email": "joao@email.com",
-  "senha": "senha123"
+  "nomeUsuario": "João da Silva",
+  "senha": "senhaSegura123",
+  "email": "joao.silva@email.com",
+  "cpf": 12345678909,
+  "dt_nascimento": "2006-05-20"
 }
 ```
 
@@ -233,10 +235,15 @@ http://localhost:8080/h2-console
 
 ```json
 {
-  "id": 2,
-  "nomeUsuario": "joao",
-  "email": "joao@email.com",
-  "ativo": true
+    "id": 2,
+    "nomeUsuario": "João da Silva",
+    "email": "joao.silva@email.com",
+    "role": "ROLE_USER",
+    "cpf": 12345678909,
+    "dt_nascimento": "2006-05-20",
+    "tipo_de_investidor": "nenhum por enquanto",
+    "userIsActive": true,
+    "user_permissions": "nenhuma por enquanto"
 }
 ```
 
