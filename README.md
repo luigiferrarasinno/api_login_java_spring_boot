@@ -121,7 +121,7 @@ http://localhost:8080/h2-console
 ```json
 {
   "nomeUsuario": "João da Silva",
-  "senha": "senhaSegura123",
+  "senha": "senha123",
   "email": "joao.silva@email.com",
   "cpf": 12345678909,
   "dt_nascimento": "2006-05-20"
@@ -289,11 +289,13 @@ http://localhost:8080/h2-console
    ```
    Corpo da requisição (JSON):
    ```json
-   {
-     "nomeUsuario": "joao",
-     "email": "joao@email.com",
-     "senha": "senha123"
-   }
+      {
+      "nomeUsuario": "João da Silva",
+      "senha": "senha123",
+      "email": "joao.silva@email.com",
+      "cpf": 12345678909,
+      "dt_nascimento": "2006-05-20"
+    }
    ```
 
 2. **Faça login** para obter o token:  
