@@ -13,7 +13,7 @@ src
     └── java
         └── com.example.demo
             ├── security/              # Lógica de autenticação, JWT e segurança
-            └── user/
+            └── user/                  # Pasta com tudo relacionado a entidade user 
                 ├── controller/        # Endpoints da API
                 ├── dao/               # Classe auxiliar para troca de senha
                 ├── dto/               # Objetos de transferência de dados (entrada/saída)
