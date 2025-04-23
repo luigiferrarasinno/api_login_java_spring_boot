@@ -1,5 +1,5 @@
 
-# 🛡️ API de Autenticação com Spring Boot e JWT
+# 🛡️ API de java
 
 Esta é uma API de autenticação e gerenciamento de usuários desenvolvida com **Java 17** e **Spring Boot 3.2.2**, utilizando autenticação via **JWT (JSON Web Token)**. A API possui controle de acesso baseado em **roles** (`USER` e `ADMIN`) e protege os endpoints adequadamente. A autenticação é feita por **email e senha**.
 
