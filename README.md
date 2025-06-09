@@ -33,11 +33,13 @@ src
 | `controller`   | Define os endpoints públicos e protegidos da API                       |
 | `service`      | Contém as regras de negócio (ex: criação de conta, validações, etc.)   |
 | `repository`   | Acesso ao banco de dados via Spring Data JPA                           |
+| `dao`          | Realiza consultas personalizadas e operações mais complexas no banco   |
 | `dto`          | Objetos usados para entrada e saída de dados (evita expor entidades)   |
 | `model`        | Entidades JPA que representam as tabelas no banco de dados             |
 | `security`     | Configuração de autenticação e geração/validação de tokens JWT         |
 | `exception`    | Gerencia erros com mensagens claras usando `@ControllerAdvice`         |
 | `init`         | Cria automaticamente um usuário ADMIN no início da aplicação           |
+
 
 ---
 
@@ -56,7 +58,7 @@ git clone https://github.com/luigiferrarasinno/api_login_java_spring_boot.git
 cd api_login_java_spring_boot
 ```
 
-- Execute a aplicação com `./mvn spring-boot:run` ou através da sua IDE.  
+- Execute a aplicação com `mvn spring-boot:run` ou através da sua IDE.  
 - A API sobe na porta padrão: `http://localhost:8080`
 
 > ⚠️ Um usuário **ADMIN** será criado automaticamente:
