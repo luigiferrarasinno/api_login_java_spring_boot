@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
-import jakarta.persistence.*;
-
 
 @Entity
 public class Usuario {
@@ -18,7 +16,7 @@ public class Usuario {
     private String nomeUsuario;
 
     @NotBlank
-    private String tipo_de_investidor="nenhum por enquanto";
+    private String tipo_de_investidor = "nenhum por enquanto";
 
     @NotBlank
     private LocalDate dt_nascimento;
@@ -36,9 +34,11 @@ public class Usuario {
 
     private boolean userIsActive = true;
 
-    private String user_permissions="nenhuma por enquanto";
+    private String user_permissions = "nenhuma por enquanto";
 
     private String role = "ROLE_USER"; // Pode ser "USER" ou "ADMIN"
+
+    private boolean firstLogin = true; // Novo campo adicionado
 
     // Getters e Setters
     public Long getId() {
@@ -92,28 +92,40 @@ public class Usuario {
     public LocalDate getDt_nascimento() {
         return dt_nascimento;
     }
-    
+
     public void setDt_nascimento(LocalDate dt_nascimento) {
         this.dt_nascimento = dt_nascimento;
     }
-    
+
     public Long getCpf() {
         return cpf;
     }
-    
+
     public void setCpf(Long cpf) {
         this.cpf = cpf;
     }
+
     public String getTipo_de_investidor() {
         return tipo_de_investidor;
     }
+
     public void setTipo_de_investidor(String tipo_de_investidor) {
         this.tipo_de_investidor = tipo_de_investidor;
-    }    
+    }
+
     public String getUser_permissions() {
         return user_permissions;
     }
+
     public void setUser_permissions(String user_permissions) {
         this.user_permissions = user_permissions;
+    }
+
+    public boolean isFirstLogin() {
+        return firstLogin;
+    }
+
+    public void setFirstLogin(boolean firstLogin) {
+        this.firstLogin = firstLogin;
     }
 }

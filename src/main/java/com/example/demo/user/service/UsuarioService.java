@@ -45,13 +45,22 @@ public class UsuarioService {
     Optional<Usuario> usuario = usuarioDAO.findByEmail(email);
 
     if (usuario.isPresent() && passwordEncoder.matches(senha, usuario.get().getSenha())) {
-        Long userId = usuario.get().getId();
+        Usuario user = usuario.get();
+
+        // Se for o primeiro login, atualizar o campo para false
+        if (user.isFirstLogin()) {
+            user.setFirstLogin(false);
+            usuarioDAO.save(user);
+        }
+
+        Long userId = user.getId();
         String token = JwtUtil.gerarToken(email);
         return new LoginResponseDTO(token, userId);
     } else {
         throw new RuntimeException("Email ou senha inválidos!");
     }
     }
+
 
 
     // Método para validar CPF
