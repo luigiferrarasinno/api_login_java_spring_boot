@@ -6,6 +6,8 @@ import com.example.demo.user.dto.Responses.StatusAtivoResponseDTO;
 import com.example.demo.user.dto.Responses.UsuarioResponseDTO;
 import com.example.demo.user.model.Usuario;
 import com.example.demo.user.service.UsuarioService;
+import com.example.demo.user.dto.AlterarSenhaPorCpfEmailDTO;
+import com.example.demo.user.dto.AlterarSenhaComSenhaAntiga;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +34,7 @@ public class UsuarioController {
     }
 
     @PostMapping("/criar")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public String criarConta(@RequestBody UsuarioDTO usuarioDTO) {
         Usuario usuario = new Usuario();
         usuario.setNomeUsuario(usuarioDTO.getNomeUsuario());
@@ -43,10 +46,30 @@ public class UsuarioController {
     }
 
     @PutMapping("/alterar-senha")
-    @PreAuthorize("#usuarioDTO.email == authentication.name or hasAuthority('ROLE_ADMIN')")
-    public String alterarSenha(@RequestBody UsuarioDTO usuarioDTO) {
-        return usuarioService.alterarSenha(usuarioDTO.getEmail(), usuarioDTO.getSenha());
+    @PreAuthorize("#dto.email == authentication.name or hasAuthority('ROLE_ADMIN')")
+    public String alterarSenha(@RequestBody AlterarSenhaComSenhaAntiga dto) {
+        return usuarioService.alterarSenha(dto.getEmail(), dto.getSenhaAntiga(), dto.getSenhaNova());
     }
+
+
+
+    @PostMapping("/criar-senha")
+    public ResponseEntity<String> redefinirSenha(@RequestBody AlterarSenhaPorCpfEmailDTO dto) {
+        String resultado = usuarioService.redefinirSenhaPorEmailCpf(
+            dto.getEmail(),
+            dto.getCpf(),
+            dto.getDtNascimento(),
+            dto.getSenhaNova()
+        );
+        
+        if (resultado.equals("Senha redefinida com sucesso!")) {
+            return ResponseEntity.ok(resultado);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
+        }
+    }
+
+
     
     
     

@@ -13,6 +13,8 @@ public class UsuarioResponseDTO {
     private String tipo_de_investidor = "nenhum por enquanto";
     private boolean userIsActive = true;
     private String user_permissions = "nenhuma por enquanto";
+    private boolean firstLogin = true; // Novo campo adicionado
+
 
 
     public UsuarioResponseDTO(Usuario usuario) {
@@ -25,6 +27,7 @@ public class UsuarioResponseDTO {
         this.tipo_de_investidor = usuario.getTipo_de_investidor();
         this.userIsActive = usuario.isUserIsActive();
         this.user_permissions = usuario.getUser_permissions();
+        this.firstLogin = usuario.isFirstLogin(); // Acessando o novo campo
     }
 
     public Long getId() {
@@ -60,6 +63,9 @@ public class UsuarioResponseDTO {
    
     public String getUser_permissions() {
         return user_permissions;
+    }
+    public boolean isFirstLogin() {
+        return firstLogin;
     }
    
 }

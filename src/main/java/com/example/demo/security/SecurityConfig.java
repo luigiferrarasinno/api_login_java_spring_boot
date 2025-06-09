@@ -26,7 +26,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**").disable())
             .headers(headers -> headers.frameOptions().disable()) // Habilita o uso do H2 Console
             .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/usuarios/login", "/usuarios/criar", "/h2-console/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+            .requestMatchers("/usuarios/login", "/h2-console/**", "/usuarios/criar-senha", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(usuarioDAO), UsernamePasswordAuthenticationFilter.class);

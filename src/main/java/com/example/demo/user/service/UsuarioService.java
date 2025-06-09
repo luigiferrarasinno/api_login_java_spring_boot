@@ -133,20 +133,49 @@ public class UsuarioService {
         return "Conta criada com sucesso!";
     }
 
-    
-    
+    //para criraar a senha
+    public String redefinirSenhaPorEmailCpf(String email, Long cpf, LocalDate dtNascimento, String novaSenha) {
+        Optional<Usuario> usuarioOpt = usuarioDAO.findByEmail(email);
 
-    public String alterarSenha(String email, String novaSenha) {
+        if (usuarioOpt.isEmpty()) {
+            return "Usuário com esse e-mail não encontrado!";
+        }
+
+        Usuario usuario = usuarioOpt.get();
+
+        if (!usuario.getCpf().equals(cpf)) {
+            return "CPF não confere com o e-mail fornecido!";
+        }
+
+        if (!usuario.getDt_nascimento().isEqual(dtNascimento)) {
+            return "Data de nascimento não confere com o e-mail e CPF fornecidos!";
+        }
+
+
+        usuario.setSenha(passwordEncoder.encode(novaSenha));
+        usuarioDAO.save(usuario);
+
+        return "Senha redefinida com sucesso!";
+    }
+
+
+    
+    //para alterar a senha do usuário
+    public String alterarSenha(String email, String senhaAntiga, String senhaNova) {
         Optional<Usuario> usuarioExistente = usuarioDAO.findByEmail(email);
         if (usuarioExistente.isPresent()) {
             Usuario usuario = usuarioExistente.get();
-            usuario.setSenha(passwordEncoder.encode(novaSenha));
+            if (!passwordEncoder.matches(senhaAntiga, usuario.getSenha())) {
+                return "Senha antiga incorreta!";
+            }
+            usuario.setSenha(passwordEncoder.encode(senhaNova));
             usuarioDAO.save(usuario);
             return "Senha alterada com sucesso!";
         } else {
             return "Usuário não encontrado!";
         }
     }
+
     
     
 

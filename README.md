@@ -175,7 +175,8 @@ http://localhost:8080/h2-console
 ```json
 {
   "email": "joao@email.com",
-  "senha": "novaSenha456"
+  "senhaAntiga": "uma senha",
+  "senhaNova": "nova senha"
 }
 ```
 
@@ -266,72 +267,143 @@ http://localhost:8080/h2-console
   "ativo": false
 }
 ```
+---
+
+### 8. Criar Senha
+
+**PUT** `/usuarios/criar-senha`
+**Acesso**:
+
+* Público: qualquer usuário que tenha CPF, email e data de nascimento corretos pode criar ou redefinir sua senha.
+
+#### Corpo da Requisição (JSON):
+
+```json
+{
+  "cpf": 12345678900,
+  "email": "usuario@email.com",
+  "dt_nascimento": "2006-05-20",
+  "senhaNova": "minhaNovaSenhaSegura"
+}
+```
+
+> **Observação:** o campo `dt_nascimento` deve estar no formato `"yyyy-MM-dd"`, e será convertido corretamente mesmo com o nome em snake\_case.
+
+#### Resposta (200 OK):
+
+```json
+{
+  "mensagem": "Senha redefinida com sucesso!"
+}
+```
 
 ---
 
+
+
 ## 🧠 Regras de Permissão
 
-| Endpoint                   | USER           | ADMIN         |
-|---------------------------|----------------|---------------|
-| `/usuarios/criar`         | ✅              | ✅             |
-| `/usuarios/login`         | ✅              | ✅             |
-| `/usuarios/alterar-senha` | ✅ (próprio)    | ✅             |
-| `/usuarios/{id}` (DELETE) | ✅ (próprio)    | ✅             |
-| `/usuarios` (GET)         | ❌              | ✅             |
-| `/usuarios/{id}` (GET)    | ✅ (próprio)    | ✅             |
-| `/usuarios/{id}` (PUT)    | ✅ (próprio)    | ✅             |
+| Endpoint                           | USER                  | ADMIN |
+| ---------------------------------- | ---------------------| ----- |
+| `/usuarios/criar`                  | ❌                   | ✅     |
+| `/usuarios/login`                  | ✅ (publico)         | ✅(publico)|
+| `/usuarios/alterar-senha`          | ✅ (próprio)         | ✅     |
+| `/usuarios/criar-senha`            | ✅ (publico)         | ✅(publico)|
+| `/usuarios/{id}` (DELETE)          | ✅ (próprio)         | ✅     |
+| `/usuarios` (GET)                  | ❌                   | ✅     |
+| `/usuarios/{id}` (GET)             | ✅ (próprio)         | ✅     |
+| `/usuarios/{id}` (PUT)             | ✅ (próprio)         | ✅     |
+
 
 ---
 
 ## 📦 Exemplo de uso com Postman
 
-1. **Crie uma conta** usando o endpoint:  
-   ```
-   POST /usuarios/criar
-   ```
-   Corpo da requisição (JSON):
-   ```json
-      {
-      "nomeUsuario": "João da Silva",
-      "senha": "senha123",
-      "email": "joao.silva@email.com",
-      "cpf": 12345678909,
-      "dt_nascimento": "2006-05-20"
-    }
-   ```
+### 1. **Login como administrador**
 
-2. **Faça login** para obter o token:  
-   ```
-   POST /usuarios/login
-   ```
-   Corpo:
-   ```json
-   {
-     "email": "joao@email.com",
-     "senha": "senha123"
-   }
-   ```
+Antes de criar qualquer conta, é necessário fazer login com um usuário administrador para obter o token JWT.
 
-3. **Copie o token** JWT da resposta. Exemplo:
-   ```json
-   {
-     "token": "eyJhbGciOiJIUzI1NiIsInR5..."
-   }
-   ```
+```
+POST /usuarios/login
+```
 
-4. Para testar endpoints protegidos no **Postman**:
+Corpo da requisição (JSON):
 
-   - Vá até a **aba Authorization**
-   - Em **Type**, selecione **Bearer Token**
-   - No campo **Token**, cole o token recebido
-   - O Postman automaticamente adicionará o header:
-     ```
-     Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5...
-     ```
+```json
+{
+  "email": "admin@admin.com",
+  "senha": "admin123"
+}
+```
 
+### 2. **Copie o token JWT da resposta**
 
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5..."
+}
+```
+
+Você usará esse token para autenticar as requisições protegidas, como a criação de usuários.
 
 ---
+
+### 3. **Criar uma nova conta de usuário**
+
+```
+POST /usuarios/criar
+```
+
+Corpo da requisição (JSON):
+
+```json
+{
+  "nomeUsuario": "João da Silva",
+  "senha": "senha123",
+  "email": "joao.silva@email.com",
+  "cpf": 12345678909,
+  "dt_nascimento": "2006-05-20"
+}
+```
+
+> **Atenção:** Este endpoint exige um token de **ADMIN** no cabeçalho da requisição.
+
+---
+
+### 4. **Fazer login com o novo usuário criado**
+
+```
+POST /usuarios/login
+```
+
+Corpo da requisição (JSON):
+
+```json
+{
+  "email": "joao.silva@email.com",
+  "senha": "senha123"
+}
+```
+
+---
+
+### 5. **Autenticação no Postman (Bearer Token)**
+
+Para testar qualquer endpoint protegido:
+
+* Vá até a aba **Authorization**
+* Em **Type**, selecione **Bearer Token**
+* No campo **Token**, cole o token JWT copiado
+* O Postman automaticamente adicionará o cabeçalho:
+
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5...
+```
+
+---
+
+
+
 
 ## ❌ Tratamento de Erros
 
