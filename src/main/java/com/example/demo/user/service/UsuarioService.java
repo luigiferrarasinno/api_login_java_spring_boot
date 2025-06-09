@@ -40,28 +40,25 @@ public class UsuarioService {
     
     
     
-
     public LoginResponseDTO login(String email, String senha) {
-    Optional<Usuario> usuario = usuarioDAO.findByEmail(email);
+        Optional<Usuario> usuario = usuarioDAO.findByEmail(email);
 
-    if (usuario.isPresent() && passwordEncoder.matches(senha, usuario.get().getSenha())) {
-        Usuario user = usuario.get();
+        if (usuario.isPresent() && passwordEncoder.matches(senha, usuario.get().getSenha())) {
+            Usuario user = usuario.get();
+            boolean wasFirstLogin = user.isFirstLogin(); // guarda valor original
 
-        // Se for o primeiro login, atualizar o campo para false
-        if (user.isFirstLogin()) {
-            user.setFirstLogin(false);
-            usuarioDAO.save(user);
+            // Se for o primeiro login, atualizar para false no banco
+            if (wasFirstLogin) {
+                user.setFirstLogin(false);
+                usuarioDAO.save(user);
+            }
+
+            String token = JwtUtil.gerarToken(email);
+            return new LoginResponseDTO(token, user.getId(), wasFirstLogin);
+        } else {
+            throw new RuntimeException("Email ou senha inválidos!");
         }
-
-        Long userId = user.getId();
-        String token = JwtUtil.gerarToken(email);
-        return new LoginResponseDTO(token, userId);
-    } else {
-        throw new RuntimeException("Email ou senha inválidos!");
     }
-    }
-
-
 
     // Método para validar CPF
     // O CPF deve ter 11 dígitos e não pode conter todos os dígitos iguais (ex: 111.111.111-11)
