@@ -147,7 +147,9 @@ http://localhost:8080/h2-console
 ```json
 {
   "email": "joao@email.com",
-  "senha": "senha123"
+  "senha": "senha123",
+  "firstLogin": false
+
 }
 ```
 

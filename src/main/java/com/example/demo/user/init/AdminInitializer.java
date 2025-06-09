@@ -41,6 +41,8 @@ public class AdminInitializer {
             // Campos adicionados
             admin.setCpf(99999999999L); // CPF fictício válido (não será verificado aqui)
             admin.setDt_nascimento(LocalDate.of(1990, 1, 1)); // Data de nascimento padrão
+            // Setar firstLogin como false para o admin
+            admin.setFirstLogin(false);
 
             usuarioDAO.save(admin);
             System.out.println("Usuário ADMIN criado: admin@admin.com / admin123");
