@@ -56,7 +56,7 @@ git clone https://github.com/luigiferrarasinno/api_login_java_spring_boot.git
 cd api_login_java_spring_boot
 ```
 
-- Execute a aplicação com `./mvn spring-boot:run` ou através da sua IDE.  
+- Execute a aplicação com `mvn spring-boot:run` ou através da sua IDE.  
 - A API sobe na porta padrão: `http://localhost:8080`
 
 > ⚠️ Um usuário **ADMIN** será criado automaticamente:
