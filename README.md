@@ -83,7 +83,7 @@ Email: usuario@teste.com
 Senha: teste123
 ```
 
-> ⚠️ Alguns investimentos são criados automaticamente:
+> ⚠️ Alguns investimentos são criados automaticamente tambem
 ---
 
 ## 📚 Documentação e Ferramentas
