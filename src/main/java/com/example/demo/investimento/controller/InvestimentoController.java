@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -50,12 +51,16 @@ public class InvestimentoController {
         return ResponseEntity.ok(new InvestimentoDTO(investimento));
     }
 
+  
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/investimentos/{id}")
     public ResponseEntity<?> deletarInvestimento(@PathVariable Long id) {
         investimentoService.deletar(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().body(
+            Map.of("message", "Investimento com ID " + id + " foi excluído com sucesso.")
+        );
     }
+
 
 
 

@@ -46,6 +46,7 @@ public class InvestimentoService {
     }
 
     public void deletar(Long id) {
+        //System.out.println("Tentando deletar investimento com ID: " + id);
         Optional<Investimento> investimento = investimentoRepository.findById(id);
 
         if (investimento.isEmpty()) {
