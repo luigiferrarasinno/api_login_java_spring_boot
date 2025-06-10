@@ -139,7 +139,7 @@ http://localhost:8080/h2-console
 | `/usuarios/{id}` (GET)             | ✅ (próprio)         | ✅     |
 | `/usuarios/{id}` (PUT)             | ✅ (próprio)         | ✅     |
 
-
+---
 ### 1. Criar Conta
 
 **POST** `/usuarios/criar`  
