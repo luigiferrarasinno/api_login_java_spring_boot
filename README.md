@@ -13,15 +13,23 @@ src
     └── java
         └── com.example.demo
             ├── security/              # Lógica de autenticação, JWT e segurança
-            └── user/                  # Pasta com tudo relacionado a entidade user 
+            ├── user/                  # Pasta com tudo relacionado a entidade user 
+            │   ├── controller/        # Endpoints da API
+            │   ├── dao/               # Classe auxiliar para troca de senha
+            │   ├── dto/               # Objetos de transferência de dados (entrada/saída)
+            │   ├── exception/         # Tratamento global de erros e exceções personalizadas
+            │   ├── init/              # Inicializador com criação do usuário admin
+            │   ├── model/             # Entidades JPA (Usuario e Role)
+            │   ├── repository/        # Interfaces para acesso ao banco
+            │   └── service/           # Lógica de negócio (cadastro, login, exclusão, etc.)
+            └── investimento/          # Pasta com tudo relacionado à entidade investimento
                 ├── controller/        # Endpoints da API
-                ├── dao/               # Classe auxiliar para troca de senha
                 ├── dto/               # Objetos de transferência de dados (entrada/saída)
-                ├── exception/         # Tratamento global de erros e exceções personalizadas
-                ├── init/              # Inicializador com criação do usuário admin
-                ├── model/             # Entidades JPA (Usuario e Role)
+                ├── init/              # Inicializador para investimentos, se aplicável
+                ├── model/             # Entidades JPA relacionadas a investimentos
                 ├── repository/        # Interfaces para acesso ao banco
-                └── service/           # Lógica de negócio (cadastro, login, exclusão, etc.)
+                └── service/           # Lógica de negócio (cadastro, consulta, atualização, etc.)
+
 ```
 
 ---
