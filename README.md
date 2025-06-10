@@ -416,7 +416,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5...
 
 ## 📈 Seção: Investimentos
 
-Essa parte descreve como usar os endpoints de investimento após você obter o token JWT (veja na seção de login).
+Essa parte descreve como usar os endpoints de investimento após você obter o token JWT (veja na seção de manipulação de usuario).
 
 
 ---
