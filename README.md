@@ -446,8 +446,6 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
 ### ✅ Headers comuns para endpoints protegidos:
 
 * **Authorization**: `Bearer SEU_TOKEN_JWT`
-* **Content-Type**: `application/json`
-
 ---
 
 ### 📋 1. Listar todos os investimentos
