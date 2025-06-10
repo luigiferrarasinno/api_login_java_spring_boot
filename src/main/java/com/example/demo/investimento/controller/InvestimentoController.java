@@ -44,10 +44,11 @@ public class InvestimentoController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<String> deletar(@PathVariable Long id) {
         investimentoService.deletar(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Investimento com ID " + id + " foi excluído com sucesso.");
     }
+
 
     @PostMapping("/{investimentoId}/usuario/{usuarioId}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#usuarioId, authentication.name)")

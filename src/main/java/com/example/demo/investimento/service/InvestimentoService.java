@@ -36,9 +36,13 @@ public class InvestimentoService {
                 .orElseThrow(() -> new EntityNotFoundException("Investimento não encontrado"));
     }
 
-    public void deletar(Long id) {
-        investimentoRepository.deleteById(id);
+   public void deletar(Long id) {
+    if (!investimentoRepository.existsById(id)) {
+        throw new EntityNotFoundException("Investimento com ID " + id + " não encontrado.");
+        }
+    investimentoRepository.deleteById(id);
     }
+
 
     // Lista investimentos de um usuário específico
     public List<Investimento> listarPorUsuario(Long usuarioId) {

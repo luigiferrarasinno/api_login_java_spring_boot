@@ -12,12 +12,12 @@ src
 └── main
     └── java
         └── com.example.demo
+            ├── exception/         # Tratamento global de erros e exceções personalizadas
             ├── security/              # Lógica de autenticação, JWT e segurança
             ├── user/                  # Pasta com tudo relacionado a entidade user 
             │   ├── controller/        # Endpoints da API
             │   ├── dao/               # Classe auxiliar para troca de senha
             │   ├── dto/               # Objetos de transferência de dados (entrada/saída)
-            │   ├── exception/         # Tratamento global de erros e exceções personalizadas
             │   ├── init/              # Inicializador com criação do usuário admin
             │   ├── model/             # Entidades JPA (Usuario e Role)
             │   ├── repository/        # Interfaces para acesso ao banco
@@ -539,14 +539,24 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
 
 ---
 
-### ❌ 4. Deletar um investimento
+### ✅ 4. Deletar um investimento
 
 * **Método:** `DELETE`
 * **URL:** `http://localhost:8080/investimentos/{id}`
-* **Só ADMIN** pode executar
-* **Resposta (204 No Content)**
+* **Autorização:** Apenas usuários com `ROLE_ADMIN` podem executar
+* **Resposta (200 OK):**
+
+  ```json
+  {
+    "message": "Investimento com ID {id} foi excluído com sucesso."
+  }
+  ```
+* **Erros possíveis:**
+
+  * `404 Not Found`: Se o investimento com o ID informado não existir (caso esteja implementado no serviço)
 
 ---
+
 
 ### 🔄 5. Vincular / Desvincular investimento a usuário (Toggle)
 
