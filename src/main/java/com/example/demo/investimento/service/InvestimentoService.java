@@ -8,6 +8,9 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
+// import org.springframework.exception.RecursoNaoEncontradoException;
+import com.example.demo.exception.RecursoNaoEncontradoException;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -46,15 +49,15 @@ public class InvestimentoService {
     }
 
     public void deletar(Long id) {
-        //System.out.println("Tentando deletar investimento com ID: " + id);
         Optional<Investimento> investimento = investimentoRepository.findById(id);
 
         if (investimento.isEmpty()) {
-            throw new AccessDeniedException("Acesso negado"); // ou uma exceção mais descritiva
+            throw new RecursoNaoEncontradoException("Investimento com ID " + id + " não encontrado");
         }
 
         investimentoRepository.deleteById(id);
     }
+
 
 
     // Lista investimentos de um usuário específico
