@@ -105,6 +105,8 @@ http://localhost:8080/h2-console
 - **Password:** `Fiap123`
 
 > 💡 Dica: após logar no H2 Console, use `SELECT * FROM USUARIO;` para visualizar os dados.
+> > 💡 Dica: após logar no H2 Console, use `SELECT * FROM Investimento;` para visualizar os dados.
+
 
 ---
 
