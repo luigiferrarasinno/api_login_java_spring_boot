@@ -1,6 +1,7 @@
 package com.example.demo.investimento.controller;
 
 import com.example.demo.investimento.dto.InvestimentoDTO;
+import com.example.demo.investimento.dto.response.VincularResponseDTO;
 import com.example.demo.investimento.model.Investimento;
 import com.example.demo.investimento.service.InvestimentoService;
 import org.springframework.http.ResponseEntity;
@@ -50,10 +51,20 @@ public class InvestimentoController {
 
     @PostMapping("/{investimentoId}/usuario/{usuarioId}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#usuarioId, authentication.name)")
-    public ResponseEntity<InvestimentoDTO> vincular(@PathVariable Long investimentoId, @PathVariable Long usuarioId) {
-        Investimento vinculado = investimentoService.vincularInvestimentoAUsuario(investimentoId, usuarioId);
-        return ResponseEntity.ok(new InvestimentoDTO(vinculado));
+    public ResponseEntity<VincularResponseDTO> vincular(@PathVariable Long investimentoId, @PathVariable Long usuarioId) {
+        Investimento investimento = investimentoService.vincularInvestimentoAUsuario(investimentoId, usuarioId);
+
+        String mensagem;
+        if (investimento.getUsuario() != null && investimento.getUsuario().getId().equals(usuarioId)) {
+            mensagem = "Investimento vinculado com sucesso.";
+        } else {
+            mensagem = "Investimento desvinculado com sucesso.";
+        }
+
+        VincularResponseDTO responseDTO = new VincularResponseDTO(new InvestimentoDTO(investimento), mensagem);
+        return ResponseEntity.ok(responseDTO);
     }
+
 
     @GetMapping("/usuario/{usuarioId}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#usuarioId, authentication.name)")

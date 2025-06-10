@@ -48,7 +48,6 @@ public class InvestimentoService {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
 
-        // Se já estiver vinculado ao mesmo usuário, então desvincula
         if (investimento.getUsuario() != null && investimento.getUsuario().getId().equals(usuarioId)) {
             investimento.setUsuario(null);
         } else {
@@ -57,5 +56,6 @@ public class InvestimentoService {
 
         return investimentoRepository.save(investimento);
     }
+
 
 }
