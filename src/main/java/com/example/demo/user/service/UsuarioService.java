@@ -4,11 +4,18 @@ import com.example.demo.user.dao.UsuarioDAO;
 import com.example.demo.user.dto.Responses.LoginResponseDTO;
 import com.example.demo.user.model.Usuario;
 import org.springframework.stereotype.Service;
+
+import com.example.demo.exception.EmailJaCadastradoException;
+import com.example.demo.exception.RecursoNaoEncontradoException;
 import com.example.demo.security.JwtUtil;
 
 import java.time.LocalDate;
 import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UsuarioService {
@@ -214,5 +221,21 @@ public class UsuarioService {
         return usuarioDAO.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o email: " + email));
     }
-    
+    @Transactional
+    public void trocarEmailPorCpf(Long cpf, String novoEmail) {
+        Usuario usuario = usuarioDAO.findByCpf(cpf)
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado para o CPF informado"));
+
+        if (usuario.getEmail().equalsIgnoreCase(novoEmail)) {
+            throw new EmailJaCadastradoException("O email informado já está cadastrado para este usuário.");
+        }
+
+        usuarioDAO.findByEmail(novoEmail).ifPresent(u -> {
+            throw new EmailJaCadastradoException("Email já cadastrado por outro usuário.");
+        });
+
+        usuario.setEmail(novoEmail);
+        usuarioDAO.save(usuario);
+    }
+
 }

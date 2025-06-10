@@ -14,9 +14,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.Map;
+import com.example.demo.user.dto.TrocarEmailRequest;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
 //import java.util.stream.StreamSupport;
 //import java.util.List;
 //import java.util.stream.Collectors;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -68,6 +73,20 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
         }
     }
+
+   @PutMapping("/trocar-email")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> trocarEmail(@RequestBody TrocarEmailRequest request) {
+        usuarioService.trocarEmailPorCpf(request.getCpf(), request.getNovoEmail());
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now().toString());
+        body.put("mensagem", "Email do usuário com CPF " + request.getCpf() + " alterado com sucesso.");
+
+        return ResponseEntity.ok(body);
+    }
+
+
 
     @DeleteMapping("/{id}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#id, authentication.name)")

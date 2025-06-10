@@ -75,6 +75,14 @@ cd api_login_java_spring_boot
 Email: admin@admin.com
 Senha: admin123
 ```
+
+> 👤 Um usuário **comum (ROLE\_USER)** também será criado automaticamente:
+
+```
+Email: usuario@teste.com
+Senha: teste123
+```
+
 > ⚠️ Alguns investimentos são criados automaticamente:
 ---
 
@@ -126,19 +134,21 @@ http://localhost:8080/h2-console
 ---
 
 
-
 ## 🧠 Regras de Permissão
 
-| Endpoint                           | USER                  | ADMIN |
-| ---------------------------------- | ---------------------| ----- |
-| `/usuarios/criar`                  | ❌                   | ✅     |
-| `/usuarios/login`                  | ✅ (publico)         | ✅(publico)|
-| `/usuarios/alterar-senha`          | ✅ (próprio)         | ✅     |
-| `/usuarios/criar-senha`            | ✅ (publico)         | ✅(publico)|
-| `/usuarios/{id}` (DELETE)          | ✅ (próprio)         | ✅     |
-| `/usuarios` (GET)                  | ❌                   | ✅     |
-| `/usuarios/{id}` (GET)             | ✅ (próprio)         | ✅     |
-| `/usuarios/{id}` (PUT)             | ✅ (próprio)         | ✅     |
+| Endpoint                       | USER        | ADMIN       |
+| ------------------------------ | ----------- | ----------- |
+| `/usuarios/criar`              | ❌           | ✅           |
+| `/usuarios/login`              | ✅ (público) | ✅ (público) |
+| `/usuarios/alterar-senha`      | ✅ (próprio) | ✅           |
+| `/usuarios/criar-senha`        | ✅ (público) | ✅ (público) |
+| `/usuarios/{id}` (DELETE)      | ✅ (próprio) | ✅           |
+| `/usuarios` (GET)              | ❌           | ✅           |
+| `/usuarios/{id}` (GET)         | ✅ (próprio) | ✅           |
+| `/usuarios/{id}` (PUT)         | ✅ (próprio) | ✅           |
+| `/usuarios/trocar-email` (PUT) | ❌           | ✅           |
+
+
 
 ---
 ### 1. Criar Conta
@@ -324,6 +334,56 @@ http://localhost:8080/h2-console
 ```json
 {
   "mensagem": "Senha redefinida com sucesso!"
+}
+```
+
+---
+
+### 9. Trocar Email
+
+**PUT** `/usuarios/trocar-email`
+**Acesso**:
+
+* Apenas **ADMINs** com token **Bearer**.
+
+#### Corpo da Requisição (JSON):
+
+```json
+{
+  "cpf": 12345678900,
+  "novoEmail": "novo.email@email.com"
+}
+```
+
+> **Observação:** o CPF deve estar cadastrado no sistema. O novo email **não pode** ser igual ao atual nem já estar em uso por outro usuário.
+
+#### Resposta (200 OK):
+
+```json
+{
+  "mensagem": "Email do usuário com CPF 12345678900 alterado com sucesso para novo.email@email.com"
+}
+```
+
+#### Respostas de Erro:
+
+* **400 Bad Request** – Quando o novo email já está cadastrado:
+
+```json
+{
+  "timestamp": "2025-06-10T14:22:00",
+  "erro": "Email já cadastrado",
+  "status": 400
+}
+```
+
+* **404 Not Found** – Quando o CPF informado não existe:
+
+```json
+{
+  "timestamp": "2025-06-10T14:25:00",
+  "erro": "Usuário não encontrado para o CPF informado",
+  "status": 404
 }
 ```
 
