@@ -59,7 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.setContentType("application/json");
 
                 Map<String, Object> body = new HashMap<>();
-                body.put("timestamp", LocalDateTime.now());
+                body.put("timestamp", LocalDateTime.now().toString());
                 body.put("status", HttpStatus.UNAUTHORIZED.value());
                 body.put("erro", "Acesso não autorizado");
 
