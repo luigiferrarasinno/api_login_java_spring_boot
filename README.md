@@ -560,7 +560,7 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
 
   * Usuário com `ROLE_USER`: só pode vincular/desvincular seu próprio ID (ou seja, `{usuarioId}` = seu ID)
   * ADMIN: pode vincular/desvincular qualquer usuário
-* **Resposta (200 OK):** mostra o investimento atualizado, incluindo o campo `usuarioId` (ou `null`, se tiver sido desvinculado)
+* **Resposta (200 OK):** mostra o investimento atualizado, incluindo o campo `usuarioId` (ou `null`) alem de incluir uma `message` que mostra qual foi a ação que foi feita, sendo ela o vinculamento ou desvinculamento do usuario com o investimento
 
 ---
 
