@@ -463,7 +463,9 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
     "categoria": "Renda Fixa",
     "valor": 1000.0,
     "descricao": "Investimento seguro em títulos do governo",
-    "usuarioId": null
+    "usuarioId": null,
+    "data": "2025-06-10",
+    "risco": "Alto"
   },
   {
     "id": 2,
@@ -471,7 +473,9 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
     "categoria": "Renda Variável",
     "valor": 5000.0,
     "descricao": "Investimento em ações da Vale",
-    "usuarioId": null
+    "usuarioId": null,
+    "data": "2025-06-10",
+    "risco": "Alto"
   }
 ]
 ```
@@ -492,7 +496,9 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
   "categoria": "Renda Fixa",
   "valor": 1000.0,
   "descricao": "Investimento seguro em títulos do governo",
-  "usuarioId": null
+  "usuarioId": null,
+  "data": "2025-06-10",
+  "risco": "Alto"
 }
 ```
 
@@ -510,7 +516,9 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
   "nome": "Fundo Imobiliário",
   "categoria": "Fundo",
   "valor": 3000.00,
-  "descricao": "Investimento em fundos imobiliários"
+  "descricao": "Investimento em fundos imobiliários",
+  "data": "2025-06-10",
+  "risco": "Alto"
 }
 ```
 
@@ -523,7 +531,9 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
   "categoria": "Fundo",
   "valor": 3000.0,
   "descricao": "Investimento em fundos imobiliários",
-  "usuarioId": null
+  "usuarioId": null,
+  "data": "2025-06-10",
+  "risco": "Alto"
 }
 ```
 

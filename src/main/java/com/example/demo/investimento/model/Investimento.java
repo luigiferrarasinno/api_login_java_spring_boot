@@ -3,6 +3,7 @@ package com.example.demo.investimento.model;
 import com.example.demo.user.model.Usuario;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 public class Investimento {
@@ -18,6 +19,10 @@ public class Investimento {
     private BigDecimal valor;
 
     private String descricao;
+
+    private LocalDate data;
+
+    private String risco;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
@@ -43,6 +48,14 @@ public class Investimento {
     public String getDescricao() { return descricao; }
 
     public void setDescricao(String descricao) { this.descricao = descricao; }
+
+    public LocalDate getData() { return data; }
+
+    public void setData(LocalDate data) { this.data = data; }
+
+    public String getRisco() { return risco; }
+
+    public void setRisco(String risco) { this.risco = risco; }
 
     public Usuario getUsuario() { return usuario; }
 

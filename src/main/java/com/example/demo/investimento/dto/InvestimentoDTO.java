@@ -1,6 +1,7 @@
 package com.example.demo.investimento.dto;
 
 import com.example.demo.investimento.model.Investimento;
+import java.time.format.DateTimeFormatter;
 
 public class InvestimentoDTO {
     private Long id;
@@ -9,6 +10,8 @@ public class InvestimentoDTO {
     private Double valor;
     private String descricao;
     private Long usuarioId; // apenas o ID do usuário
+    private String data;    // data no formato ISO (yyyy-MM-dd)
+    private String risco;
 
     public InvestimentoDTO(Investimento investimento) {
         this.id = investimento.getId();
@@ -17,6 +20,8 @@ public class InvestimentoDTO {
         this.valor = investimento.getValor() != null ? investimento.getValor().doubleValue() : null;
         this.descricao = investimento.getDescricao();
         this.usuarioId = investimento.getUsuario() != null ? investimento.getUsuario().getId() : null;
+        this.data = investimento.getData() != null ? investimento.getData().format(DateTimeFormatter.ISO_LOCAL_DATE) : null;
+        this.risco = investimento.getRisco();
     }
 
     // getters e setters
@@ -55,5 +60,17 @@ public class InvestimentoDTO {
     }
     public void setUsuarioId(Long usuarioId) {
         this.usuarioId = usuarioId;
+    }
+    public String getData() {
+        return data;
+    }
+    public void setData(String data) {
+        this.data = data;
+    }
+    public String getRisco() {
+        return risco;
+    }
+    public void setRisco(String risco) {
+        this.risco = risco;
     }
 }
