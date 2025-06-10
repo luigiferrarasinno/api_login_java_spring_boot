@@ -19,7 +19,9 @@ public class InvestimentoDTO {
         this.categoria = investimento.getCategoria();
         this.valor = investimento.getValor() != null ? investimento.getValor().doubleValue() : null;
         this.descricao = investimento.getDescricao();
-        this.usuarioId = investimento.getUsuario() != null ? investimento.getUsuario().getId() : null;
+        this.usuarioId = (investimento.getUsuarios() != null && !investimento.getUsuarios().isEmpty())
+            ? investimento.getUsuarios().stream().findFirst().map(u -> u.getId()).orElse(null)
+            : null;
         this.data = investimento.getData() != null ? investimento.getData().format(DateTimeFormatter.ISO_LOCAL_DATE) : null;
         this.risco = investimento.getRisco();
     }

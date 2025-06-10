@@ -25,8 +25,8 @@ public class InvestimentoInitializer implements CommandLineRunner {
             i1.setCategoria("Renda Fixa");
             i1.setValor(new BigDecimal("1000.00"));
             i1.setDescricao("Investimento seguro em títulos do governo");
-            i1.setUsuario(null);
-            i1.setData(LocalDate.of(2025, 6, 10));   // data exemplo
+            // i1.setUsuario(null);  --> removido
+            i1.setData(LocalDate.of(2025, 6, 10));
             i1.setRisco("Baixo");
 
             Investimento i2 = new Investimento();
@@ -34,7 +34,7 @@ public class InvestimentoInitializer implements CommandLineRunner {
             i2.setCategoria("Renda Variável");
             i2.setValor(new BigDecimal("5000.00"));
             i2.setDescricao("Investimento em ações da Vale");
-            i2.setUsuario(null);
+            // i2.setUsuario(null);  --> removido
             i2.setData(LocalDate.of(2025, 5, 20));
             i2.setRisco("Alto");
 
@@ -43,7 +43,7 @@ public class InvestimentoInitializer implements CommandLineRunner {
             i3.setCategoria("Fundo");
             i3.setValor(new BigDecimal("3000.00"));
             i3.setDescricao("Investimento em fundos imobiliários");
-            i3.setUsuario(null);
+            // i3.setUsuario(null);  --> removido
             i3.setData(LocalDate.of(2025, 4, 15));
             i3.setRisco("Médio");
 

@@ -55,7 +55,8 @@ public class InvestimentoController {
         Investimento investimento = investimentoService.vincularInvestimentoAUsuario(investimentoId, usuarioId);
 
         String mensagem;
-        if (investimento.getUsuario() != null && investimento.getUsuario().getId().equals(usuarioId)) {
+        if (investimento.getUsuarios() != null && 
+            investimento.getUsuarios().stream().anyMatch(usuario -> usuario.getId().equals(usuarioId))) {
             mensagem = "Investimento vinculado com sucesso.";
         } else {
             mensagem = "Investimento desvinculado com sucesso.";
