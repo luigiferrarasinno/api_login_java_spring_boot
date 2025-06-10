@@ -75,7 +75,7 @@ cd api_login_java_spring_boot
 Email: admin@admin.com
 Senha: admin123
 ```
-
+> ⚠️ Alguns investimentos são criados automaticamente:
 ---
 
 ## 📚 Documentação e Ferramentas
@@ -105,7 +105,7 @@ http://localhost:8080/h2-console
 - **Password:** `Fiap123`
 
 > 💡 Dica: após logar no H2 Console, use `SELECT * FROM USUARIO;` para visualizar os dados.
-> > 💡 Dica: após logar no H2 Console, use `SELECT * FROM Investimento;` para visualizar os dados.
+> 💡 Dica: após logar no H2 Console, use `SELECT * FROM Investimento;` para visualizar os dados.
 
 
 ---
@@ -121,7 +121,24 @@ http://localhost:8080/h2-console
 - Swagger (OpenAPI)
 
 
-## 🔐 Endpoints da API
+# 🔐 Endpoints da API de manipulação de usuario
+---
+
+
+
+## 🧠 Regras de Permissão
+
+| Endpoint                           | USER                  | ADMIN |
+| ---------------------------------- | ---------------------| ----- |
+| `/usuarios/criar`                  | ❌                   | ✅     |
+| `/usuarios/login`                  | ✅ (publico)         | ✅(publico)|
+| `/usuarios/alterar-senha`          | ✅ (próprio)         | ✅     |
+| `/usuarios/criar-senha`            | ✅ (publico)         | ✅(publico)|
+| `/usuarios/{id}` (DELETE)          | ✅ (próprio)         | ✅     |
+| `/usuarios` (GET)                  | ❌                   | ✅     |
+| `/usuarios/{id}` (GET)             | ✅ (próprio)         | ✅     |
+| `/usuarios/{id}` (PUT)             | ✅ (próprio)         | ✅     |
+
 
 ### 1. Criar Conta
 
@@ -308,24 +325,6 @@ http://localhost:8080/h2-console
   "mensagem": "Senha redefinida com sucesso!"
 }
 ```
-
----
-
-
-
-## 🧠 Regras de Permissão
-
-| Endpoint                           | USER                  | ADMIN |
-| ---------------------------------- | ---------------------| ----- |
-| `/usuarios/criar`                  | ❌                   | ✅     |
-| `/usuarios/login`                  | ✅ (publico)         | ✅(publico)|
-| `/usuarios/alterar-senha`          | ✅ (próprio)         | ✅     |
-| `/usuarios/criar-senha`            | ✅ (publico)         | ✅(publico)|
-| `/usuarios/{id}` (DELETE)          | ✅ (próprio)         | ✅     |
-| `/usuarios` (GET)                  | ❌                   | ✅     |
-| `/usuarios/{id}` (GET)             | ✅ (próprio)         | ✅     |
-| `/usuarios/{id}` (PUT)             | ✅ (próprio)         | ✅     |
-
 
 ---
 
