@@ -38,6 +38,13 @@ public class InvestimentoService {
                 .orElseThrow(() -> new EntityNotFoundException("Investimento não encontrado"));
     }
 
+    @Transactional
+    public Investimento toggleAtivo(Long investimentoId) {
+        Investimento investimento = buscarPorId(investimentoId);
+        investimento.setAtivo(!investimento.isAtivo());
+        return investimentoRepository.save(investimento);
+    }
+
     public void deletar(Long id) {
         Optional<Investimento> investimento = investimentoRepository.findById(id);
 

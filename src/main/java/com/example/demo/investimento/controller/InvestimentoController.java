@@ -35,6 +35,14 @@ public class InvestimentoController {
         return ResponseEntity.ok(new InvestimentoDTO(salvo));
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PatchMapping("/{id}/toggle-ativo")
+    public ResponseEntity<InvestimentoDTO> toggleAtivo(@PathVariable Long id) {
+        Investimento investimentoAtualizado = investimentoService.toggleAtivo(id);
+        return ResponseEntity.ok(new InvestimentoDTO(investimentoAtualizado));
+    }
+
+
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<InvestimentoDTO> buscar(@PathVariable Long id) {
