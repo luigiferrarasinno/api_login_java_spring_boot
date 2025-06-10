@@ -64,7 +64,7 @@ cd api_login_java_spring_boot
 > ⚠️ Um usuário **ADMIN** será criado automaticamente:
 
 ```
-Email: admin@email.com
+Email: admin@admin.com
 Senha: admin123
 ```
 
@@ -404,7 +404,157 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5...
 
 ---
 
+## 📈 Seção: Investimentos
 
+Essa parte descreve como usar os endpoints de investimento após você obter o token JWT (veja na seção de login).
+
+
+---
+
+## 🧠 Regras de Permissão - Investimentos
+
+| Endpoint                                                   | USER            | ADMIN           |
+| ---------------------------------------------------------- | --------------- | --------------- |
+| `GET /investimentos`                                       | ✅ (autenticado) | ✅ (autenticado) |
+| `POST /investimentos`                                      | ❌               | ✅               |
+| `GET /investimentos/{id}`                                  | ✅ (autenticado) | ✅               |
+| `DELETE /investimentos/{id}`                               | ❌               | ✅               |
+| `POST /investimentos/{investimentoId}/usuario/{usuarioId}` | ✅ (próprio)     | ✅               |
+| `GET /investimentos/usuario/{usuarioId}`                   | ✅ (próprio)     | ✅               |
+
+---
+
+**Legenda:**
+
+* ✅: Permitido
+* ❌: Negado
+* (próprio): Somente para o próprio usuário (via verificação customizada `@usuarioService.isOwnerOrAdmin`)
+* (autenticado): Qualquer usuário autenticado
+
+---
+
+### ✅ Headers comuns para endpoints protegidos:
+
+* **Authorization**: `Bearer SEU_TOKEN_JWT`
+* **Content-Type**: `application/json`
+
+---
+
+### 📋 1. Listar todos os investimentos
+
+* **Método:** `GET`
+* **URL:** `http://localhost:8080/investimentos`
+* **Pré-requisito:** qualquer usuário **autenticado**
+* **Resposta (200 OK):** Lista JSON como:
+
+```json
+[
+  {
+    "id": 1,
+    "nome": "Tesouro Direto",
+    "categoria": "Renda Fixa",
+    "valor": 1000.0,
+    "descricao": "Investimento seguro em títulos do governo",
+    "usuarioId": null
+  },
+  {
+    "id": 2,
+    "nome": "Ações Vale",
+    "categoria": "Renda Variável",
+    "valor": 5000.0,
+    "descricao": "Investimento em ações da Vale",
+    "usuarioId": null
+  }
+]
+```
+
+---
+
+### 🔍 2. Buscar investimento por ID
+
+* **Método:** `GET`
+* **URL:** `http://localhost:8080/investimentos/{id}` (substitua `{id}` por um número)
+* **Pré-requisito:** usuário autenticado
+* **Resposta (200 OK):**
+
+```json
+{
+  "id": 1,
+  "nome": "Tesouro Direto",
+  "categoria": "Renda Fixa",
+  "valor": 1000.0,
+  "descricao": "Investimento seguro em títulos do governo",
+  "usuarioId": null
+}
+```
+
+---
+
+### ➕ 3. Criar um novo investimento
+
+* **Método:** `POST`
+* **URL:** `http://localhost:8080/investimentos`
+* **Só ADMIN** pode executar
+* **Body (JSON):**
+
+```json
+{
+  "nome": "Fundo Imobiliário",
+  "categoria": "Fundo",
+  "valor": 3000.00,
+  "descricao": "Investimento em fundos imobiliários"
+}
+```
+
+* **Resposta (200 OK):**
+
+```json
+{
+  "id": 3,
+  "nome": "Fundo Imobiliário",
+  "categoria": "Fundo",
+  "valor": 3000.0,
+  "descricao": "Investimento em fundos imobiliários",
+  "usuarioId": null
+}
+```
+
+---
+
+### ❌ 4. Deletar um investimento
+
+* **Método:** `DELETE`
+* **URL:** `http://localhost:8080/investimentos/{id}`
+* **Só ADMIN** pode executar
+* **Resposta (204 No Content)**
+
+---
+
+### 🔄 5. Vincular / Desvincular investimento a usuário (Toggle)
+
+* **Método:** `POST`
+* **URL:** `http://localhost:8080/investimentos/{investimentoId}/usuario/{usuarioId}`
+
+  * Exemplo: `http://localhost:8080/investimentos/1/usuario/2`
+* **Acesso:**
+
+  * Usuário com `ROLE_USER`: só pode vincular/desvincular seu próprio ID (ou seja, `{usuarioId}` = seu ID)
+  * ADMIN: pode vincular/desvincular qualquer usuário
+* **Resposta (200 OK):** mostra o investimento atualizado, incluindo o campo `usuarioId` (ou `null`, se tiver sido desvinculado)
+
+---
+
+### 👤 6. Listar investimentos vinculados a um usuário
+
+* **Método:** `GET`
+* **URL:** `http://localhost:8080/investimentos/usuario/{usuarioId}`
+* **Acesso:**
+
+  * Usuário: só pode acessar seus próprios investimentos
+  * ADMIN: pode ver qualquer usuário
+* **Resposta (200 OK):** lista somente os investimentos cujo `usuarioId` é o mesmo passado na URL
+
+---
 
 
 ## ❌ Tratamento de Erros

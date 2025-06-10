@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.example.demo.investimento.model.Investimento;
 
 @Entity
 public class Usuario {
@@ -39,6 +43,18 @@ public class Usuario {
     private String role = "ROLE_USER"; // Pode ser "USER" ou "ADMIN"
 
     private boolean firstLogin = true; // Novo campo adicionado
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Investimento> investimentos = new ArrayList<>();
+
+    public List<Investimento> getInvestimentos() {
+        return investimentos;
+    }
+
+    public void setInvestimentos(List<Investimento> investimentos) {
+        this.investimentos = investimentos;
+    }
+
 
     // Getters e Setters
     public Long getId() {
