@@ -7,8 +7,10 @@ import com.example.demo.user.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,11 +38,14 @@ public class InvestimentoService {
                 .orElseThrow(() -> new EntityNotFoundException("Investimento não encontrado"));
     }
 
-   public void deletar(Long id) {
-    if (!investimentoRepository.existsById(id)) {
-        throw new EntityNotFoundException("Investimento com ID " + id + " não encontrado.");
+    public void deletar(Long id) {
+        Optional<Investimento> investimento = investimentoRepository.findById(id);
+
+        if (investimento.isEmpty()) {
+            throw new AccessDeniedException("Acesso negado"); // ou uma exceção mais descritiva
         }
-    investimentoRepository.deleteById(id);
+
+        investimentoRepository.deleteById(id);
     }
 
 

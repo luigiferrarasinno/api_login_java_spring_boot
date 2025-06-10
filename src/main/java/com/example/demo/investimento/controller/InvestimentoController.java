@@ -42,12 +42,13 @@ public class InvestimentoController {
         return ResponseEntity.ok(new InvestimentoDTO(investimento));
     }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<String> deletar(@PathVariable Long id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/investimentos/{id}")
+    public ResponseEntity<?> deletarInvestimento(@PathVariable Long id) {
         investimentoService.deletar(id);
-        return ResponseEntity.ok("Investimento com ID " + id + " foi excluído com sucesso.");
+        return ResponseEntity.noContent().build();
     }
+
 
 
     @PostMapping("/{investimentoId}/usuario/{usuarioId}")

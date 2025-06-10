@@ -69,11 +69,6 @@ public class UsuarioController {
         }
     }
 
-
-    
-    
-    
-
     @DeleteMapping("/{id}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#id, authentication.name)")
     public String deletarConta(@PathVariable Long id) {

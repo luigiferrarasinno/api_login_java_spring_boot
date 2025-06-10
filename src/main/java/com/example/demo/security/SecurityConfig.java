@@ -1,4 +1,5 @@
 package com.example.demo.security;
+
 import com.example.demo.user.dao.UsuarioDAO;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,9 +16,12 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 public class SecurityConfig {
 
     private final UsuarioDAO usuarioDAO;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
-    public SecurityConfig(UsuarioDAO usuarioDAO) {
+    // Injetando o handler no construtor
+    public SecurityConfig(UsuarioDAO usuarioDAO, CustomAccessDeniedHandler accessDeniedHandler) {
         this.usuarioDAO = usuarioDAO;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
@@ -26,8 +30,11 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**").disable())
             .headers(headers -> headers.frameOptions().disable()) // Habilita o uso do H2 Console
             .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/usuarios/login", "/h2-console/**", "/usuarios/criar-senha", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                .requestMatchers("/usuarios/login", "/h2-console/**", "/usuarios/criar-senha", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated()
+            )
+            .exceptionHandling(exception -> 
+                exception.accessDeniedHandler(accessDeniedHandler)  // Aqui!
             )
             .addFilterBefore(new JwtAuthenticationFilter(usuarioDAO), UsernamePasswordAuthenticationFilter.class);
 
@@ -44,7 +51,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-
-//p n esquecer
-//http://localhost:8080/swagger-ui/index.html
-//http://localhost:8080/h2-console/login.jsp?jsessionid=428ae249ba30e7a7e0ac245afc66f3b2
