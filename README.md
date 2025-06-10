@@ -412,12 +412,12 @@ Para testar qualquer endpoint protegido:
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5...
 ```
 
+
 ---
 
 ## 📈 Seção: Investimentos
 
-Essa parte descreve como usar os endpoints de investimento após você obter o token JWT (veja na seção de manipulação de usuario).
-
+Essa parte descreve como usar os endpoints de investimento após você obter o token JWT (veja na seção de manipulação de usuário).
 
 ---
 
@@ -446,6 +446,7 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
 ### ✅ Headers comuns para endpoints protegidos:
 
 * **Authorization**: `Bearer SEU_TOKEN_JWT`
+
 ---
 
 ### 📋 1. Listar todos os investimentos
@@ -460,22 +461,22 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
   {
     "id": 1,
     "nome": "Tesouro Direto",
-    "categoria": "Renda Fixa",
+    "categoria": "RENDA_FIXA",
     "valor": 1000.0,
     "descricao": "Investimento seguro em títulos do governo",
     "usuarioId": null,
     "data": "2025-06-10",
-    "risco": "Alto"
+    "risco": "ALTO"
   },
   {
     "id": 2,
     "nome": "Ações Vale",
-    "categoria": "Renda Variável",
+    "categoria": "RENDA_VARIAVEL",
     "valor": 5000.0,
     "descricao": "Investimento em ações da Vale",
     "usuarioId": null,
     "data": "2025-06-10",
-    "risco": "Alto"
+    "risco": "ALTO"
   }
 ]
 ```
@@ -493,12 +494,12 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
 {
   "id": 1,
   "nome": "Tesouro Direto",
-  "categoria": "Renda Fixa",
+  "categoria": "RENDA_FIXA",
   "valor": 1000.0,
   "descricao": "Investimento seguro em títulos do governo",
   "usuarioId": null,
   "data": "2025-06-10",
-  "risco": "Alto"
+  "risco": "ALTO"
 }
 ```
 
@@ -514,11 +515,11 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
 ```json
 {
   "nome": "Fundo Imobiliário",
-  "categoria": "Fundo",
+  "categoria": "FUNDO",
   "valor": 3000.00,
   "descricao": "Investimento em fundos imobiliários",
   "data": "2025-06-10",
-  "risco": "Alto"
+  "risco": "ALTO"
 }
 ```
 
@@ -528,12 +529,12 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
 {
   "id": 3,
   "nome": "Fundo Imobiliário",
-  "categoria": "Fundo",
+  "categoria": "FUNDO",
   "valor": 3000.0,
   "descricao": "Investimento em fundos imobiliários",
   "usuarioId": null,
   "data": "2025-06-10",
-  "risco": "Alto"
+  "risco": "ALTO"
 }
 ```
 
@@ -542,21 +543,18 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
 ### ✅ 4. Deletar um investimento
 
 * **Método:** `DELETE`
-* **URL:** `http://localhost:8080/investimentos/{id}`
-* **Autorização:** Apenas usuários com `ROLE_ADMIN` podem executar
-* **Resposta (200 OK):**
 
-  ```json
-  {
-    "message": "Investimento com ID {id} foi excluído com sucesso."
-  }
-  ```
+* **URL:** `http://localhost:8080/investimentos/{id}`
+
+* **Autorização:** Apenas usuários com `ROLE_ADMIN` podem executar
+
+* **Resposta (204 No Content):** Nenhum conteúdo retornado
+
 * **Erros possíveis:**
 
   * `404 Not Found`: Se o investimento com o ID informado não existir (caso esteja implementado no serviço)
 
 ---
-
 
 ### 🔄 5. Vincular / Desvincular investimento a usuário (Toggle)
 
@@ -568,7 +566,7 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
 
   * Usuário com `ROLE_USER`: só pode vincular/desvincular seu próprio ID (ou seja, `{usuarioId}` = seu ID)
   * ADMIN: pode vincular/desvincular qualquer usuário
-* **Resposta (200 OK):** mostra o investimento atualizado, incluindo o campo `usuarioId` (ou `null`) alem de incluir uma `message` que mostra qual foi a ação que foi feita, sendo ela o vinculamento ou desvinculamento do usuario com o investimento
+* **Resposta (200 OK):** mostra o investimento atualizado, incluindo o campo `usuarioId` (ou `null`) além de incluir uma `message` que informa se houve vinculação ou desvinculação do usuário com o investimento
 
 ---
 
@@ -584,7 +582,6 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
 
 ---
 
-
 ## ❌ Tratamento de Erros
 
 A API retorna erros em formato padronizado:
@@ -594,6 +591,30 @@ A API retorna erros em formato padronizado:
   "timestamp": "2025-04-09T15:10:22.491",
   "erro": "Usuário ou senha inválidos!",
   "status": 401
+}
+```
+
+---
+
+### 🔄 7. Ativar / Desativar um investimento (toggle ativo)
+
+* **Método:** `PATCH`
+* **URL:** `http://localhost:8080/investimentos/{id}/toggle-ativo`
+* **Autorização:** Apenas usuários com `ROLE_ADMIN` podem executar
+* **Descrição:** Alterna o status ativo/inativo do investimento com o ID informado
+* **Resposta (200 OK):** Retorna o investimento atualizado, exemplo:
+
+```json
+{
+  "id": 1,
+  "nome": "Tesouro Direto",
+  "categoria": "RENDA_FIXA",
+  "valor": 1000.0,
+  "descricao": "Investimento seguro em títulos do governo",
+  "usuarioId": null,
+  "data": "2025-06-10",
+  "risco": "ALTO",
+  "ativo": false
 }
 ```
 

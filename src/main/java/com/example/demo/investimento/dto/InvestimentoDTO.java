@@ -36,7 +36,6 @@ public class InvestimentoDTO {
             investimento.getUsuarios().stream().map(u -> u.getId()).collect(Collectors.toSet())
             : null;
         this.data = investimento.getData() != null ? investimento.getData().format(DATE_FORMAT) : null;
-        this.vencimento = investimento.getVencimento() != null ? investimento.getVencimento().format(DATE_FORMAT) : null;
         this.liquidez = investimento.getLiquidez();
         this.taxaRetorno = investimento.getTaxaRetorno() != null ? investimento.getTaxaRetorno().doubleValue() : null;
         this.ativo = investimento.isAtivo();

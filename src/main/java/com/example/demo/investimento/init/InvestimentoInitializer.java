@@ -32,7 +32,6 @@ public class InvestimentoInitializer implements CommandLineRunner {
             i1.setValor(new BigDecimal("1000.00"));
             i1.setDescricao("Investimento seguro em títulos do governo");
             i1.setData(LocalDate.of(2025, 6, 10));
-            i1.setVencimento(LocalDate.of(2030, 6, 10));
             i1.setLiquidez("Diária");
             i1.setTaxaRetorno(new BigDecimal("5.5"));
             i1.setAtivo(true);
@@ -46,7 +45,6 @@ public class InvestimentoInitializer implements CommandLineRunner {
             i2.setValor(new BigDecimal("5000.00"));
             i2.setDescricao("Investimento em ações da Vale");
             i2.setData(LocalDate.of(2025, 5, 20));
-            i2.setVencimento(LocalDate.of(2035, 5, 20));
             i2.setLiquidez("Baixa");
             i2.setTaxaRetorno(new BigDecimal("12.0"));
             i2.setAtivo(true);
@@ -60,7 +58,6 @@ public class InvestimentoInitializer implements CommandLineRunner {
             i3.setValor(new BigDecimal("3000.00"));
             i3.setDescricao("Investimento em fundos imobiliários");
             i3.setData(LocalDate.of(2025, 4, 15));
-            i3.setVencimento(LocalDate.of(2032, 4, 15));
             i3.setLiquidez("Média");
             i3.setTaxaRetorno(new BigDecimal("8.0"));
             i3.setAtivo(true);

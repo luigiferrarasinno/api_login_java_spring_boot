@@ -32,8 +32,6 @@ public class Investimento {
     @NotNull
     private LocalDate data;
 
-    private LocalDate vencimento;
-
     private String liquidez;
 
     @PositiveOrZero
@@ -83,9 +81,6 @@ public class Investimento {
 
     public LocalDate getData() { return data; }
     public void setData(LocalDate data) { this.data = data; }
-
-    public LocalDate getVencimento() { return vencimento; }
-    public void setVencimento(LocalDate vencimento) { this.vencimento = vencimento; }
 
     public String getLiquidez() { return liquidez; }
     public void setLiquidez(String liquidez) { this.liquidez = liquidez; }
