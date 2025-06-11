@@ -37,10 +37,8 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         body.put("status", HttpStatus.FORBIDDEN.value());
         body.put("erro", "Acesso não autorizado");
 
-        // Escreve o corpo JSON
         objectMapper.writeValue(response.getOutputStream(), body);
-        response.flushBuffer(); // <- importante
-        return; // <- garante que a requisição termina aqui
-        // Garante que a resposta termine aqui
+        response.flushBuffer(); 
+        return; 
     }
 }
