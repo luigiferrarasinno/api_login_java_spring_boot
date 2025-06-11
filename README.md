@@ -12,7 +12,7 @@ src
 └── main
     └── java
         └── com.example.demo
-            ├── exception/         # Tratamento global de erros e exceções personalizadas
+            ├── exception/             # Tratamento global de erros e exceções personalizadas
             ├── security/              # Lógica de autenticação, JWT e segurança
             ├── user/                  # Pasta com tudo relacionado a entidade user 
             │   ├── controller/        # Endpoints da API
