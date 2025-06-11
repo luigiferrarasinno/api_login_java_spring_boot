@@ -145,7 +145,7 @@ http://localhost:8080/h2-console
 | `/usuarios/{id}` (DELETE)      | ✅ (próprio) | ✅           |
 | `/usuarios` (GET)              | ❌           | ✅           |
 | `/usuarios/{id}` (GET)         | ✅ (próprio) | ✅           |
-| `/usuarios/{id}` (PUT)         | ✅ (próprio) | ✅           |
+| `/usuarios/{id}` (PATCH)       | ✅ (próprio) | ✅           |
 | `/usuarios/trocar-email` (PUT) | ❌           | ✅           |
 
 
