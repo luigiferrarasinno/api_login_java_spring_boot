@@ -618,7 +618,7 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
 
 ### 🔄 5. Vincular / Desvincular investimento a usuário (Toggle)
 
-* **Método:** `PATCH`
+* **Método:** `POST`
 * **URL:** `http://localhost:8080/investimentos/{investimentoId}/usuario/{usuarioId}`
 
   * Exemplo: `http://localhost:8080/investimentos/1/usuario/2`
