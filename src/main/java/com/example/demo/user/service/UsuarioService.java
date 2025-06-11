@@ -49,7 +49,10 @@ public class UsuarioService {
     
     public LoginResponseDTO login(String email, String senha) {
         Optional<Usuario> usuario = usuarioDAO.findByEmail(email);
-
+        //verifica se a senha é vazia
+        if (senha == null || senha.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Senha não pode ser vazia!");
+        }
         if (usuario.isPresent() && passwordEncoder.matches(senha, usuario.get().getSenha())) {
             Usuario user = usuario.get();
             boolean wasFirstLogin = user.isFirstLogin(); // guarda valor original
