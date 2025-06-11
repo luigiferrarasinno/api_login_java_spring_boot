@@ -294,7 +294,7 @@ http://localhost:8080/h2-console
 
 ### 7. Alternar Status de Atividade
 
-**PUT** `/usuarios/{id}`  
+**PATCH** `/usuarios/{id}`  
 **Acesso**:
 - USER: pode alterar apenas o próprio status  
 - ADMIN: pode alterar qualquer usuário

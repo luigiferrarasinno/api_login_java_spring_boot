@@ -74,7 +74,7 @@ public class UsuarioController {
         }
     }
 
-   @PutMapping("/trocar-email")
+    @PutMapping("/trocar-email")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> trocarEmail(@RequestBody TrocarEmailRequest request) {
         usuarioService.trocarEmailPorCpf(request.getCpf(), request.getNovoEmail());
@@ -113,7 +113,7 @@ public class UsuarioController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#id, authentication.name)")
     public ResponseEntity<Object> alternarStatusUsuario(@PathVariable Long id) {
         try {
