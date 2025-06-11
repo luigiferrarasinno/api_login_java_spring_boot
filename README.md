@@ -45,8 +45,8 @@ src
 | `dto`          | Objetos usados para entrada e saída de dados (evita expor entidades)   |
 | `model`        | Entidades JPA que representam as tabelas no banco de dados             |
 | `security`     | Configuração de autenticação e geração/validação de tokens JWT         |
-| `exception`    | Gerencia erros com mensagens claras usando `@ControllerAdvice`         |
-| `init`         | Cria automaticamente um usuário ADMIN no início da aplicação           |
+| `exception`    | Gerencia erros com mensagens personalizadas                            |
+| `init`         | Cria automaticamente algumas coisas no início da aplicação             |
 
 
 ---
