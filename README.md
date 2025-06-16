@@ -684,9 +684,13 @@ A API retorna erros em formato padronizado:
 
 Desenvolvido por:
 • Davi Passanha de Sousa Guerra - RM551605
+
 • Cauã Gonçalves de Jesus - RM97648
+
 • Luan Silveira Macea - RM98290
+
 • Rui Amorim Siqueira - RM98436
+
 • Luigi Ferrara Sinno -RM98047
 
 GitHub: [api_login_java_spring_boot](https://github.com/luigiferrarasinno/api_login_java_spring_boot.git)
