@@ -683,6 +683,7 @@ A API retorna erros em formato padronizado:
 ## 👤 Autor
 
 Desenvolvido por:
+
 • Davi Passanha de Sousa Guerra - RM551605
 
 • Cauã Gonçalves de Jesus - RM97648
