@@ -14,6 +14,7 @@ src
         └── com.example.demo
             ├── exception/             # Tratamento global de erros e exceções personalizadas
             ├── security/              # Lógica de autenticação, JWT e segurança
+            ├── logging/               # Filtro para log de requisições e respostas da API
             ├── user/                  # Pasta com tudo relacionado a entidade user 
             │   ├── controller/        # Endpoints da API
             │   ├── dao/               # Classe auxiliar para troca de senha
