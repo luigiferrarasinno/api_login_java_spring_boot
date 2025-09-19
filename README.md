@@ -132,27 +132,9 @@ http://localhost:8080/h2-console
 
 ---
 
-## 🏗️ Arquitetura e diagramas (peso 10%)
+## 🏗️ Arquitetura e diagramas 
 
-### 📐 Arquitetura em Camadas
-
-```mermaid
-graph TD
-    A[🌐 Cliente] --> B[🔒 Security Layer]
-    B --> C[🎯 Controller Layer]
-    C --> D[⚙️ Service Layer]
-    D --> E[💾 Repository Layer]
-    E --> F[🗄️ Database H2]
-    
-    style A fill:#e1f5fe
-    style B fill:#fff3e0
-    style C fill:#f3e5f5
-    style D fill:#e8f5e8
-    style E fill:#fff8e1
-    style F fill:#fce4ec
-```
-
-### 🗂️ Diagrama de Entidades
+### ️ Diagrama de Entidades
 
 ```mermaid
 erDiagram
@@ -180,45 +162,6 @@ erDiagram
     }
     
     USUARIO ||--o{ INVESTIMENTO : "tem vários"
-```
-
-### 🔄 Casos de Uso por Módulo
-
-```mermaid
-graph LR
-    subgraph "👤 Usuários"
-        U1[Criar Conta]
-        U2[Fazer Login]
-        U3[Alterar Senha]
-        U4[Ver Perfil]
-    end
-    
-    subgraph "💰 Investimentos"
-        I1[Listar Todos]
-        I2[Ver Detalhes]
-        I3[Vincular ao Usuário]
-        I4[Meus Investimentos]
-    end
-    
-    subgraph "🔐 Admin"
-        A1[Criar Investimento]
-        A2[Gerenciar Usuários]
-        A3[Excluir Dados]
-    end
-    
-    style U1 fill:#e3f2fd
-    style U2 fill:#e3f2fd
-    style U3 fill:#e3f2fd
-    style U4 fill:#e3f2fd
-    
-    style I1 fill:#e8f5e8
-    style I2 fill:#e8f5e8
-    style I3 fill:#e8f5e8
-    style I4 fill:#e8f5e8
-    
-    style A1 fill:#fff3e0
-    style A2 fill:#fff3e0
-    style A3 fill:#fff3e0
 ```
 
 ### 🏛️ Fluxo de uma Requisição
