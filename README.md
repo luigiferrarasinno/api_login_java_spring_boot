@@ -134,221 +134,111 @@ http://localhost:8080/h2-console
 
 ## 🏗️ Arquitetura e diagramas (peso 10%)
 
-### 📐 Diagramas de arquitetura (camadas e componentes)
+### 📐 Arquitetura em Camadas
 
 ```mermaid
-graph TB
-    subgraph "Presentation Layer"
-        UC[Usuario Controller]
-        IC[Investimento Controller]
-    end
+graph TD
+    A[🌐 Cliente] --> B[🔒 Security Layer]
+    B --> C[🎯 Controller Layer]
+    C --> D[⚙️ Service Layer]
+    D --> E[💾 Repository Layer]
+    E --> F[🗄️ Database H2]
     
-    subgraph "Security Layer"
-        JWT[JWT Filter]
-        SEC[Security Config]
-        AUTH[Authentication]
-    end
-    
-    subgraph "Service Layer"
-        US[Usuario Service]
-        IS[Investimento Service]
-    end
-    
-    subgraph "Data Access Layer"
-        UR[Usuario Repository]
-        IR[Investimento Repository]
-        DAO[Usuario DAO]
-    end
-    
-    subgraph "Model Layer"
-        UE[Usuario Entity]
-        IE[Investimento Entity]
-    end
-    
-    subgraph "Database"
-        H2[(H2 Database)]
-    end
-    
-    subgraph "Exception Handling"
-        GEH[Global Exception Handler]
-        CUSTOM[Custom Exceptions]
-    end
-    
-    UC --> JWT
-    IC --> JWT
-    JWT --> SEC
-    SEC --> AUTH
-    UC --> US
-    IC --> IS
-    US --> UR
-    IS --> IR
-    US --> DAO
-    UR --> UE
-    IR --> IE
-    UE --> H2
-    IE --> H2
-    US --> GEH
-    IS --> GEH
-    GEH --> CUSTOM
+    style A fill:#e1f5fe
+    style B fill:#fff3e0
+    style C fill:#f3e5f5
+    style D fill:#e8f5e8
+    style E fill:#fff8e1
+    style F fill:#fce4ec
 ```
 
-### 🗂️ Diagrama de entidades (ER)
+### 🗂️ Diagrama de Entidades
 
 ```mermaid
 erDiagram
     USUARIO {
-        Long id PK
-        String nomeUsuario
-        String email UK
-        String senha
-        Long cpf UK
-        LocalDate dt_nascimento
-        String role
-        Boolean userIsActive
-        String tipo_de_investidor
-        String user_permissions
+        id LONG PK
+        nomeUsuario STRING
+        email STRING
+        senha STRING
+        cpf LONG
+        dt_nascimento DATE
+        role STRING
+        userIsActive BOOLEAN
     }
     
     INVESTIMENTO {
-        Long id PK
-        String nome
-        String categoria
-        Double valor
-        String descricao
-        LocalDate data
-        String risco
-        Boolean ativo
-        Long usuarioId FK
+        id LONG PK
+        nome STRING
+        categoria STRING
+        valor DOUBLE
+        descricao STRING
+        data DATE
+        risco STRING
+        ativo BOOLEAN
+        usuarioId LONG FK
     }
     
-    USUARIO ||--o{ INVESTIMENTO : "possui"
+    USUARIO ||--o{ INVESTIMENTO : "tem vários"
 ```
 
-### 🔄 Casos de uso implementados como serviços
+### 🔄 Casos de Uso por Módulo
 
 ```mermaid
 graph LR
-    subgraph "Usuario Service Cases"
-        UC1[Cadastrar Usuario]
-        UC2[Autenticar Usuario]
-        UC3[Alterar Senha]
-        UC4[Redefinir Senha]
-        UC5[Trocar Email]
-        UC6[Ativar/Desativar]
-        UC7[Consultar Usuario]
-        UC8[Excluir Usuario]
+    subgraph "👤 Usuários"
+        U1[Criar Conta]
+        U2[Fazer Login]
+        U3[Alterar Senha]
+        U4[Ver Perfil]
     end
     
-    subgraph "Investimento Service Cases"
-        IC1[Listar Investimentos]
-        IC2[Criar Investimento]
-        IC3[Consultar por ID]
-        IC4[Vincular Usuario]
-        IC5[Desvincular Usuario]
-        IC6[Investimentos do Usuario]
-        IC7[Toggle Ativo]
-        IC8[Excluir Investimento]
+    subgraph "💰 Investimentos"
+        I1[Listar Todos]
+        I2[Ver Detalhes]
+        I3[Vincular ao Usuário]
+        I4[Meus Investimentos]
     end
     
-    subgraph "Security Cases"
-        SC1[Gerar JWT]
-        SC2[Validar Token]
-        SC3[Autorizar Acesso]
-        SC4[Filtrar Requisições]
+    subgraph "🔐 Admin"
+        A1[Criar Investimento]
+        A2[Gerenciar Usuários]
+        A3[Excluir Dados]
     end
     
-    UC2 --> SC1
-    UC7 --> SC2
-    IC1 --> SC3
-    UC1 --> SC4
+    style U1 fill:#e3f2fd
+    style U2 fill:#e3f2fd
+    style U3 fill:#e3f2fd
+    style U4 fill:#e3f2fd
+    
+    style I1 fill:#e8f5e8
+    style I2 fill:#e8f5e8
+    style I3 fill:#e8f5e8
+    style I4 fill:#e8f5e8
+    
+    style A1 fill:#fff3e0
+    style A2 fill:#fff3e0
+    style A3 fill:#fff3e0
 ```
 
-### 🏛️ Arquitetura de Camadas Detalhada
+### 🏛️ Fluxo de uma Requisição
 
 ```mermaid
-graph TD
-    subgraph "Client Layer"
-        WEB[Web Browser]
-        MOBILE[Mobile App]
-        API_CLIENT[API Client]
-    end
+sequenceDiagram
+    participant C as Cliente
+    participant S as Security
+    participant Ctrl as Controller
+    participant Svc as Service
+    participant DB as Database
     
-    subgraph "API Gateway"
-        CORS[CORS Filter]
-        LOG[Logging Filter]
-    end
-    
-    subgraph "Controller Layer"
-        subgraph "Usuario Module"
-            UCONTROLLER[Usuario Controller]
-        end
-        subgraph "Investimento Module"
-            ICONTROLLER[Investimento Controller]
-        end
-    end
-    
-    subgraph "Security Layer"
-        JWTFILTER[JWT Authentication Filter]
-        AUTHPROVIDER[Authentication Provider]
-        ACCESSHANDLER[Access Denied Handler]
-    end
-    
-    subgraph "Business Layer"
-        subgraph "Usuario Domain"
-            USERVICE[Usuario Service]
-            UDTO[Usuario DTOs]
-        end
-        subgraph "Investimento Domain"
-            ISERVICE[Investimento Service]
-            IDTO[Investimento DTOs]
-        end
-    end
-    
-    subgraph "Data Layer"
-        subgraph "Repository Layer"
-            UREPO[Usuario Repository]
-            IREPO[Investimento Repository]
-            UDAO[Usuario DAO]
-        end
-        subgraph "Entity Layer"
-            UENTITY[Usuario Entity]
-            IENTITY[Investimento Entity]
-        end
-    end
-    
-    subgraph "Database Layer"
-        H2DB[(H2 Database)]
-    end
-    
-    WEB --> CORS
-    MOBILE --> CORS
-    API_CLIENT --> CORS
-    
-    CORS --> LOG
-    LOG --> UCONTROLLER
-    LOG --> ICONTROLLER
-    
-    UCONTROLLER --> JWTFILTER
-    ICONTROLLER --> JWTFILTER
-    
-    JWTFILTER --> AUTHPROVIDER
-    AUTHPROVIDER --> ACCESSHANDLER
-    
-    UCONTROLLER --> USERVICE
-    ICONTROLLER --> ISERVICE
-    
-    USERVICE --> UDTO
-    ISERVICE --> IDTO
-    
-    USERVICE --> UREPO
-    ISERVICE --> IREPO
-    USERVICE --> UDAO
-    
-    UREPO --> UENTITY
-    IREPO --> IENTITY
-    
-    UENTITY --> H2DB
-    IENTITY --> H2DB
+    C->>S: 1. Requisição + Token
+    S->>S: 2. Validar Token
+    S->>Ctrl: 3. Token OK
+    Ctrl->>Svc: 4. Chamar Serviço
+    Svc->>DB: 5. Buscar Dados
+    DB->>Svc: 6. Retornar Dados
+    Svc->>Ctrl: 7. Processar
+    Ctrl->>C: 8. Resposta JSON
 ```
 
 ---
