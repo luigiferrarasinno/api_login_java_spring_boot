@@ -130,6 +130,228 @@ http://localhost:8080/h2-console
 - Maven  
 - Swagger (OpenAPI)
 
+---
+
+## 🏗️ Arquitetura e diagramas (peso 10%)
+
+### 📐 Diagramas de arquitetura (camadas e componentes)
+
+```mermaid
+graph TB
+    subgraph "Presentation Layer"
+        UC[Usuario Controller]
+        IC[Investimento Controller]
+    end
+    
+    subgraph "Security Layer"
+        JWT[JWT Filter]
+        SEC[Security Config]
+        AUTH[Authentication]
+    end
+    
+    subgraph "Service Layer"
+        US[Usuario Service]
+        IS[Investimento Service]
+    end
+    
+    subgraph "Data Access Layer"
+        UR[Usuario Repository]
+        IR[Investimento Repository]
+        DAO[Usuario DAO]
+    end
+    
+    subgraph "Model Layer"
+        UE[Usuario Entity]
+        IE[Investimento Entity]
+    end
+    
+    subgraph "Database"
+        H2[(H2 Database)]
+    end
+    
+    subgraph "Exception Handling"
+        GEH[Global Exception Handler]
+        CUSTOM[Custom Exceptions]
+    end
+    
+    UC --> JWT
+    IC --> JWT
+    JWT --> SEC
+    SEC --> AUTH
+    UC --> US
+    IC --> IS
+    US --> UR
+    IS --> IR
+    US --> DAO
+    UR --> UE
+    IR --> IE
+    UE --> H2
+    IE --> H2
+    US --> GEH
+    IS --> GEH
+    GEH --> CUSTOM
+```
+
+### 🗂️ Diagrama de entidades (ER)
+
+```mermaid
+erDiagram
+    USUARIO {
+        Long id PK
+        String nomeUsuario
+        String email UK
+        String senha
+        Long cpf UK
+        LocalDate dt_nascimento
+        String role
+        Boolean userIsActive
+        String tipo_de_investidor
+        String user_permissions
+    }
+    
+    INVESTIMENTO {
+        Long id PK
+        String nome
+        String categoria
+        Double valor
+        String descricao
+        LocalDate data
+        String risco
+        Boolean ativo
+        Long usuarioId FK
+    }
+    
+    USUARIO ||--o{ INVESTIMENTO : "possui"
+```
+
+### 🔄 Casos de uso implementados como serviços
+
+```mermaid
+graph LR
+    subgraph "Usuario Service Cases"
+        UC1[Cadastrar Usuario]
+        UC2[Autenticar Usuario]
+        UC3[Alterar Senha]
+        UC4[Redefinir Senha]
+        UC5[Trocar Email]
+        UC6[Ativar/Desativar]
+        UC7[Consultar Usuario]
+        UC8[Excluir Usuario]
+    end
+    
+    subgraph "Investimento Service Cases"
+        IC1[Listar Investimentos]
+        IC2[Criar Investimento]
+        IC3[Consultar por ID]
+        IC4[Vincular Usuario]
+        IC5[Desvincular Usuario]
+        IC6[Investimentos do Usuario]
+        IC7[Toggle Ativo]
+        IC8[Excluir Investimento]
+    end
+    
+    subgraph "Security Cases"
+        SC1[Gerar JWT]
+        SC2[Validar Token]
+        SC3[Autorizar Acesso]
+        SC4[Filtrar Requisições]
+    end
+    
+    UC2 --> SC1
+    UC7 --> SC2
+    IC1 --> SC3
+    UC1 --> SC4
+```
+
+### 🏛️ Arquitetura de Camadas Detalhada
+
+```mermaid
+graph TD
+    subgraph "Client Layer"
+        WEB[Web Browser]
+        MOBILE[Mobile App]
+        API_CLIENT[API Client]
+    end
+    
+    subgraph "API Gateway"
+        CORS[CORS Filter]
+        LOG[Logging Filter]
+    end
+    
+    subgraph "Controller Layer"
+        subgraph "Usuario Module"
+            UCONTROLLER[Usuario Controller]
+        end
+        subgraph "Investimento Module"
+            ICONTROLLER[Investimento Controller]
+        end
+    end
+    
+    subgraph "Security Layer"
+        JWTFILTER[JWT Authentication Filter]
+        AUTHPROVIDER[Authentication Provider]
+        ACCESSHANDLER[Access Denied Handler]
+    end
+    
+    subgraph "Business Layer"
+        subgraph "Usuario Domain"
+            USERVICE[Usuario Service]
+            UDTO[Usuario DTOs]
+        end
+        subgraph "Investimento Domain"
+            ISERVICE[Investimento Service]
+            IDTO[Investimento DTOs]
+        end
+    end
+    
+    subgraph "Data Layer"
+        subgraph "Repository Layer"
+            UREPO[Usuario Repository]
+            IREPO[Investimento Repository]
+            UDAO[Usuario DAO]
+        end
+        subgraph "Entity Layer"
+            UENTITY[Usuario Entity]
+            IENTITY[Investimento Entity]
+        end
+    end
+    
+    subgraph "Database Layer"
+        H2DB[(H2 Database)]
+    end
+    
+    WEB --> CORS
+    MOBILE --> CORS
+    API_CLIENT --> CORS
+    
+    CORS --> LOG
+    LOG --> UCONTROLLER
+    LOG --> ICONTROLLER
+    
+    UCONTROLLER --> JWTFILTER
+    ICONTROLLER --> JWTFILTER
+    
+    JWTFILTER --> AUTHPROVIDER
+    AUTHPROVIDER --> ACCESSHANDLER
+    
+    UCONTROLLER --> USERVICE
+    ICONTROLLER --> ISERVICE
+    
+    USERVICE --> UDTO
+    ISERVICE --> IDTO
+    
+    USERVICE --> UREPO
+    ISERVICE --> IREPO
+    USERVICE --> UDAO
+    
+    UREPO --> UENTITY
+    IREPO --> IENTITY
+    
+    UENTITY --> H2DB
+    IENTITY --> H2DB
+```
+
+---
 
 # 🔐 Endpoints da API de manipulação de usuario
 ---
