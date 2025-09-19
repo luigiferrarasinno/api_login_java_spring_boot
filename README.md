@@ -168,20 +168,30 @@ erDiagram
 
 ```mermaid
 sequenceDiagram
-    participant C as Cliente
-    participant S as Security
-    participant Ctrl as Controller
-    participant Svc as Service
-    participant DB as Database
+    participant Cliente as 🌐 Cliente
+    participant Filter as 🔒 JWT Filter
+    participant Controller as 🎯 Controller
+    participant DTO as 📦 DTO
+    participant Service as ⚙️ Service
+    participant Repository as 💾 Repository
+    participant Entity as 🗃️ Entity
+    participant DB as 🗄️ H2 Database
     
-    C->>S: 1. Requisição + Token
-    S->>S: 2. Validar Token
-    S->>Ctrl: 3. Token OK
-    Ctrl->>Svc: 4. Chamar Serviço
-    Svc->>DB: 5. Buscar Dados
-    DB->>Svc: 6. Retornar Dados
-    Svc->>Ctrl: 7. Processar
-    Ctrl->>C: 8. Resposta JSON
+    Cliente->>Filter: 1. HTTP Request + JWT Token
+    Filter->>Filter: 2. Validar JWT Token
+    Filter->>Controller: 3. Token válido - prosseguir
+    Controller->>DTO: 4. Converter JSON para DTO
+    Controller->>Service: 5. Chamar método do Service(DTO)
+    Service->>Service: 6. Aplicar regras de negócio
+    Service->>Repository: 7. Solicitar dados do Repository
+    Repository->>Entity: 8. Mapear para Entity (JPA)
+    Entity->>DB: 9. Executar query SQL
+    DB->>Entity: 10. Retornar resultados
+    Entity->>Repository: 11. Dados como Entity
+    Repository->>Service: 12. Retornar Entity para Service
+    Service->>DTO: 13. Converter Entity para ResponseDTO
+    Service->>Controller: 14. Retornar ResponseDTO
+    Controller->>Cliente: 15. HTTP Response (JSON)
 ```
 
 ---
