@@ -27,14 +27,25 @@ public class InvestimentoDTO {
     private static final DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     public InvestimentoDTO(Investimento investimento) {
+        this(investimento, true); // Por padrão, inclui usuarioIds (para compatibilidade)
+    }
+
+    public InvestimentoDTO(Investimento investimento, boolean incluirUsuarioIds) {
         this.id = investimento.getId();
         this.nome = investimento.getNome();
         this.categoria = investimento.getCategoria() != null ? investimento.getCategoria().name() : null;
         this.valor = investimento.getValor() != null ? investimento.getValor().doubleValue() : null;
         this.descricao = investimento.getDescricao();
-        this.usuarioIds = investimento.getUsuarios() != null ?
-            investimento.getUsuarios().stream().map(u -> u.getId()).collect(Collectors.toSet())
-            : null;
+        
+        // Só inclui usuarioIds se for permitido
+        if (incluirUsuarioIds) {
+            this.usuarioIds = investimento.getUsuarios() != null ?
+                investimento.getUsuarios().stream().map(u -> u.getId()).collect(Collectors.toSet())
+                : null;
+        } else {
+            this.usuarioIds = null; // Oculta para usuários não-admin
+        }
+        
         this.data = investimento.getData() != null ? investimento.getData().format(DATE_FORMAT) : null;
         this.liquidez = investimento.getLiquidez();
         this.taxaRetorno = investimento.getTaxaRetorno() != null ? investimento.getTaxaRetorno().doubleValue() : null;

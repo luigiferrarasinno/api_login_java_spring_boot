@@ -6,6 +6,7 @@ import com.example.demo.investimento.model.Investimento;
 import com.example.demo.investimento.service.InvestimentoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,10 +23,17 @@ public class InvestimentoController {
         this.investimentoService = investimentoService;
     }
 
+    private boolean isAdmin(Authentication auth) {
+        return auth != null && auth.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+    }
+
     @GetMapping
-    @PreAuthorize("isAuthenticated()")    public List<InvestimentoDTO> listarTodos() {
+    @PreAuthorize("isAuthenticated()")
+    public List<InvestimentoDTO> listarTodos(Authentication auth) {
+        boolean incluirUsuarios = isAdmin(auth);
         return investimentoService.listarTodos().stream()
-                .map(InvestimentoDTO::new)
+                .map(inv -> new InvestimentoDTO(inv, incluirUsuarios))
                 .collect(Collectors.toList());
     }
 
@@ -46,9 +54,10 @@ public class InvestimentoController {
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<InvestimentoDTO> buscar(@PathVariable Long id) {
+    public ResponseEntity<InvestimentoDTO> buscar(@PathVariable Long id, Authentication auth) {
+        boolean incluirUsuarios = isAdmin(auth);
         Investimento investimento = investimentoService.buscarPorId(id);
-        return ResponseEntity.ok(new InvestimentoDTO(investimento));
+        return ResponseEntity.ok(new InvestimentoDTO(investimento, incluirUsuarios));
     }
 
   
@@ -66,7 +75,8 @@ public class InvestimentoController {
 
     @PostMapping("/{investimentoId}/usuario/{usuarioId}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#usuarioId, authentication.name)")
-    public ResponseEntity<VincularResponseDTO> vincular(@PathVariable Long investimentoId, @PathVariable Long usuarioId) {
+    public ResponseEntity<VincularResponseDTO> vincular(@PathVariable Long investimentoId, @PathVariable Long usuarioId, Authentication auth) {
+        boolean incluirUsuarios = isAdmin(auth);
         Investimento investimento = investimentoService.vincularInvestimentoAUsuario(investimentoId, usuarioId);
 
         String mensagem;
@@ -77,16 +87,17 @@ public class InvestimentoController {
             mensagem = "Investimento desvinculado com sucesso.";
         }
 
-        VincularResponseDTO responseDTO = new VincularResponseDTO(new InvestimentoDTO(investimento), mensagem);
+        VincularResponseDTO responseDTO = new VincularResponseDTO(new InvestimentoDTO(investimento, incluirUsuarios), mensagem);
         return ResponseEntity.ok(responseDTO);
     }
 
 
     @GetMapping("/usuario/{usuarioId}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#usuarioId, authentication.name)")
-    public List<InvestimentoDTO> listarPorUsuario(@PathVariable Long usuarioId) {
+    public List<InvestimentoDTO> listarPorUsuario(@PathVariable Long usuarioId, Authentication auth) {
+        boolean incluirUsuarios = isAdmin(auth);
         return investimentoService.listarPorUsuario(usuarioId).stream()
-                .map(InvestimentoDTO::new)
+                .map(inv -> new InvestimentoDTO(inv, incluirUsuarios))
                 .collect(Collectors.toList());
     }
 }

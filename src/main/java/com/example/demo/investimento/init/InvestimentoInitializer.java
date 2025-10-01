@@ -4,23 +4,30 @@ import com.example.demo.investimento.model.Investimento;
 import com.example.demo.investimento.model.Categoria;
 import com.example.demo.investimento.model.Risco;
 import com.example.demo.investimento.repository.InvestimentoRepository;
+import com.example.demo.user.dao.UsuarioDAO;
+import com.example.demo.user.model.Usuario;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Component
 public class InvestimentoInitializer implements CommandLineRunner {
 
     private final InvestimentoRepository investimentoRepository;
+    private final UsuarioDAO usuarioDAO;
 
-    public InvestimentoInitializer(InvestimentoRepository investimentoRepository) {
+    public InvestimentoInitializer(InvestimentoRepository investimentoRepository, UsuarioDAO usuarioDAO) {
         this.investimentoRepository = investimentoRepository;
+        this.usuarioDAO = usuarioDAO;
     }
 
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
         if (investimentoRepository.count() == 0) { // evita duplicar na reinicialização
 
@@ -70,6 +77,35 @@ public class InvestimentoInitializer implements CommandLineRunner {
             investimentoRepository.save(i3);
 
             System.out.println("Investimentos padrão criados com sucesso.");
+            
+            // Vincular investimentos ao usuário comum
+            vincularInvestimentosAoUsuarioComum(i1, i2);
+        }
+    }
+    
+    private void vincularInvestimentosAoUsuarioComum(Investimento inv1, Investimento inv2) {
+        try {
+            Optional<Usuario> usuarioOpt = usuarioDAO.findByEmail("usuario@teste.com");
+            
+            if (usuarioOpt.isPresent()) {
+                Usuario usuario = usuarioOpt.get();
+                
+                // Adicionar investimentos ao usuário
+                usuario.getInvestimentos().add(inv1);
+                usuario.getInvestimentos().add(inv2);
+                
+                // Salvar o usuário com os investimentos vinculados
+                usuarioDAO.save(usuario);
+                
+                System.out.println("✅ " + inv1.getNome() + " vinculado ao usuário comum");
+                System.out.println("✅ " + inv2.getNome() + " vinculado ao usuário comum");
+                System.out.println("🎯 Investimentos vinculados com sucesso ao usuário comum!");
+            } else {
+                System.out.println("⚠️ Usuário comum não encontrado para vincular investimentos");
+            }
+        } catch (Exception e) {
+            System.out.println("❌ Erro ao vincular investimentos: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

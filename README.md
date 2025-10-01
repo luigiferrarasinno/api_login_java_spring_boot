@@ -569,6 +569,37 @@ Essa parte descreve como usar os endpoints de investimento após você obter o t
 
 ---
 
+### 🔒 **Política de Segurança - Campo `usuarioIds`**
+
+Por questões de **privacidade e segurança**, o campo `usuarioIds` nos responses dos investimentos é **controlado baseado no papel do usuário**:
+
+- **👨‍💼 Usuários ADMIN**: Visualizam **todos** os IDs de usuários vinculados aos investimentos
+- **👤 Usuários comuns**: O campo `usuarioIds` é **sempre `null`** (oculto por segurança)
+
+**Exemplo de resposta para ADMIN:**
+```json
+{
+  "id": 1,
+  "nome": "Tesouro Direto",
+  "usuarioIds": [1, 2, 5],  // ← VISÍVEL para admin
+  "valor": 1000.0
+}
+```
+
+**Exemplo de resposta para USER:**
+```json
+{
+  "id": 1,
+  "nome": "Tesouro Direto", 
+  "usuarioIds": null,  // ← OCULTO para usuário comum
+  "valor": 1000.0
+}
+```
+
+> 🛡️ **Nota de Segurança**: Esta implementação previne vazamento de informações sobre outros usuários do sistema, mantendo a privacidade dos dados.
+
+---
+
 ### ✅ Headers comuns para endpoints protegidos:
 
 * **Authorization**: `Bearer SEU_TOKEN_JWT`
