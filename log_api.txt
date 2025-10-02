@@ -204,3 +204,25 @@
 (vazio)
 --------------------------------------
 
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-01T22:33:17.113343100
+➡️  PUT /usuarios/admin/alterar/2
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - content-type: application/json
+ - authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3VhcmlvQHRlc3RlLmNvbSIsImV4cCI6MTc1OTQ0NTgyNH0.d1P7TrdoTGldjNZfTN2R5CY5OIoHncSQmK7d7nxIjys
+ - user-agent: PostmanRuntime/7.46.1
+ - accept: */*
+ - cache-control: no-cache
+ - postman-token: 61580c99-597c-4dee-bb7d-89c3c5eb14cf
+ - host: localhost:8080
+ - accept-encoding: gzip, deflate, br
+ - connection: keep-alive
+ - content-length: 201
+ - cookie: JSESSIONID=B6D210097AFA9CE44C79B8E046E8439A
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+

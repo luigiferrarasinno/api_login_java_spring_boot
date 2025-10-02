@@ -6,6 +6,7 @@ import com.example.demo.user.dto.CriarUsuarioRequestDTO;
 import com.example.demo.user.dto.CriarSenhaRequestDTO;
 import com.example.demo.user.dto.TrocarEmailRequestDTO;
 import com.example.demo.user.dto.AlterarSenhaRequestDTO;
+import com.example.demo.user.dto.AlterarUsuarioAdminRequestDTO;
 import com.example.demo.user.dto.Responses.LoginResponseDTO;
 import com.example.demo.user.dto.Responses.StatusAtivoResponseDTO;
 import com.example.demo.user.dto.Responses.UsuarioResponseDTO;
@@ -153,6 +154,40 @@ public class UsuarioController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                 .body(Map.of("erro", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/admin/alterar/{usuarioId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> alterarDadosUsuarioPorAdmin(
+            @PathVariable Long usuarioId,
+            @RequestBody AlterarUsuarioAdminRequestDTO request) {
+        try {
+            String mensagem = usuarioService.alterarDadosUsuarioPorAdmin(
+                usuarioId,
+                request.getNomeUsuario(),
+                request.getEmail(),
+                request.getCpf(),
+                request.getDt_nascimento(),
+                request.getSenha(),
+                request.getUserIsActive(),
+                request.getRole(),
+                request.getTipo()
+            );
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("mensagem", mensagem);
+            response.put("timestamp", LocalDateTime.now());
+            response.put("status", "sucesso");
+            
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("erro", e.getMessage());
+            errorResponse.put("timestamp", LocalDateTime.now());
+            errorResponse.put("status", "erro");
+            
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
 

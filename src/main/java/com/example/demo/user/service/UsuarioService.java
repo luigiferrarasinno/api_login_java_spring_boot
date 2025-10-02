@@ -293,4 +293,64 @@ public class UsuarioService {
         return "Senha alterada com sucesso!";
     }
 
+    @Transactional
+    public String alterarDadosUsuarioPorAdmin(Long usuarioId, String nomeUsuario, String email, 
+                                            Long cpf, LocalDate dt_nascimento, String senha, 
+                                            Boolean userIsActive, String role, com.example.demo.user.model.TipoPerfil tipo) {
+        Optional<Usuario> usuarioOpt = usuarioDAO.findbyid(usuarioId);
+        
+        if (usuarioOpt.isEmpty()) {
+            throw new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + usuarioId);
+        }
+        
+        Usuario usuario = usuarioOpt.get();
+        
+        // Verificar se email já existe (se foi alterado)
+        if (email != null && !email.equals(usuario.getEmail())) {
+            Optional<Usuario> usuarioExistente = usuarioDAO.findByEmail(email);
+            if (usuarioExistente.isPresent()) {
+                throw new EmailJaCadastradoException("Email já está em uso: " + email);
+            }
+            usuario.setEmail(email);
+        }
+        
+        // Verificar se CPF já existe (se foi alterado)
+        if (cpf != null && !cpf.equals(usuario.getCpf())) {
+            Optional<Usuario> usuarioExistente = usuarioDAO.findByCpf(cpf);
+            if (usuarioExistente.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CPF já está em uso: " + cpf);
+            }
+            usuario.setCpf(cpf);
+        }
+        
+        // Atualizar campos se foram fornecidos
+        if (nomeUsuario != null) {
+            usuario.setNomeUsuario(nomeUsuario);
+        }
+        
+        if (dt_nascimento != null) {
+            usuario.setDt_nascimento(dt_nascimento);
+        }
+        
+        if (senha != null) {
+            usuario.setSenha(passwordEncoder.encode(senha));
+        }
+        
+        if (userIsActive != null) {
+            usuario.setUserIsActive(userIsActive);
+        }
+        
+        if (role != null) {
+            usuario.setRole(role);
+        }
+        
+        if (tipo != null) {
+            usuario.setTipo(tipo);
+        }
+        
+        usuarioDAO.save(usuario);
+        
+        return "Dados do usuário alterados com sucesso!";
+    }
+
 }

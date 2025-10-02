@@ -1,6 +1,7 @@
 package com.example.demo.user.dto.Responses;
 
 import com.example.demo.user.model.Usuario;
+import com.example.demo.user.model.TipoPerfil;
 
 public class UsuarioListaResponseDTO {
     private Long id;
@@ -8,6 +9,7 @@ public class UsuarioListaResponseDTO {
     private String email;
     private String role;
     private boolean ativo;
+    private TipoPerfil tipo;
 
     public UsuarioListaResponseDTO() {}
 
@@ -17,6 +19,7 @@ public class UsuarioListaResponseDTO {
         this.email = usuario.getEmail();
         this.role = usuario.getRole();
         this.ativo = usuario.isUserIsActive();
+        this.tipo = usuario.getTipo();
     }
 
     public Long getId() {
@@ -57,5 +60,13 @@ public class UsuarioListaResponseDTO {
 
     public void setAtivo(boolean ativo) {
         this.ativo = ativo;
+    }
+
+    public TipoPerfil getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(TipoPerfil tipo) {
+        this.tipo = tipo;
     }
 }

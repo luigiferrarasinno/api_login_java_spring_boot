@@ -43,6 +43,10 @@ public class Usuario {
 
     private boolean firstLogin = true;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_perfil")
+    private TipoPerfil tipo;
+
     @ManyToMany
     @JoinTable(
         name = "usuario_investimento",
@@ -87,4 +91,7 @@ public class Usuario {
 
     public Set<Investimento> getInvestimentos() { return investimentos; }
     public void setInvestimentos(Set<Investimento> investimentos) { this.investimentos = investimentos; }
+
+    public TipoPerfil getTipo() { return tipo; }
+    public void setTipo(TipoPerfil tipo) { this.tipo = tipo; }
 }

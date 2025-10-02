@@ -1,6 +1,7 @@
 package com.example.demo.user.dto.Responses;
 
 import com.example.demo.user.model.Usuario;
+import com.example.demo.user.model.TipoPerfil;
 import java.time.LocalDate;
 
 public class UsuarioResponseDTO {
@@ -14,6 +15,7 @@ public class UsuarioResponseDTO {
     private boolean userIsActive = true;
     private String user_permissions = "nenhuma por enquanto";
     private boolean firstLogin = true; // Novo campo adicionado
+    private TipoPerfil tipo;
 
 
 
@@ -28,6 +30,7 @@ public class UsuarioResponseDTO {
         this.userIsActive = usuario.isUserIsActive();
         this.user_permissions = usuario.getUser_permissions();
         this.firstLogin = usuario.isFirstLogin(); // Acessando o novo campo
+        this.tipo = usuario.getTipo();
     }
 
     public Long getId() {
@@ -66,6 +69,10 @@ public class UsuarioResponseDTO {
     }
     public boolean isFirstLogin() {
         return firstLogin;
+    }
+    
+    public TipoPerfil getTipo() {
+        return tipo;
     }
    
 }

@@ -8,7 +8,7 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final String SECRET = "esperoquefuncioneJWT123"; // segredo usado para assinar o token
-    private static final long EXPIRATION_TIME = 86400000; // 1 dia em milissegundos, pq por algum motivo quem fez esse ngc decidiu que tinha que colocar o tempo em milesegundos ao inves de minutos
+    private static final long EXPIRATION_TIME = 864000000; // 10 dias em milissegundos, pq por algum motivo quem fez esse ngc decidiu que tinha que colocar o tempo em milesegundos ao inves de minutos
 
     public static String gerarToken(String email) {
         return JWT.create()
