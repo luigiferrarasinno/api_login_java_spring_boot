@@ -135,3 +135,72 @@
 (vazio)
 --------------------------------------
 
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-01T22:00:22.977077100
+➡️  GET /usuarios
+🔐 Status: 401 (Unauthorized)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJleHAiOjE3NDk2NDgzOTl9.uV9bb3l2mvRNHwFTKiZSXizXEJG7xqIC-Gh0F6xViQ8
+ - user-agent: PostmanRuntime/7.46.1
+ - accept: */*
+ - cache-control: no-cache
+ - postman-token: ed7e2dae-ef50-48d9-adee-9a9bbb66cf8c
+ - host: localhost:8080
+ - accept-encoding: gzip, deflate, br
+ - connection: keep-alive
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-01T22:01:40.982245400
+➡️  GET /favicon.ico
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - host: localhost:8080
+ - connection: keep-alive
+ - sec-ch-ua-platform: "Windows"
+ - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0
+ - sec-ch-ua: "Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"
+ - sec-ch-ua-mobile: ?0
+ - accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+ - sec-fetch-site: same-origin
+ - sec-fetch-mode: no-cors
+ - sec-fetch-dest: image
+ - referer: http://localhost:8080/h2-console/login.jsp?jsessionid=fb7d4bd30aea48974ce2e4b6657069fd
+ - accept-encoding: gzip, deflate, br, zstd
+ - accept-language: pt-BR,pt;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+ - cookie: JSESSIONID=D58D4D9F658C74167A4D7458B4BBE54A
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-01T22:01:47.103918100
+➡️  GET /favicon.ico
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - host: localhost:8080
+ - connection: keep-alive
+ - sec-ch-ua-platform: "Windows"
+ - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0
+ - sec-ch-ua: "Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"
+ - sec-ch-ua-mobile: ?0
+ - accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+ - sec-fetch-site: same-origin
+ - sec-fetch-mode: no-cors
+ - sec-fetch-dest: image
+ - referer: http://localhost:8080/h2-console/login.do?jsessionid=fb7d4bd30aea48974ce2e4b6657069fd
+ - accept-encoding: gzip, deflate, br, zstd
+ - accept-language: pt-BR,pt;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+ - cookie: JSESSIONID=FA1FAB2F20B032A09B885B05D1C6A134
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+

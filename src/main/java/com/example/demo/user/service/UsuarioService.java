@@ -241,4 +241,56 @@ public class UsuarioService {
         usuarioDAO.save(usuario);
     }
 
+    // Método simplificado para redefinir senha apenas com CPF
+    public String redefinirSenhaPorCpf(Long cpf, String novaSenha) {
+        Optional<Usuario> usuarioOpt = usuarioDAO.findByCpf(cpf);
+
+        if (usuarioOpt.isEmpty()) {
+            return "Usuário com esse CPF não encontrado!";
+        }
+
+        Usuario usuario = usuarioOpt.get();
+        usuario.setSenha(passwordEncoder.encode(novaSenha));
+        usuarioDAO.save(usuario);
+
+        return "Senha redefinida com sucesso!";
+    }
+
+    // Método para trocar email usando o token JWT (email atual)
+    public void trocarEmailPorToken(String emailAtual, String novoEmail) {
+        Usuario usuario = usuarioDAO.findByEmail(emailAtual)
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+
+        if (usuario.getEmail().equalsIgnoreCase(novoEmail)) {
+            throw new EmailJaCadastradoException("O email informado já está cadastrado para este usuário.");
+        }
+
+        usuarioDAO.findByEmail(novoEmail).ifPresent(u -> {
+            throw new EmailJaCadastradoException("Email já cadastrado por outro usuário.");
+        });
+
+        usuario.setEmail(novoEmail);
+        usuarioDAO.save(usuario);
+    }
+
+    // Método para alterar senha usando o token JWT (sem precisar do email)
+    public String alterarSenhaPorToken(String emailUsuario, String senhaAntiga, String senhaNova) {
+        Optional<Usuario> usuarioOpt = usuarioDAO.findByEmail(emailUsuario);
+
+        if (usuarioOpt.isEmpty()) {
+            return "Usuário não encontrado!";
+        }
+
+        Usuario usuario = usuarioOpt.get();
+
+        if (!passwordEncoder.matches(senhaAntiga, usuario.getSenha())) {
+            return "Senha antiga não confere!";
+        }
+
+        usuario.setSenha(passwordEncoder.encode(senhaNova));
+        usuarioDAO.save(usuario);
+
+        return "Senha alterada com sucesso!";
+    }
+
 }

@@ -1,9 +1,15 @@
 package com.example.demo.user.controller;
 
 import com.example.demo.user.dto.UsuarioDTO;
+import com.example.demo.user.dto.LoginRequestDTO;
+import com.example.demo.user.dto.CriarUsuarioRequestDTO;
+import com.example.demo.user.dto.CriarSenhaRequestDTO;
+import com.example.demo.user.dto.TrocarEmailRequestDTO;
+import com.example.demo.user.dto.AlterarSenhaRequestDTO;
 import com.example.demo.user.dto.Responses.LoginResponseDTO;
 import com.example.demo.user.dto.Responses.StatusAtivoResponseDTO;
 import com.example.demo.user.dto.Responses.UsuarioResponseDTO;
+import com.example.demo.user.dto.Responses.UsuarioListaResponseDTO;
 import com.example.demo.user.model.Usuario;
 import com.example.demo.user.service.UsuarioService;
 import com.example.demo.user.dto.AlterarSenhaPorCpfEmailDTO;
@@ -13,14 +19,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import java.util.Map;
 import com.example.demo.user.dto.TrocarEmailRequest;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-//import java.util.stream.StreamSupport;
-//import java.util.List;
-//import java.util.stream.Collectors;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.HashMap;
 
 @RestController
@@ -33,55 +39,68 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-   @PostMapping("/login")
-    public LoginResponseDTO login(@RequestBody UsuarioDTO usuarioDTO) {
-        return usuarioService.login(usuarioDTO.getEmail(), usuarioDTO.getSenha());
+    @PostMapping("/login")
+    public LoginResponseDTO login(@RequestBody LoginRequestDTO loginRequest) {
+        return usuarioService.login(loginRequest.getEmail(), loginRequest.getSenha());
     }
 
     @PostMapping("/criar")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public String criarConta(@RequestBody UsuarioDTO usuarioDTO) {
+    public String criarConta(@RequestBody CriarUsuarioRequestDTO criarRequest) {
         Usuario usuario = new Usuario();
-        usuario.setNomeUsuario(usuarioDTO.getNomeUsuario());
-        usuario.setSenha(usuarioDTO.getSenha());
-        usuario.setEmail(usuarioDTO.getEmail());
-        usuario.setDt_nascimento(usuarioDTO.getDt_nascimento());
-        usuario.setCpf(usuarioDTO.getCpf());
+        usuario.setNomeUsuario(criarRequest.getNomeUsuario());
+        usuario.setSenha(criarRequest.getSenha());
+        usuario.setEmail(criarRequest.getEmail());
+        usuario.setDt_nascimento(criarRequest.getDt_nascimento());
+        usuario.setCpf(criarRequest.getCpf());
         return usuarioService.criarConta(usuario);
     }
 
     @PutMapping("/alterar-senha")
-    @PreAuthorize("#dto.email == authentication.name or hasAuthority('ROLE_ADMIN')")
-    public String alterarSenha(@RequestBody AlterarSenhaComSenhaAntiga dto) {
-        return usuarioService.alterarSenha(dto.getEmail(), dto.getSenhaAntiga(), dto.getSenhaNova());
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Map<String, String>> alterarSenha(@RequestBody AlterarSenhaRequestDTO alterarSenhaRequest, Authentication auth) {
+        String emailUsuario = auth.getName(); // Email do usuário logado
+        
+        String resultado = usuarioService.alterarSenhaPorToken(emailUsuario, alterarSenhaRequest.getSenhaAntiga(), alterarSenhaRequest.getSenhaNova());
+        
+        Map<String, String> response = new HashMap<>();
+        
+        if (resultado.equals("Senha alterada com sucesso!")) {
+            response.put("mensagem", resultado);
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("erro", resultado);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
     }
 
 
 
     @PostMapping("/criar-senha")
-    public ResponseEntity<String> redefinirSenha(@RequestBody AlterarSenhaPorCpfEmailDTO dto) {
-        String resultado = usuarioService.redefinirSenhaPorEmailCpf(
-            dto.getEmail(),
-            dto.getCpf(),
-            dto.getDtNascimento(),
-            dto.getSenhaNova()
-        );
+    public ResponseEntity<Map<String, String>> redefinirSenha(@RequestBody CriarSenhaRequestDTO criarSenhaRequest) {
+        String resultado = usuarioService.redefinirSenhaPorCpf(criarSenhaRequest.getCpf(), criarSenhaRequest.getSenhaNova());
+        
+        Map<String, String> response = new HashMap<>();
         
         if (resultado.equals("Senha redefinida com sucesso!")) {
-            return ResponseEntity.ok(resultado);
+            response.put("mensagem", resultado);
+            return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
+            response.put("erro", resultado);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 
     @PutMapping("/trocar-email")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<?> trocarEmail(@RequestBody TrocarEmailRequest request) {
-        usuarioService.trocarEmailPorCpf(request.getCpf(), request.getNovoEmail());
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> trocarEmail(@RequestBody TrocarEmailRequestDTO trocarEmailRequest, Authentication auth) {
+        String emailAtual = auth.getName(); // Email do usuário logado
+        
+        usuarioService.trocarEmailPorToken(emailAtual, trocarEmailRequest.getNovoEmail());
 
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now().toString());
-        body.put("mensagem", "Email do usuário com CPF " + request.getCpf() + " alterado com sucesso.");
+        body.put("mensagem", "Email alterado com sucesso de " + emailAtual + " para " + trocarEmailRequest.getNovoEmail());
 
         return ResponseEntity.ok(body);
     }
@@ -98,8 +117,16 @@ public class UsuarioController {
     // Endpoint para listar todos os usuários
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public Iterable<Usuario> listarUsuarios() {
-        return usuarioService.listarUsuarios();
+    public ResponseEntity<List<UsuarioListaResponseDTO>> listarUsuarios() {
+        try {
+            List<Usuario> usuarios = (List<Usuario>) usuarioService.listarUsuarios();
+            List<UsuarioListaResponseDTO> usuariosDTO = usuarios.stream()
+                .map(UsuarioListaResponseDTO::new)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(usuariosDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @GetMapping("/{id}")
