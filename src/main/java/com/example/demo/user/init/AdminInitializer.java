@@ -2,6 +2,7 @@ package com.example.demo.user.init;
 
 import com.example.demo.user.dao.UsuarioDAO;
 import com.example.demo.user.model.Usuario;
+import com.example.demo.user.model.TipoPerfil;
 import jakarta.annotation.PostConstruct;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -61,6 +62,7 @@ public class AdminInitializer {
             user.setCpf(88888888888L);
             user.setDt_nascimento(LocalDate.of(2000, 5, 15));
             user.setFirstLogin(true);
+            user.setTipo(TipoPerfil.PERFIL_CONSERVADOR); // Definindo perfil conservador como padrão
 
             usuarioDAO.save(user);
             System.out.println("Usuário COMUM criado: usuario@teste.com / teste123");
