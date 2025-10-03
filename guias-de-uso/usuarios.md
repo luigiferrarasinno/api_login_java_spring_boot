@@ -17,8 +17,8 @@ Authorization: Bearer SEU_TOKEN_JWT
     - Senha: `admin123`
 
 - **Usuário Comum**
-    - Email: `joao.silva@email.com`
-    - Senha: `senha123`
+    - Email: `usuario@teste.com`
+    - Senha: `teste123`
 ---
 
 ## 🧠 Regras de Permissão
@@ -46,8 +46,8 @@ Authorization: Bearer SEU_TOKEN_JWT
 #### Requisição:
 ```json
 {
-  "email": "admin@admin.com",
-  "senha": "admin123"
+  "email": "usuario@teste.com",
+  "senha": "teste123"
 }
 ```
 
@@ -68,11 +68,11 @@ Authorization: Bearer SEU_TOKEN_JWT
 #### Requisição:
 ```json
 {
-  "nomeUsuario": "João da Silva",
-  "senha": "senha123",
-  "email": "joao.silva@email.com",
-  "cpf": 12345678909,
-  "dt_nascimento": "2006-05-20"
+  "nomeUsuario": "Usuário Comum",
+  "senha": "teste123",
+  "email": "usuario@teste.com",
+  "cpf": 88888888888,
+  "dt_nascimento": "2000-05-15"
 }
 ```
 
@@ -140,11 +140,11 @@ GET /usuarios?nomeUsuario=silva&email=gmail&role=ROLE_USER
 ```json
 {
   "id": 2,
-  "nomeUsuario": "João da Silva",
-  "email": "joao.silva@email.com",
+  "nomeUsuario": "Usuário Comum",
+  "email": "usuario@teste.com",
   "role": "ROLE_USER",
-  "cpf": 12345678909,
-  "dt_nascimento": "2006-05-20",
+  "cpf": 88888888888,
+  "dt_nascimento": "2000-05-15",
   "tipo_de_investidor": "nenhum por enquanto",
   "userIsActive": true,
   "user_permissions": "nenhuma por enquanto",
@@ -161,8 +161,8 @@ GET /usuarios?nomeUsuario=silva&email=gmail&role=ROLE_USER
 #### Requisição:
 ```json
 {
-  "email": "joao@email.com",
-  "senhaAntiga": "senhaAtual123",
+  "email": "usuario@teste.com",
+  "senhaAntiga": "teste123",
   "senhaNova": "novaSenha456"
 }
 ```
@@ -176,9 +176,9 @@ GET /usuarios?nomeUsuario=silva&email=gmail&role=ROLE_USER
 #### Requisição:
 ```json
 {
-  "cpf": 12345678900,
-  "email": "usuario@email.com",
-  "dt_nascimento": "2006-05-20",
+  "cpf": 88888888888,
+  "email": "usuario@teste.com",
+  "dt_nascimento": "2000-05-15",
   "senhaNova": "minhaNovaSenhaSegura"
 }
 ```
@@ -192,7 +192,7 @@ GET /usuarios?nomeUsuario=silva&email=gmail&role=ROLE_USER
 #### Requisição:
 ```json
 {
-  "cpf": 12345678900,
+  "cpf": 88888888888,
   "novoEmail": "novo.email@email.com"
 }
 ```
@@ -250,17 +250,17 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 Content-Type: application/json
 
 {
-  "nomeUsuario": "João da Silva",
-  "senha": "senha123",
-  "email": "joao.silva@email.com",
-  "cpf": 12345678909,
-  "dt_nascimento": "2006-05-20"
+  "nomeUsuario": "Novo Usuário",
+  "senha": "novasenha123",
+  "email": "novo.usuario@email.com",
+  "cpf": 11111111111,
+  "dt_nascimento": "1995-03-10"
 }
 ```
 
 ### 4. Listar Usuários com Filtros
 ```
-GET /usuarios?nomeUsuario=joão&userIsActive=true
+GET /usuarios?nomeUsuario=usuario&userIsActive=true
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
