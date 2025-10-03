@@ -704,3 +704,51 @@
 (vazio)
 --------------------------------------
 
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-03T10:56:38.272800500
+➡️  POST /auth/login
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - user-agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.26100.6584
+ - content-type: application/json
+ - host: localhost:8080
+ - content-length: 67
+ - expect: 100-continue
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-03T10:57:59.486346600
+➡️  POST /auth/login
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - user-agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.26100.6584
+ - content-type: application/json
+ - host: localhost:8080
+ - content-length: 67
+ - expect: 100-continue
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-03T10:59:52.364662600
+➡️  POST /auth/login
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - user-agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.26100.6584
+ - content-type: application/json
+ - host: localhost:8080
+ - content-length: 65
+ - expect: 100-continue
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+

@@ -30,17 +30,20 @@ public class ExtratoService {
     private final InvestimentoRepository investimentoRepository;
     private final PosicaoCarteiraRepository posicaoCarteiraRepository;
     private final CotacaoService cotacaoService;
+    private final DividendoService dividendoService;
 
     public ExtratoService(ExtratoRepository extratoRepository, 
                          UsuarioRepository usuarioRepository,
                          InvestimentoRepository investimentoRepository,
                          PosicaoCarteiraRepository posicaoCarteiraRepository,
-                         CotacaoService cotacaoService) {
+                         CotacaoService cotacaoService,
+                         DividendoService dividendoService) {
         this.extratoRepository = extratoRepository;
         this.usuarioRepository = usuarioRepository;
         this.investimentoRepository = investimentoRepository;
         this.posicaoCarteiraRepository = posicaoCarteiraRepository;
         this.cotacaoService = cotacaoService;
+        this.dividendoService = dividendoService;
     }    @Transactional
     public String depositar(String emailUsuario, BigDecimal valor) {
         Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
@@ -110,7 +113,14 @@ public class ExtratoService {
         extrato.setPrecoUnitario(precoUnitario);
         extratoRepository.save(extrato);
         
-        return "Compra de " + quantidade + " ações de " + investimento.getNome() + " realizada com sucesso!";
+        // 🎯 NOVO: Pagar dividendo imediato se o investimento paga dividendos
+        String mensgemDividendo = dividendoService.pagarDividendoImediato(usuario, investimento, quantidade);
+        
+        String mensagemCompra = "Compra de " + quantidade + " ações de " + investimento.getNome() + " realizada com sucesso!";
+        if (mensgemDividendo != null) {
+            return mensagemCompra + "\n" + mensgemDividendo;
+        }
+        return mensagemCompra;
     }
 
     /**
@@ -163,7 +173,14 @@ public class ExtratoService {
         extrato.setPrecoUnitario(precoAtual);
         extratoRepository.save(extrato);
         
-        return "Compra realizada: " + quantidade + " ações de " + investimento.getNome() + " por R$ " + valorTotal + " (R$ " + precoAtual + "/ação)";
+        // 🎯 NOVO: Pagar dividendo imediato se o investimento paga dividendos
+        String mensagemDividendo = dividendoService.pagarDividendoImediato(usuario, investimento, quantidadeBigDecimal);
+        
+        String mensagemCompra = "Compra realizada: " + quantidade + " ações de " + investimento.getNome() + " por R$ " + valorTotal + " (R$ " + precoAtual + "/ação)";
+        if (mensagemDividendo != null) {
+            return mensagemCompra + "\n" + mensagemDividendo;
+        }
+        return mensagemCompra;
     }
 
     @Transactional

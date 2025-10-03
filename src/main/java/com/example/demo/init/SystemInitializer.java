@@ -93,6 +93,7 @@ public class SystemInitializer implements CommandLineRunner {
             admin.setDt_nascimento(LocalDate.of(1985, 1, 15));
             admin.setUserIsActive(true);
             admin.setTipo(TipoPerfil.PERFIL_ARROJADO);
+            admin.setSaldoCarteira(new BigDecimal("50000.00")); // 💰 R$ 50.000 para testes
             usuarioDAO.save(admin);
             System.out.println("✅ Admin criado: admin@admin.com / 123456");
         }
@@ -108,6 +109,7 @@ public class SystemInitializer implements CommandLineRunner {
             user.setDt_nascimento(LocalDate.of(1990, 5, 20));
             user.setUserIsActive(true);
             user.setTipo(TipoPerfil.PERFIL_MODERADO);
+            user.setSaldoCarteira(new BigDecimal("25000.00")); // 💰 R$ 25.000 para testes
             usuarioDAO.save(user);
             System.out.println("✅ Usuário criado: user@user.com / 123456");
         }
@@ -123,6 +125,7 @@ public class SystemInitializer implements CommandLineRunner {
             maria.setDt_nascimento(LocalDate.of(1988, 8, 10));
             maria.setUserIsActive(true);
             maria.setTipo(TipoPerfil.PERFIL_CONSERVADOR);
+            maria.setSaldoCarteira(new BigDecimal("35000.00")); // 💰 R$ 35.000 para testes
             usuarioDAO.save(maria);
             System.out.println("✅ Usuária criada: maria@investidora.com / 123456");
         }
@@ -147,9 +150,9 @@ public class SystemInitializer implements CommandLineRunner {
         criarAcao("Ambev S.A.", "ABEV3", new BigDecimal("14.80"), "Maior cervejaria da América Latina", Risco.BAIXO, new BigDecimal("4.5"), 2);
         
         // 🏢 FUNDOS IMOBILIÁRIOS
-        criarFII("CSHG Real Estate Fund", "HGLG11", new BigDecimal("105.40"), "FII de shoppings centers", new BigDecimal("0.85"), 12);
-        criarFII("Maxi Renda", "MXRF11", new BigDecimal("9.85"), "FII diversificado de renda", new BigDecimal("0.08"), 12);
-        criarFII("XP Log", "XPLG11", new BigDecimal("98.50"), "FII de galpões logísticos", new BigDecimal("0.75"), 12);
+        criarFII("CSHG Real Estate Fund", "HGLG11", new BigDecimal("105.40"), "FII de shoppings centers", new BigDecimal("10.2"), 12);
+        criarFII("Maxi Renda", "MXRF11", new BigDecimal("9.85"), "FII diversificado de renda", new BigDecimal("9.6"), 12);
+        criarFII("XP Log", "XPLG11", new BigDecimal("98.50"), "FII de galpões logísticos", new BigDecimal("8.8"), 12);
         
         // 💎 RENDA FIXA
         criarRendaFixa("Tesouro Direto Selic", "TD-SELIC", new BigDecimal("102.50"), "Título público indexado à Selic", Risco.BAIXO);
@@ -174,6 +177,8 @@ public class SystemInitializer implements CommandLineRunner {
         acao.setFrequenciaDividendo(frequencia);
         acao.setAtivo(true);
         acao.setRisco(risco);
+        acao.setQuantidadeTotal(50000L); // 📊 Total de 50.000 ações emitidas
+        acao.setQuantidadeDisponivel(25000L); // 🔥 Disponibilizar 25.000 ações para compra
         investimentoRepository.save(acao);
     }
 
@@ -192,6 +197,8 @@ public class SystemInitializer implements CommandLineRunner {
         fii.setFrequenciaDividendo(frequencia);
         fii.setAtivo(true);
         fii.setRisco(Risco.MEDIO);
+        fii.setQuantidadeTotal(20000L); // 📊 Total de 20.000 cotas emitidas
+        fii.setQuantidadeDisponivel(10000L); // 🔥 Disponibilizar 10.000 cotas para compra
         investimentoRepository.save(fii);
     }
 
@@ -206,10 +213,12 @@ public class SystemInitializer implements CommandLineRunner {
         rf.setDescricao(descricao);
         rf.setData(LocalDate.now().minusDays(10));
         rf.setLiquidez("Diária");
-        rf.setDividendYield(BigDecimal.ZERO);
+        rf.setDividendYield(BigDecimal.ZERO); // Renda fixa não paga dividendos
         rf.setFrequenciaDividendo(0);
         rf.setAtivo(true);
         rf.setRisco(risco);
+        rf.setQuantidadeTotal(100000L); // 📊 Total disponível para aplicação
+        rf.setQuantidadeDisponivel(100000L); // 🔥 Toda quantidade disponível
         investimentoRepository.save(rf);
     }
 
@@ -424,9 +433,14 @@ public class SystemInitializer implements CommandLineRunner {
         System.out.println("💬 Comentários: " + comentarioRepository.count());
         System.out.println("");
         System.out.println("🔑 CREDENCIAIS DE ACESSO:");
-        System.out.println("   👨‍💼 Admin: admin@admin.com / 123456");
-        System.out.println("   👤 User: user@user.com / 123456");
-        System.out.println("   👩‍💼 Maria: maria@investidora.com / 123456");
+        System.out.println("   👨‍💼 Admin: admin@admin.com / 123456 (R$ 50.000)");
+        System.out.println("   👤 User: user@user.com / 123456 (R$ 25.000)");
+        System.out.println("   👩‍💼 Maria: maria@investidora.com / 123456 (R$ 35.000)");
+        System.out.println("");
+        System.out.println("🎯 TESTE OS DIVIDENDOS AUTOMÁTICOS:");
+        System.out.println("   📈 Ações com dividendos: PETR4 (8.5%), VALE3 (12.3%), ITUB4 (6.8%), BBAS3 (9.2%), ABEV3 (4.5%)");
+        System.out.println("   🏢 FIIs com dividendos: HGLG11 (10.2%), MXRF11 (9.6%), XPLG11 (8.8%)");
+        System.out.println("   💡 Compre qualquer ação/FII e receba dividendo IMEDIATO!");
         System.out.println("");
         System.out.println("🌐 Swagger UI: http://localhost:8080/swagger-ui.html");
         System.out.println("🎵 Teste as playlists após fazer login!");

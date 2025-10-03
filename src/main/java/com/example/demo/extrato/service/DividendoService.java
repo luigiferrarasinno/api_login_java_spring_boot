@@ -328,4 +328,41 @@ public class DividendoService {
     public long contarDividendosPendentes() {
         return dividendoPendenteRepository.countByStatus(StatusDividendo.PENDENTE);
     }
+
+    /**
+     * 🎯 NOVO: Paga dividendo IMEDIATO ao comprar ação
+     * Chamado automaticamente na compra - SEM aprovação administrativa
+     */
+    @Transactional
+    public String pagarDividendoImediato(Usuario usuario, Investimento investimento, BigDecimal quantidadeComprada) {
+        // Verificar se o investimento paga dividendos
+        if (investimento.getDividendYield() == null || investimento.getDividendYield().compareTo(BigDecimal.ZERO) <= 0) {
+            return null; // Não paga dividendo, retorna null silenciosamente
+        }
+        
+        // Calcular dividendo por ação (mesma lógica existente)
+        BigDecimal dividendoPorAcao = calcularDividendoPorAcao(investimento);
+        BigDecimal valorDividendoTotal = quantidadeComprada.multiply(dividendoPorAcao).setScale(2, RoundingMode.HALF_UP);
+        
+        // Creditar dividendo IMEDIATAMENTE na carteira
+        BigDecimal saldoAnterior = usuario.getSaldoCarteira();
+        BigDecimal novoSaldo = saldoAnterior.add(valorDividendoTotal);
+        
+        usuario.setSaldoCarteira(novoSaldo);
+        usuarioRepository.save(usuario);
+        
+        // Registrar no extrato como dividendo de boas-vindas
+        Extrato extrato = new Extrato(usuario, TipoTransacao.DIVIDENDO_RECEBIDO, valorDividendoTotal, 
+                                     saldoAnterior, novoSaldo,
+                                     "🎁 Dividendo de Boas-Vindas: " + investimento.getNome() + 
+                                     " - " + quantidadeComprada + " ações × R$ " + dividendoPorAcao);
+        extrato.setInvestimento(investimento);
+        extrato.setQuantidade(quantidadeComprada);
+        extrato.setPrecoUnitario(dividendoPorAcao);
+        
+        extratoRepository.save(extrato);
+        
+        return String.format("🎁 Dividendo de boas-vindas creditado: R$ %.2f (%s ações × R$ %.2f)", 
+                            valorDividendoTotal, quantidadeComprada, dividendoPorAcao);
+    }
 }
