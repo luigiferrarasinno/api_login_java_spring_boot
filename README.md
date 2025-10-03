@@ -1,795 +1,336 @@
+# 🏦 API de Investimentos Brasileira - Spring Boot
 
-# 🛡️ API de java
+Uma API RESTful completa para gestão de investimentos com autenticação JWT, construída com **Spring Boot 3.2.2** e **Java 17**. 
 
-Esta é uma API de autenticação e gerenciamento de usuários e gerenciamento de investimentos desenvolvida com **Java 17** e **Spring Boot 3.2.2**, utilizando autenticação via **JWT (JSON Web Token)**. A API possui controle de acesso baseado em **roles** (`USER` e `ADMIN`) e protege os endpoints adequadamente. A autenticação é feita por **email e senha**.
-
----
-
-## 📁 Estrutura do Projeto
-
-```bash
-src
-└── main
-    └── java
-        └── com.example.demo
-            ├── exception/             # Tratamento global de erros e exceções personalizadas
-            ├── security/              # Lógica de autenticação, JWT e segurança
-            ├── logging/               # Filtro para log de requisições e respostas da API
-            ├── user/                  # Pasta com tudo relacionado a entidade user 
-            │   ├── controller/        # Endpoints da API
-            │   ├── dao/               # Classe auxiliar para troca de senha
-            │   ├── dto/               # Objetos de transferência de dados (entrada/saída)
-            │   ├── init/              # Inicializador com criação do usuário admin
-            │   ├── model/             # Entidades JPA (Usuario e Role)
-            │   ├── repository/        # Interfaces para acesso ao banco
-            │   └── service/           # Lógica de negócio (cadastro, login, exclusão, etc.)
-            └── investimento/          # Pasta com tudo relacionado à entidade investimento
-                ├── controller/        # Endpoints da API
-                ├── dto/               # Objetos de transferência de dados (entrada/saída)
-                ├── init/              # Inicializador para investimentos, se aplicável
-                ├── model/             # Entidades JPA relacionadas a investimentos
-                ├── repository/        # Interfaces para acesso ao banco
-                └── service/           # Lógica de negócio (cadastro, consulta, atualização, etc.)
-
-```
+**Sistema totalmente adaptado às regras do mercado brasileiro** com números inteiros de ações, controle administrativo de dividendos, sistema de comentários e filtros avançados.
 
 ---
 
-## 🔧 Camadas do Projeto
+## ✨ Principais Funcionalidades
 
-| Camada         | Função                                                                 |
-|----------------|------------------------------------------------------------------------|
-| `controller`   | Define os endpoints públicos e protegidos da API                       |
-| `service`      | Contém as regras de negócio (ex: criação de conta, validações, etc.)   |
-| `repository`   | Acesso ao banco de dados via Spring Data JPA                           |
-| `dao`          | Realiza consultas personalizadas e operações mais complexas no banco   |
-| `dto`          | Objetos usados para entrada e saída de dados (evita expor entidades)   |
-| `model`        | Entidades JPA que representam as tabelas no banco de dados             |
-| `security`     | Configuração de autenticação e geração/validação de tokens JWT         |
-| `exception`    | Gerencia erros com mensagens personalizadas                            |
-| `init`         | Cria automaticamente algumas coisas no início da aplicação             |
-
+- 🔐 **Autenticação JWT** com roles diferenciadas (USER/ADMIN)
+- 📈 **Sistema Brasileiro de Ações** (apenas números inteiros, estoque limitado)
+- 💰 **Dividendos Administrativos** (controle manual pelo admin)
+- 💼 **Carteira Completa** com compra/venda e extrato
+- 💬 **Sistema de Comentários** nas ações com moderação
+- 🔍 **Filtros Avançados** em todos os endpoints GET
+- ⚙️ **Controle de Visibilidade** de investimentos para usuários
+- 📊 **Preços Dinâmicos** com simulação de volatilidade por risco
 
 ---
 
-## 🚀 Como rodar o projeto
+## 🚀 Como Rodar o Projeto
 
 ### Pré-requisitos
-
-- Java 17 instalado  
-- Maven instalado  
+- **Java 17** ou superior instalado
+- **Maven** instalado
 - IDE de sua preferência (VS Code, IntelliJ...)
 
-### Passos
+### Passos para Executar
 
+**1. Clone o repositório:**
 ```bash
 git clone https://github.com/luigiferrarasinno/api_login_java_spring_boot.git
 cd api_login_java_spring_boot
 ```
 
-- Execute a aplicação com `mvn spring-boot:run` ou através da sua IDE.  
-- A API sobe na porta padrão: `http://localhost:8080`
+**2. Execute a aplicação:**
 
-> ⚠️ Um usuário **ADMIN** será criado automaticamente:
-
-```
-Email: admin@admin.com
-Senha: admin123
+**Windows (PowerShell):**
+```powershell
+.\mvnw.cmd spring-boot:run
 ```
 
-> 👤 Um usuário **comum (ROLE\_USER)** também será criado automaticamente:
-
-```
-Email: usuario@teste.com
-Senha: teste123
+**Linux/Mac:**
+```bash
+./mvnw spring-boot:run
 ```
 
-> ⚠️ Alguns investimentos são criados automaticamente tambem
+**3. Acesse a aplicação:**
+- **API Base URL**: `http://localhost:8080`
+
+---
+
+## 🧪 Dados de Teste Automáticos
+
+> ⚠️ **Usuários criados automaticamente:**
+
+| Usuário | Email | Senha | Role | CPF |
+|---------|-------|-------|------|-----|
+| **admin** | admin@admin.com | admin123 | ADMIN | 12345678901 |
+| **usuario** | usuario@teste.com | teste123 | USER | 98765432100 |
+
+> 📈 **Investimentos criados automaticamente:**
+- **Tesouro Direto (TD)** - Baixo risco, sem dividendos
+- **Ações Vale (VALE3)** - Alto risco, 8,5% dividendos trimestrais
+- **FII HGLG11** - Médio risco, 6,2% dividendos mensais
+
 ---
 
 ## 📚 Documentação e Ferramentas
 
-### 🧪 Swagger (Documentação Interativa da API)
-
-Acesse o Swagger UI para testar os endpoints diretamente pelo navegador:
-
+### 🧪 Swagger (Documentação Interativa)
+Teste todos os endpoints diretamente no navegador:
 ```
 http://localhost:8080/swagger-ui/index.html
 ```
 
----
-
-### 🛢️ Console do Banco de Dados H2
-
-A API utiliza o banco em memória H2. Acesse pelo navegador em:
-
+### 🛢️ Console do Banco H2
+Acesse o banco de dados em memória para consultas SQL:
 ```
 http://localhost:8080/h2-console
 ```
 
 **Credenciais de Acesso:**
-
 - **JDBC URL:** `jdbc:h2:mem:fellerdb`
 - **Username:** `Admin`
 - **Password:** `Fiap123`
 
-> 💡 Dica: após logar no H2 Console, use `SELECT * FROM USUARIO;` para visualizar os dados.
-
-> 💡 Dica: após logar no H2 Console, use `SELECT * FROM Investimento;` para visualizar os dados.
-
-
----
-
-## 🛠️ Tecnologias Utilizadas
-
-- Java 17  
-- Spring Boot 3.2.2  
-- Spring Security  
-- JWT (JSON Web Token)  
-- H2 Database (em memória)  
-- Maven  
-- Swagger (OpenAPI)
+> 💡 **Dicas úteis:**
+> - `SELECT * FROM USUARIO;` - Ver todos os usuários
+> - `SELECT * FROM INVESTIMENTO;` - Ver todos os investimentos
+> - `SELECT * FROM COMENTARIO;` - Ver todos os comentários
+> - `SELECT * FROM POSICAO_CARTEIRA;` - Ver posições dos usuários
 
 ---
 
-## 🏗️ Arquitetura e diagramas 
+## 🔑 Login Rápido para Testes
 
-### ️ Diagrama de Entidades
-
-```mermaid
-erDiagram
-    USUARIO {
-        id LONG PK
-        nomeUsuario STRING
-        email STRING
-        senha STRING
-        cpf LONG
-        dt_nascimento DATE
-        role STRING
-        userIsActive BOOLEAN
-    }
-    
-    INVESTIMENTO {
-        id LONG PK
-        nome STRING
-        categoria STRING
-        valor DOUBLE
-        descricao STRING
-        data DATE
-        risco STRING
-        ativo BOOLEAN
-        usuarioId LONG FK
-    }
-    
-    USUARIO ||--o{ INVESTIMENTO : "tem vários"
-```
-
-### 🏛️ Fluxo de uma Requisição
-
-```mermaid
-sequenceDiagram
-    participant Cliente as 🌐 Cliente
-    participant Filter as 🔒 JWT Filter
-    participant Controller as 🎯 Controller
-    participant DTO as 📦 DTO
-    participant Service as ⚙️ Service
-    participant Repository as 💾 Repository
-    participant Entity as 🗃️ Entity
-    participant DB as 🗄️ H2 Database
-    
-    Cliente->>Filter: 1. HTTP Request + JWT Token
-    Filter->>Filter: 2. Validar JWT Token
-    Filter->>Controller: 3. Token válido - prosseguir
-    Controller->>DTO: 4. Converter JSON para DTO
-    Controller->>Service: 5. Chamar método do Service(DTO)
-    Service->>Service: 6. Aplicar regras de negócio
-    Service->>Repository: 7. Solicitar dados do Repository
-    Repository->>Entity: 8. Mapear para Entity (JPA)
-    Entity->>DB: 9. Executar query SQL
-    DB->>Entity: 10. Retornar resultados
-    Entity->>Repository: 11. Dados como Entity
-    Repository->>Service: 12. Retornar Entity para Service
-    Service->>DTO: 13. Converter Entity para ResponseDTO
-    Service->>Controller: 14. Retornar ResponseDTO
-    Controller->>Cliente: 15. HTTP Response (JSON)
-```
-
----
-
-# 🔐 Endpoints da API de manipulação de usuario
----
-
-
-## 🧠 Regras de Permissão
-
-| Endpoint                       | USER        | ADMIN       |
-| ------------------------------ | ----------- | ----------- |
-| `/usuarios/criar`              | ❌           | ✅           |
-| `/usuarios/login`              | ✅ (público) | ✅ (público) |
-| `/usuarios/alterar-senha`      | ✅ (próprio) | ✅           |
-| `/usuarios/criar-senha`        | ✅ (público) | ✅ (público) |
-| `/usuarios/{id}` (DELETE)      | ✅ (próprio) | ✅           |
-| `/usuarios` (GET)              | ❌           | ✅           |
-| `/usuarios/{id}` (GET)         | ✅ (próprio) | ✅           |
-| `/usuarios/{id}` (PATCH)       | ✅ (próprio) | ✅           |
-| `/usuarios/trocar-email` (PUT) | ❌           | ✅           |
-
-
-
----
-### 1. Criar Conta
-
-**POST** `/usuarios/criar`  
-**Acesso**: Público
-
-#### Requisição:
-
+**Admin (acesso total):**
 ```json
-{
-  "nomeUsuario": "João da Silva",
-  "senha": "senha123",
-  "email": "joao.silva@email.com",
-  "cpf": 12345678909,
-  "dt_nascimento": "2006-05-20"
-}
-```
-
-#### Resposta:
-
-- **201 Created**: Usuário criado com sucesso  
-- **400 Bad Request**: Usuário já existe ou dados inválidos
-
----
-
-### 2. Login
-
-**POST** `/usuarios/login`  
-**Acesso**: Público
-
-#### Requisição:
-
-```json
-{
-  "email": "joao@email.com",
-  "senha": "senha123",
-  "firstLogin": false
-
-}
-```
-
-#### Resposta:
-
-```json
-{
-    "token": "um token",
-    "userId": "id do usuario"
-}
-```
-
-- **200 OK**: Token JWT válido  
-- **401 Unauthorized**: Credenciais inválidas
-
----
-
-### 3. Alterar Senha
-
-**PUT** `/usuarios/alterar-senha`  
-**Acesso**: Protegido (o próprio usuário ou admin)
-
-#### Requisição:
-
-```json
-{
-  "email": "joao@email.com",
-  "senhaAntiga": "uma senha",
-  "senhaNova": "nova senha"
-}
-```
-
-#### Resposta:
-
-- **200 OK**: Senha alterada com sucesso  
-- **403 Forbidden**: Tentativa de alterar senha de outro usuário
-
----
-
-### 4. Deletar Usuário
-
-**DELETE** `/usuarios/{id}`  
-**Acesso**: 
-- USER: pode deletar apenas sua própria conta  
-- ADMIN: pode deletar qualquer usuário
-
-#### Resposta:
-
-- **200 OK**: Usuário deletado  
-- **403 Forbidden**: Tentativa de deletar outro usuário sem permissão
-
----
-
-### 5. Listar Todos os Usuários
-
-**GET** `/usuarios`  
-**Acesso**: Apenas ADMIN
-
-#### Resposta:
-
-```json
-[
-  {
-    "id": 1,
-    "nomeUsuario": "admin",
-    "email": "admin@email.com",
-    "ativo": true
-  },
-  {
-    "id": 2,
-    "nomeUsuario": "joao",
-    "email": "joao@email.com",
-    "ativo": true
-  }
-]
-```
-
----
-
-### 6. Buscar Usuário por ID
-
-**GET** `/usuarios/{id}`  
-**Acesso**:
-- USER: pode ver apenas seus próprios dados  
-- ADMIN: pode ver qualquer usuário
-
-#### Resposta:
-
-```json
-{
-    "id": 2,
-    "nomeUsuario": "João da Silva",
-    "email": "joao.silva@email.com",
-    "role": "ROLE_USER",
-    "cpf": 12345678909,
-    "dt_nascimento": "2006-05-20",
-    "tipo_de_investidor": "nenhum por enquanto",
-    "userIsActive": true,
-    "user_permissions": "nenhuma por enquanto"
-}
-```
-
----
-
-### 7. Alternar Status de Atividade
-
-**PATCH** `/usuarios/{id}`  
-**Acesso**:
-- USER: pode alterar apenas o próprio status  
-- ADMIN: pode alterar qualquer usuário
-
-#### Resposta:
-
-```json
-{
-  "mensagem": "Status de atividade atualizado com sucesso!",
-  "ativo": false
-}
-```
----
-
-### 8. Criar Senha
-
-**PUT** `/usuarios/criar-senha`
-**Acesso**:
-
-* Público: qualquer usuário que tenha CPF, email e data de nascimento corretos pode criar ou redefinir sua senha.
-
-#### Corpo da Requisição (JSON):
-
-```json
-{
-  "cpf": 12345678900,
-  "email": "usuario@email.com",
-  "dt_nascimento": "2006-05-20",
-  "senhaNova": "minhaNovaSenhaSegura"
-}
-```
-
-> **Observação:** o campo `dt_nascimento` deve estar no formato `"yyyy-MM-dd"`, e será convertido corretamente mesmo com o nome em snake\_case.
-
-#### Resposta (200 OK):
-
-```json
-{
-  "mensagem": "Senha redefinida com sucesso!"
-}
-```
-
----
-
-### 9. Trocar Email
-
-**PUT** `/usuarios/trocar-email`
-**Acesso**:
-
-* Apenas **ADMINs** com token **Bearer**.
-
-#### Corpo da Requisição (JSON):
-
-```json
-{
-  "cpf": 12345678900,
-  "novoEmail": "novo.email@email.com"
-}
-```
-
-> **Observação:** o CPF deve estar cadastrado no sistema. O novo email **não pode** ser igual ao atual nem já estar em uso por outro usuário.
-
-#### Resposta (200 OK):
-
-```json
-{
-  "mensagem": "Email do usuário com CPF 12345678900 alterado com sucesso para novo.email@email.com"
-}
-```
-
-#### Respostas de Erro:
-
-* **400 Bad Request** – Quando o novo email já está cadastrado:
-
-```json
-{
-  "timestamp": "2025-06-10T14:22:00",
-  "erro": "Email já cadastrado",
-  "status": 400
-}
-```
-
-* **404 Not Found** – Quando o CPF informado não existe:
-
-```json
-{
-  "timestamp": "2025-06-10T14:25:00",
-  "erro": "Usuário não encontrado para o CPF informado",
-  "status": 404
-}
-```
-
----
-
-## 📦 Exemplo de uso com Postman
-
-### 1. **Login como administrador**
-
-Antes de criar qualquer conta, é necessário fazer login com um usuário administrador para obter o token JWT.
-
-```
 POST /usuarios/login
-```
-
-Corpo da requisição (JSON):
-
-```json
 {
   "email": "admin@admin.com",
   "senha": "admin123"
 }
 ```
 
-### 2. **Copie o token JWT da resposta**
-
+**Usuário comum:**
 ```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5..."
-}
-```
-
-Você usará esse token para autenticar as requisições protegidas, como a criação de usuários.
-
----
-
-### 3. **Criar uma nova conta de usuário**
-
-```
-POST /usuarios/criar
-```
-
-Corpo da requisição (JSON):
-
-```json
-{
-  "nomeUsuario": "João da Silva",
-  "senha": "senha123",
-  "email": "joao.silva@email.com",
-  "cpf": 12345678909,
-  "dt_nascimento": "2006-05-20"
-}
-```
-
-> **Atenção:** Este endpoint exige um token de **ADMIN** no cabeçalho da requisição.
-
----
-
-### 4. **Fazer login com o novo usuário criado**
-
-```
 POST /usuarios/login
+{
+  "email": "usuario@teste.com", 
+  "senha": "teste123"
+}
 ```
 
-Corpo da requisição (JSON):
-
+**Resposta:**
 ```json
 {
-  "email": "joao.silva@email.com",
-  "senha": "senha123"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "userId": "1"
 }
 ```
 
 ---
 
-### 5. **Autenticação no Postman (Bearer Token)**
+## 📖 Documentação Detalhada por Funcionalidade
 
-Para testar qualquer endpoint protegido:
+### 📚 Guias Completos de Uso
 
-* Vá até a aba **Authorization**
-* Em **Type**, selecione **Bearer Token**
-* No campo **Token**, cole o token JWT copiado
-* O Postman automaticamente adicionará o cabeçalho:
+| 📋 Guia | 🎯 Funcionalidades | 📎 Link |
+|---------|-------------------|---------|
+| 👤 **Usuários** | Login, cadastro, alteração de dados, filtros por role/email/CPF | [usuarios.md](guias-de-uso/usuarios.md) |
+| 📈 **Investimentos** | CRUD, favoritos, filtros avançados, controle de visibilidade | [investimentos.md](guias-de-uso/investimentos.md) |
+| 💬 **Comentários** | Sistema completo de comentários com moderação admin | [comentarios.md](guias-de-uso/comentarios.md) |
+| 💰 **Dividendos** | Liberação administrativa manual, cálculos automáticos, histórico | [dividendos.md](guias-de-uso/dividendos.md) |
+| 💼 **Carteira & Extrato** | Compra/venda com validações brasileiras, posições, extrato completo | [carteira-extrato.md](guias-de-uso/carteira-extrato.md) |
 
-```
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5...
-```
-
-
----
-
-## 📈 Seção: Investimentos
-
-Essa parte descreve como usar os endpoints de investimento após você obter o token JWT (veja na seção de manipulação de usuário).
+> 💡 **Cada guia contém:**
+> - Exemplos completos para Postman
+> - Todas as validações e regras de negócio
+> - Diferenças de permissão entre USER e ADMIN
+> - Tratamento de erros detalhado
 
 ---
 
-## 🧠 Regras de Permissão - Investimentos
+## 🎯 Sistema Brasileiro de Ações
 
-| Endpoint                                                   | USER            | ADMIN           |
-| ---------------------------------------------------------- | --------------- | --------------- |
-| `GET /investimentos`                                       | ✅ (autenticado) | ✅ (autenticado) |
-| `POST /investimentos`                                      | ❌               | ✅               |
-| `GET /investimentos/{id}`                                  | ✅ (autenticado) | ✅               |
-| `DELETE /investimentos/{id}`                               | ❌               | ✅               |
-| `POST /investimentos/{investimentoId}/usuario/{usuarioId}` | ✅ (próprio)     | ✅               |
-| `GET /investimentos/usuario/{usuarioId}`                   | ✅ (próprio)     | ✅               |
+### Regras do Mercado Nacional Implementadas:
+- ✅ **Números Inteiros**: Sistema não permite comprar 0,5 ações (como no Brasil)
+- ✅ **Estoque Limitado**: Investimentos têm `quantidadeDisponivel` finita e realista
+- ✅ **Validações Rigorosas**: Saldo do usuário, estoque disponível, permissões por role
+- ✅ **Preços Dinâmicos**: Simulação de mercado com volatilidade baseada no risco
 
----
-
-**Legenda:**
-
-* ✅: Permitido
-* ❌: Negado
-* (próprio): Somente para o próprio usuário (via verificação customizada `@usuarioService.isOwnerOrAdmin`)
-* (autenticado): Qualquer usuário autenticado
-
----
-
-### 🔒 **Política de Segurança - Campo `usuarioIds`**
-
-Por questões de **privacidade e segurança**, o campo `usuarioIds` nos responses dos investimentos é **controlado baseado no papel do usuário**:
-
-- **👨‍💼 Usuários ADMIN**: Visualizam **todos** os IDs de usuários vinculados aos investimentos
-- **👤 Usuários comuns**: O campo `usuarioIds` é **sempre `null`** (oculto por segurança)
-
-**Exemplo de resposta para ADMIN:**
+### Exemplo Prático:
 ```json
+// ✅ VÁLIDO - Sistema brasileiro aceita
+POST /carteira/comprar
 {
-  "id": 1,
-  "nome": "Tesouro Direto",
-  "usuarioIds": [1, 2, 5],  // ← VISÍVEL para admin
-  "valor": 1000.0
+  "usuarioId": 2,
+  "investimentoId": 1, 
+  "quantidade": 10  // ← Número inteiro
 }
-```
 
-**Exemplo de resposta para USER:**
-```json
+// ❌ INVÁLIDO - Sistema rejeita
 {
-  "id": 1,
-  "nome": "Tesouro Direto", 
-  "usuarioIds": null,  // ← OCULTO para usuário comum
-  "valor": 1000.0
-}
-```
-
-> 🛡️ **Nota de Segurança**: Esta implementação previne vazamento de informações sobre outros usuários do sistema, mantendo a privacidade dos dados.
-
----
-
-### ✅ Headers comuns para endpoints protegidos:
-
-* **Authorization**: `Bearer SEU_TOKEN_JWT`
-
----
-
-### 📋 1. Listar todos os investimentos
-
-* **Método:** `GET`
-* **URL:** `http://localhost:8080/investimentos`
-* **Pré-requisito:** qualquer usuário **autenticado**
-* **Resposta (200 OK):** Lista JSON como:
-
-```json
-[
-  {
-    "id": 1,
-    "nome": "Tesouro Direto",
-    "categoria": "RENDA_FIXA",
-    "valor": 1000.0,
-    "descricao": "Investimento seguro em títulos do governo",
-    "usuarioId": null,
-    "data": "2025-06-10",
-    "risco": "ALTO"
-  },
-  {
-    "id": 2,
-    "nome": "Ações Vale",
-    "categoria": "RENDA_VARIAVEL",
-    "valor": 5000.0,
-    "descricao": "Investimento em ações da Vale",
-    "usuarioId": null,
-    "data": "2025-06-10",
-    "risco": "ALTO"
-  }
-]
-```
-
----
-
-### 🔍 2. Buscar investimento por ID
-
-* **Método:** `GET`
-* **URL:** `http://localhost:8080/investimentos/{id}` (substitua `{id}` por um número)
-* **Pré-requisito:** usuário autenticado
-* **Resposta (200 OK):**
-
-```json
-{
-  "id": 1,
-  "nome": "Tesouro Direto",
-  "categoria": "RENDA_FIXA",
-  "valor": 1000.0,
-  "descricao": "Investimento seguro em títulos do governo",
-  "usuarioId": null,
-  "data": "2025-06-10",
-  "risco": "ALTO"
+  "quantidade": 10.5  // ← Fração não permitida no Brasil
 }
 ```
 
 ---
 
-### ➕ 3. Criar um novo investimento
+## 🌟 Diferenças de Acesso por Role
 
-* **Método:** `POST`
-* **URL:** `http://localhost:8080/investimentos`
-* **Só ADMIN** pode executar
-* **Body (JSON):**
-
-```json
-{
-  "nome": "Fundo Imobiliário",
-  "categoria": "FUNDO",
-  "valor": 3000.00,
-  "descricao": "Investimento em fundos imobiliários",
-  "data": "2025-06-10",
-  "risco": "ALTO"
-}
-```
-
-* **Resposta (200 OK):**
-
-```json
-{
-  "id": 3,
-  "nome": "Fundo Imobiliário",
-  "categoria": "FUNDO",
-  "valor": 3000.0,
-  "descricao": "Investimento em fundos imobiliários",
-  "usuarioId": null,
-  "data": "2025-06-10",
-  "risco": "ALTO"
-}
-```
+| 🎯 Funcionalidade | 👤 USER | 👑 ADMIN |
+|-------------------|---------|----------|
+| Ver investimentos | ✅ Apenas visíveis (`visivelParaUsuarios=true`) | ✅ Todos (incluindo ocultos) |
+| Criar/Editar investimentos | ❌ | ✅ |
+| Controlar visibilidade | ❌ | ✅ |
+| Liberar dividendos | ❌ | ✅ |
+| Moderar comentários | ❌ | ✅ |
+| Filtros avançados | ✅ Básicos (nome, categoria, preço) | ✅ Completos (+ ativo, visível) |
+| Ver carteiras | ✅ Apenas própria | ✅ Qualquer usuário |
+| Gerenciar usuários | ❌ | ✅ |
 
 ---
 
-### ✅ 4. Deletar um investimento
+## 🛠️ Tecnologias Utilizadas
 
-* **Método:** `DELETE`
-
-* **URL:** `http://localhost:8080/investimentos/{id}`
-
-* **Autorização:** Apenas usuários com `ROLE_ADMIN` podem executar
-
-* **Resposta (204 No Content):** Nenhum conteúdo retornado
-
-* **Erros possíveis:**
-
-  * `404 Not Found`: Se o investimento com o ID informado não existir (caso esteja implementado no serviço)
+- **Java 17** + **Spring Boot 3.2.2**
+- **Spring Security 6** (JWT Authentication)
+- **Spring Data JPA** + **H2 Database** (em memória)
+- **Bean Validation** + **Maven**
+- **Swagger/OpenAPI** (documentação interativa)
 
 ---
 
-### 🔄 5. Vincular / Desvincular investimento a usuário (Toggle)
+## 📁 Estrutura Detalhada do Projeto
 
-* **Método:** `POST`
-* **URL:** `http://localhost:8080/investimentos/{investimentoId}/usuario/{usuarioId}`
-
-  * Exemplo: `http://localhost:8080/investimentos/1/usuario/2`
-* **Acesso:**
-
-  * Usuário com `ROLE_USER`: só pode vincular/desvincular seu próprio ID (ou seja, `{usuarioId}` = seu ID)
-  * ADMIN: pode vincular/desvincular qualquer usuário
-* **Resposta (200 OK):** mostra o investimento atualizado, incluindo o campo `usuarioId` (ou `null`) além de incluir uma `message` que informa se houve vinculação ou desvinculação do usuário com o investimento
-
----
-
-### 👤 6. Listar investimentos vinculados a um usuário
-
-* **Método:** `GET`
-* **URL:** `http://localhost:8080/investimentos/usuario/{usuarioId}`
-* **Acesso:**
-
-  * Usuário: só pode acessar seus próprios investimentos
-  * ADMIN: pode ver qualquer usuário
-* **Resposta (200 OK):** lista somente os investimentos cujo `usuarioId` é o mesmo passado na URL
-
----
-
-## ❌ Tratamento de Erros
-
-A API retorna erros em formato padronizado:
-
-```json
-{
-  "timestamp": "2025-04-09T15:10:22.491",
-  "erro": "Usuário ou senha inválidos!",
-  "status": 401
-}
+```bash
+src
+└── main
+    └── java
+        └── com.example.demo
+            ├── 🔧 DemoApplication.java
+            ├── ⚠️ exception/              # Tratamento global de erros e exceções personalizadas
+            ├── 🛡️ security/               # Lógica de autenticação, JWT e segurança
+            ├── � logging/                # Filtro para log de requisições e respostas da API
+            ├── �👤 user/                   # Sistema completo de usuários
+            │   ├── controller/            # Endpoints da API (login, CRUD usuários)
+            │   ├── dao/                   # Classe auxiliar para operações complexas
+            │   ├── dto/                   # DTOs de entrada e saída
+            │   ├── init/                  # Inicializador com criação do usuário admin
+            │   ├── model/                 # Entidade Usuario e enums
+            │   ├── repository/            # Interfaces para acesso ao banco
+            │   └── service/               # Lógica de negócio (cadastro, login, etc.)
+            ├── 📈 investimento/           # Sistema de gestão de investimentos
+            │   ├── controller/            # Endpoints CRUD, favoritos, visibilidade
+            │   ├── dto/                   # DTOs para investimentos e respostas
+            │   ├── init/                  # Inicializador de investimentos padrão
+            │   ├── model/                 # Entidades Investimento, Categoria, Risco
+            │   ├── repository/            # Queries personalizadas com filtros
+            │   └── service/               # Regras de negócio e validações
+            ├── 💬 comentarios/            # Sistema de comentários nas ações
+            │   ├── controller/            # CRUD comentários, moderação admin
+            │   ├── dto/                   # DTOs de comentários
+            │   ├── model/                 # Entidade Comentario com auditoria
+            │   ├── repository/            # Queries com soft delete
+            │   └── service/               # Regras de permissão por usuário/admin
+            ├── 💰 dividendo/              # Sistema administrativo de dividendos
+            │   ├── controller/            # Liberação manual pelo admin
+            │   ├── model/                 # Entidade DividendoPendente
+            │   ├── repository/            # Consultas de dividendos
+            │   └── service/               # Cálculos automáticos e distribuição
+            ├── 💼 carteira/               # Sistema de carteira de investimentos
+            │   ├── controller/            # Compra, venda, consulta posições
+            │   ├── dto/                   # DTOs de carteira e resumos
+            │   ├── model/                 # Entidade PosicaoCarteira
+            │   ├── repository/            # Consultas de posições
+            │   └── service/               # Cálculos de preço médio e ganhos
+            └── 📊 extrato/                # Sistema de extrato financeiro
+                ├── controller/            # Consulta de transações
+                ├── dto/                   # DTOs de extrato
+                ├── model/                 # Entidade Extrato e tipos de transação
+                ├── repository/            # Histórico de transações
+                └── service/               # Consolidação de extratos
 ```
 
 ---
 
-### 🔄 7. Ativar / Desativar um investimento (toggle ativo)
+## 🔧 Camadas da Arquitetura
 
-* **Método:** `PATCH`
-* **URL:** `http://localhost:8080/investimentos/{id}/toggle-ativo`
-* **Autorização:** Apenas usuários com `ROLE_ADMIN` podem executar
-* **Descrição:** Alterna o status ativo/inativo do investimento com o ID informado
-* **Resposta (200 OK):** Retorna o investimento atualizado, exemplo:
+| 🏗️ Camada | 📝 Função |
+|-----------|-----------|
+| **Controller** | Define os endpoints públicos e protegidos da API REST |
+| **Service** | Contém as regras de negócio (validações, cálculos, etc.) |
+| **Repository** | Acesso ao banco de dados via Spring Data JPA |
+| **DAO** | Consultas personalizadas e operações complexas no banco |
+| **DTO** | Objetos de transferência (entrada/saída) - evita expor entidades |
+| **Model** | Entidades JPA que representam as tabelas no banco |
+| **Security** | Configuração JWT, autenticação e autorização |
+| **Exception** | Tratamento global de erros com mensagens personalizadas |
+| **Init** | Inicializadores automáticos (usuários e investimentos padrão) |
 
-```json
-{
-  "id": 1,
-  "nome": "Tesouro Direto",
-  "categoria": "RENDA_FIXA",
-  "valor": 1000.0,
-  "descricao": "Investimento seguro em títulos do governo",
-  "usuarioId": null,
-  "data": "2025-06-10",
-  "risco": "ALTO",
-  "ativo": false
-}
+---
+
+## 🏛️ Fluxo de uma Requisição Protegida
+
+```mermaid
+sequenceDiagram
+    participant Cliente as 🌐 Cliente
+    participant Filter as 🔒 JWT Filter
+    participant Controller as 🎯 Controller
+    participant Service as ⚙️ Service
+    participant Repository as 💾 Repository
+    participant DB as 🗄️ H2 Database
+    
+    Cliente->>Filter: 1. HTTP Request + JWT Token
+    Filter->>Filter: 2. Validar JWT Token
+    Filter->>Controller: 3. Token válido - prosseguir
+    Controller->>Service: 4. Chamar método do Service
+    Service->>Service: 5. Aplicar regras de negócio
+    Service->>Repository: 6. Solicitar dados do Repository
+    Repository->>DB: 7. Executar query SQL
+    DB->>Repository: 8. Retornar resultados
+    Repository->>Service: 9. Dados como Entity
+    Service->>Controller: 10. Converter para DTO
+    Controller->>Cliente: 11. HTTP Response (JSON)
 ```
 
 ---
 
-## 👤 Autor
+## 📞 Como Usar Esta Documentação
+
+### 🎯 **Para Começar Rapidamente:**
+1. Use os **logins rápidos** acima para obter tokens JWT
+2. Teste no **Swagger** (`/swagger-ui/index.html`)
+3. Verifique dados no **H2 Console** (`/h2-console`)
+
+### 🔍 **Para Funcionalidades Específicas:**
+- Consulte o **guia específico** da funcionalidade desejada
+- Cada guia tem **exemplos completos** para Postman
+- **Validações e permissões** explicadas detalhadamente
+
+### 🧪 **Para Desenvolvimento:**
+- Veja a **estrutura completa** do projeto acima
+- **Fluxo da arquitetura** em camadas
+- **Dados de teste** já inicializados
+
+---
+
+## 🏆 Principais Diferenciais
+
+- 🇧🇷 **100% Brasileiro**: Regras específicas do mercado nacional
+- 🔐 **Segurança Robusta**: JWT + validações granulares por role
+- 📊 **Sistema Completo**: 30+ endpoints cobrindo todo o ciclo de investimentos
+- 💬 **Interação Social**: Sistema de comentários com moderação
+- 📖 **Documentação Rica**: Guias específicos + Swagger + exemplos Postman
+- 🧪 **Pronto para Teste**: Dados iniciais e ambiente completo configurado
+
+---
+
+## 👨‍💻 Autores
 
 Desenvolvido por:
+- **Luigi Ferrara Sinno** - RM98047
+- **Davi Passanha de Sousa Guerra** - RM551605  
+- **Cauã Gonçalves de Jesus** - RM97648
+- **Luan Silveira Macea** - RM98290
+- **Rui Amorim Siqueira** - RM98436
 
-• Davi Passanha de Sousa Guerra - RM551605
+**GitHub:** [api_login_java_spring_boot](https://github.com/luigiferrarasinno/api_login_java_spring_boot.git)
 
-• Cauã Gonçalves de Jesus - RM97648
+---
 
-• Luan Silveira Macea - RM98290
-
-• Rui Amorim Siqueira - RM98436
-
-• Luigi Ferrara Sinno -RM98047
-
-GitHub: [api_login_java_spring_boot](https://github.com/luigiferrarasinno/api_login_java_spring_boot.git)
-
+**📚 Consulte os guias específicos para instruções detalhadas de cada funcionalidade!** 🚀

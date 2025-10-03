@@ -43,4 +43,14 @@ public class UsuarioDAO {
         return usuarioRepository.findByCpf(cpf);
     }
 
+    /**
+     * Busca usuários com filtros opcionais
+     */
+    public java.util.List<Usuario> findUsuariosComFiltros(String nomeUsuario, String email, String cpf,
+                                                         String role, Boolean userIsActive) {
+        return usuarioRepository.findUsuariosComFiltros(
+            nomeUsuario, email, cpf, role, userIsActive
+        );
+    }
+
 }

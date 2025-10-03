@@ -16,6 +16,7 @@ public class UsuarioResponseDTO {
     private String user_permissions = "nenhuma por enquanto";
     private boolean firstLogin = true; // Novo campo adicionado
     private TipoPerfil tipo;
+    private java.math.BigDecimal saldoCarteira;
 
 
 
@@ -31,6 +32,7 @@ public class UsuarioResponseDTO {
         this.user_permissions = usuario.getUser_permissions();
         this.firstLogin = usuario.isFirstLogin(); // Acessando o novo campo
         this.tipo = usuario.getTipo();
+        this.saldoCarteira = usuario.getSaldoCarteira();
     }
 
     public Long getId() {
@@ -73,6 +75,10 @@ public class UsuarioResponseDTO {
     
     public TipoPerfil getTipo() {
         return tipo;
+    }
+    
+    public java.math.BigDecimal getSaldoCarteira() {
+        return saldoCarteira;
     }
    
 }

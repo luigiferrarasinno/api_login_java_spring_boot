@@ -41,6 +41,7 @@ public class AdminInitializer {
             admin.setCpf(99999999999L);
             admin.setDt_nascimento(LocalDate.of(1990, 1, 1));
             admin.setFirstLogin(false);
+            admin.setSaldoCarteira(new java.math.BigDecimal("100000.00")); // R$ 100.000 para admin
 
             usuarioDAO.save(admin);
             System.out.println("Usuário ADMIN criado: admin@admin.com / admin123");
@@ -63,6 +64,7 @@ public class AdminInitializer {
             user.setDt_nascimento(LocalDate.of(2000, 5, 15));
             user.setFirstLogin(true);
             user.setTipo(TipoPerfil.PERFIL_CONSERVADOR); // Definindo perfil conservador como padrão
+            user.setSaldoCarteira(new java.math.BigDecimal("10000.00")); // R$ 10.000 para usuário comum
 
             usuarioDAO.save(user);
             System.out.println("Usuário COMUM criado: usuario@teste.com / teste123");

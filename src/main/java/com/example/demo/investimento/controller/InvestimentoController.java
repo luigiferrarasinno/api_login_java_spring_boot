@@ -30,9 +30,24 @@ public class InvestimentoController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public List<InvestimentoDTO> listarTodos(Authentication auth) {
+    public List<InvestimentoDTO> listarTodos(
+            Authentication auth,
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String simbolo,
+            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) String risco,
+            @RequestParam(required = false) Boolean ativo,
+            @RequestParam(required = false) Boolean visivel,
+            @RequestParam(required = false) String precoMin,
+            @RequestParam(required = false) String precoMax) {
+        
         boolean incluirUsuarios = isAdmin(auth);
-        return investimentoService.listarTodos().stream()
+        boolean ehAdmin = isAdmin(auth);
+        
+        return investimentoService.listarComFiltros(
+                nome, simbolo, categoria, risco, ativo, visivel, 
+                precoMin, precoMax, ehAdmin
+        ).stream()
                 .map(inv -> new InvestimentoDTO(inv, incluirUsuarios))
                 .collect(Collectors.toList());
     }
@@ -62,6 +77,13 @@ public class InvestimentoController {
 
   
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PatchMapping("/{id}/toggle-visibilidade")
+    public ResponseEntity<InvestimentoDTO> toggleVisibilidade(@PathVariable Long id) {
+        Investimento investimentoAtualizado = investimentoService.toggleVisibilidade(id);
+        return ResponseEntity.ok(new InvestimentoDTO(investimentoAtualizado, true));
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deletarInvestimento(@PathVariable Long id) {
         investimentoService.deletar(id);
@@ -73,18 +95,18 @@ public class InvestimentoController {
 
 
 
-    @PostMapping("/{investimentoId}/usuario/{usuarioId}")
+    @PostMapping("/favoritar/{investimentoId}/{usuarioId}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#usuarioId, authentication.name)")
-    public ResponseEntity<VincularResponseDTO> vincular(@PathVariable Long investimentoId, @PathVariable Long usuarioId, Authentication auth) {
+    public ResponseEntity<VincularResponseDTO> favoritar(@PathVariable Long investimentoId, @PathVariable Long usuarioId, Authentication auth) {
         boolean incluirUsuarios = isAdmin(auth);
         Investimento investimento = investimentoService.vincularInvestimentoAUsuario(investimentoId, usuarioId);
 
         String mensagem;
         if (investimento.getUsuarios() != null && 
             investimento.getUsuarios().stream().anyMatch(usuario -> usuario.getId().equals(usuarioId))) {
-            mensagem = "Investimento vinculado com sucesso.";
+            mensagem = "Investimento favoritado com sucesso.";
         } else {
-            mensagem = "Investimento desvinculado com sucesso.";
+            mensagem = "Investimento desfavoritado com sucesso.";
         }
 
         VincularResponseDTO responseDTO = new VincularResponseDTO(new InvestimentoDTO(investimento, incluirUsuarios), mensagem);
@@ -92,9 +114,9 @@ public class InvestimentoController {
     }
 
 
-    @GetMapping("/usuario/{usuarioId}")
+    @GetMapping("/favoritos/{usuarioId}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#usuarioId, authentication.name)")
-    public List<InvestimentoDTO> listarPorUsuario(@PathVariable Long usuarioId, Authentication auth) {
+    public List<InvestimentoDTO> listarFavoritos(@PathVariable Long usuarioId, Authentication auth) {
         boolean incluirUsuarios = isAdmin(auth);
         return investimentoService.listarPorUsuario(usuarioId).stream()
                 .map(inv -> new InvestimentoDTO(inv, incluirUsuarios))

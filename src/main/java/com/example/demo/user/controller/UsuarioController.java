@@ -115,12 +115,21 @@ public class UsuarioController {
     }
 
     
-    // Endpoint para listar todos os usuários
+    // Endpoint para listar usuários com filtros opcionais
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<List<UsuarioListaResponseDTO>> listarUsuarios() {
+    public ResponseEntity<List<UsuarioListaResponseDTO>> listarUsuarios(
+            @RequestParam(required = false) String nomeUsuario,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String cpf,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) Boolean userIsActive,
+            @RequestParam(required = false) String dataInicio,
+            @RequestParam(required = false) String dataFim) {
         try {
-            List<Usuario> usuarios = (List<Usuario>) usuarioService.listarUsuarios();
+            List<Usuario> usuarios = usuarioService.listarComFiltros(
+                nomeUsuario, email, cpf, role, userIsActive, dataInicio, dataFim
+            );
             List<UsuarioListaResponseDTO> usuariosDTO = usuarios.stream()
                 .map(UsuarioListaResponseDTO::new)
                 .collect(Collectors.toList());

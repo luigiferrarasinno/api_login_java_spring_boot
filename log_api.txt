@@ -226,3 +226,332 @@
 (vazio)
 --------------------------------------
 
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-02T20:00:17.446670800
+➡️  GET /favicon.ico
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - host: localhost:8080
+ - connection: keep-alive
+ - sec-ch-ua-platform: "Windows"
+ - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0
+ - sec-ch-ua: "Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"
+ - sec-ch-ua-mobile: ?0
+ - accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+ - sec-fetch-site: same-origin
+ - sec-fetch-mode: no-cors
+ - sec-fetch-dest: image
+ - referer: http://localhost:8080/h2-console/login.jsp?jsessionid=fd7ed7d6bb3eb64507e30d743d5d002f
+ - accept-encoding: gzip, deflate, br, zstd
+ - accept-language: pt-BR,pt;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-02T20:00:22.935574400
+➡️  GET /favicon.ico
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - host: localhost:8080
+ - connection: keep-alive
+ - sec-ch-ua-platform: "Windows"
+ - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0
+ - sec-ch-ua: "Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"
+ - sec-ch-ua-mobile: ?0
+ - accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+ - sec-fetch-site: same-origin
+ - sec-fetch-mode: no-cors
+ - sec-fetch-dest: image
+ - referer: http://localhost:8080/h2-console/login.do?jsessionid=fd7ed7d6bb3eb64507e30d743d5d002f
+ - accept-encoding: gzip, deflate, br, zstd
+ - accept-language: pt-BR,pt;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+ - cookie: JSESSIONID=41AE2213354464E3AA5A0FA4DA1EEBD5
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-02T20:06:56.398748200
+➡️  GET /usuarios
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - host: localhost:8080
+ - connection: keep-alive
+ - sec-ch-ua-platform: "Windows"
+ - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0
+ - accept: */*
+ - sec-ch-ua: "Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"
+ - sec-ch-ua-mobile: ?0
+ - sec-fetch-site: same-origin
+ - sec-fetch-mode: cors
+ - sec-fetch-dest: empty
+ - referer: http://localhost:8080/swagger-ui/index.html
+ - accept-encoding: gzip, deflate, br, zstd
+ - accept-language: pt-BR,pt;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+ - cookie: JSESSIONID=41AE2213354464E3AA5A0FA4DA1EEBD5
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-02T20:07:01.357680800
+➡️  GET /usuarios
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - host: localhost:8080
+ - connection: keep-alive
+ - sec-ch-ua-platform: "Windows"
+ - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0
+ - accept: */*
+ - sec-ch-ua: "Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"
+ - sec-ch-ua-mobile: ?0
+ - sec-fetch-site: same-origin
+ - sec-fetch-mode: cors
+ - sec-fetch-dest: empty
+ - referer: http://localhost:8080/swagger-ui/index.html
+ - accept-encoding: gzip, deflate, br, zstd
+ - accept-language: pt-BR,pt;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+ - cookie: JSESSIONID=32BDB435A689DA27889F2ADC753BC939
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-02T20:12:20.326312600
+➡️  GET /usuarios
+🔐 Status: 401 (Unauthorized)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJleHAiOjE3NTk0NDU3MTZ9.RCE98Qr_ITNgJYLtcYvEdZqMCWT3iqTl6zYGdH9Onow
+ - user-agent: PostmanRuntime/7.48.0
+ - accept: */*
+ - cache-control: no-cache
+ - postman-token: a516874e-88c2-4ed6-8205-c518c4613c91
+ - host: localhost:8080
+ - accept-encoding: gzip, deflate, br
+ - connection: keep-alive
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-02T20:14:37.102809200
+➡️  GET /carteira/resumo
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - user-agent: PostmanRuntime/7.48.0
+ - accept: */*
+ - cache-control: no-cache
+ - postman-token: 94db3dfc-1a77-4163-ba22-3603a8e9bb31
+ - host: localhost:8080
+ - accept-encoding: gzip, deflate, br
+ - connection: keep-alive
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-02T20:15:42.015152
+➡️  GET /investimentos
+🔐 Status: 401 (Unauthorized)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3VhcmlvQHRlc3RlLmNvbSIsImV4cCI6MTc1OTQ0NTgyNH0.d1P7TrdoTGldjNZfTN2R5CY5OIoHncSQmK7d7nxIjys
+ - user-agent: PostmanRuntime/7.48.0
+ - accept: */*
+ - cache-control: no-cache
+ - postman-token: b5683e46-196c-4b63-ac3e-ad01622c55ae
+ - host: localhost:8080
+ - accept-encoding: gzip, deflate, br
+ - connection: keep-alive
+ - cookie: JSESSIONID=451D02DA2E7CBB566618E8439471ECA5
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-02T20:21:39.573583400
+➡️  POST /extrato/admin/simular-dividendo/2/2
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - user-agent: PostmanRuntime/7.48.0
+ - accept: */*
+ - cache-control: no-cache
+ - postman-token: a452fed5-e2f8-4f9c-92af-26b39daa8792
+ - host: localhost:8080
+ - accept-encoding: gzip, deflate, br
+ - connection: keep-alive
+ - cookie: JSESSIONID=451D02DA2E7CBB566618E8439471ECA5
+ - content-length: 0
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-02T20:22:27.591910200
+➡️  POST /investimentos/favoritar/2/usuario/1
+🔐 Status: 401 (Unauthorized)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJleHAiOjE3NTk0NDQzOTV9.rcwLpegA0_S-ZkdRWFiC4TpGALjtBwVq8MydVqia9jU
+ - user-agent: PostmanRuntime/7.48.0
+ - accept: */*
+ - cache-control: no-cache
+ - postman-token: 512caa05-ca73-4f1e-a3bb-eaf619585f0b
+ - host: localhost:8080
+ - accept-encoding: gzip, deflate, br
+ - connection: keep-alive
+ - cookie: JSESSIONID=451D02DA2E7CBB566618E8439471ECA5
+ - content-length: 0
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-02T20:27:05.981735900
+➡️  POST /extrato/vender-acao
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - content-type: application/json
+ - user-agent: PostmanRuntime/7.48.0
+ - accept: */*
+ - cache-control: no-cache
+ - postman-token: 18822ca4-34c3-4fef-9f5a-b326de505bb1
+ - host: localhost:8080
+ - accept-encoding: gzip, deflate, br
+ - connection: keep-alive
+ - content-length: 82
+ - cookie: JSESSIONID=451D02DA2E7CBB566618E8439471ECA5
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-02T20:29:05.491675600
+➡️  POST /investimentos/favoritar/2/2
+🔐 Status: 401 (Unauthorized)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJleHAiOjE3NTk0NDQzOTV9.rcwLpegA0_S-ZkdRWFiC4TpGALjtBwVq8MydVqia9jU
+ - user-agent: PostmanRuntime/7.48.0
+ - accept: */*
+ - cache-control: no-cache
+ - postman-token: 49534323-3092-4a0b-be1b-f69eced26f70
+ - host: localhost:8080
+ - accept-encoding: gzip, deflate, br
+ - connection: keep-alive
+ - cookie: JSESSIONID=451D02DA2E7CBB566618E8439471ECA5
+ - content-length: 0
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-02T20:35:26.577390600
+➡️  GET /investimentos/favoritos/1
+🔐 Status: 401 (Unauthorized)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3VhcmlvQHRlc3RlLmNvbSIsImV4cCI6MTc1OTQ0NTgyNH0.d1P7TrdoTGldjNZfTN2R5CY5OIoHncSQmK7d7nxIjys
+ - user-agent: PostmanRuntime/7.48.0
+ - accept: */*
+ - cache-control: no-cache
+ - postman-token: 44268eb5-5c17-4a1d-b04d-091c27c1ae89
+ - host: localhost:8080
+ - accept-encoding: gzip, deflate, br
+ - connection: keep-alive
+ - cookie: JSESSIONID=451D02DA2E7CBB566618E8439471ECA5
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-02T21:03:14.726160800
+➡️  GET /investimentos/2
+🔐 Status: 401 (Unauthorized)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJleHAiOjE3NTk0NDQzOTV9.rcwLpegA0_S-ZkdRWFiC4TpGALjtBwVq8MydVqia9jU
+ - user-agent: PostmanRuntime/7.48.0
+ - accept: */*
+ - cache-control: no-cache
+ - postman-token: 8151291f-8ef1-4a26-91d5-3d2ae048f3b5
+ - host: localhost:8080
+ - accept-encoding: gzip, deflate, br
+ - connection: keep-alive
+ - cookie: JSESSIONID=451D02DA2E7CBB566618E8439471ECA5
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-02T22:06:02.071603100
+➡️  GET /favicon.ico
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - host: localhost:8080
+ - connection: keep-alive
+ - sec-ch-ua-platform: "Windows"
+ - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0
+ - sec-ch-ua: "Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"
+ - sec-ch-ua-mobile: ?0
+ - accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+ - sec-fetch-site: same-origin
+ - sec-fetch-mode: no-cors
+ - sec-fetch-dest: image
+ - referer: http://localhost:8080/h2-console/login.jsp?jsessionid=167d6a425967f765be23c49419dbcc21
+ - accept-encoding: gzip, deflate, br, zstd
+ - accept-language: pt-BR,pt;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+ - cookie: JSESSIONID=32BDB435A689DA27889F2ADC753BC939
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-02T22:06:07.629397700
+➡️  GET /favicon.ico
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - host: localhost:8080
+ - connection: keep-alive
+ - sec-ch-ua-platform: "Windows"
+ - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0
+ - sec-ch-ua: "Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"
+ - sec-ch-ua-mobile: ?0
+ - accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+ - sec-fetch-site: same-origin
+ - sec-fetch-mode: no-cors
+ - sec-fetch-dest: image
+ - referer: http://localhost:8080/h2-console/login.do?jsessionid=167d6a425967f765be23c49419dbcc21
+ - accept-encoding: gzip, deflate, br, zstd
+ - accept-language: pt-BR,pt;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+ - cookie: JSESSIONID=07772EFE316FAEB377554B4F7BB31A09
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+

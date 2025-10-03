@@ -19,13 +19,27 @@ public class Investimento {
     @NotBlank
     private String nome;
 
+    @NotBlank
+    private String simbolo;
+
     @Enumerated(EnumType.STRING)
     @NotNull
     private Categoria categoria;
 
     @NotNull
     @PositiveOrZero
-    private BigDecimal valor;
+    @Column(name = "preco_base")
+    private BigDecimal precoBase; // Preço de referência inicial
+
+    @PositiveOrZero
+    @Column(name = "preco_atual")
+    private BigDecimal precoAtual; // Preço atual de mercado
+
+    @Column(name = "variacao_percentual")
+    private BigDecimal variacaoPercentual; // Variação % em relação ao preço base
+
+    @Column(name = "ultima_atualizacao_preco")
+    private LocalDateTime ultimaAtualizacaoPreco;
 
     private String descricao;
 
@@ -35,9 +49,25 @@ public class Investimento {
     private String liquidez;
 
     @PositiveOrZero
-    private BigDecimal taxaRetorno;
+    @Column(name = "quantidade_total")
+    private Long quantidadeTotal; // Quantidade total de ações emitidas
+
+    @PositiveOrZero
+    @Column(name = "quantidade_disponivel")
+    private Long quantidadeDisponivel; // Quantidade disponível para compra
+
+    @PositiveOrZero
+    @Column(name = "dividend_yield")
+    private BigDecimal dividendYield; // Yield de dividendos anual (%)
+
+    @PositiveOrZero
+    @Column(name = "frequencia_dividendo")
+    private Integer frequenciaDividendo = 4; // Quantas vezes por ano paga dividendo (padrão: trimestral)
 
     private boolean ativo = true;
+
+    @Column(name = "visivel_para_usuarios")
+    private boolean visivelParaUsuarios = true; // Admin pode controlar se usuários veem este investimento
 
     @Enumerated(EnumType.STRING)
     @NotNull
@@ -70,11 +100,23 @@ public class Investimento {
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
 
+    public String getSimbolo() { return simbolo; }
+    public void setSimbolo(String simbolo) { this.simbolo = simbolo; }
+
     public Categoria getCategoria() { return categoria; }
     public void setCategoria(Categoria categoria) { this.categoria = categoria; }
 
-    public BigDecimal getValor() { return valor; }
-    public void setValor(BigDecimal valor) { this.valor = valor; }
+    public BigDecimal getPrecoBase() { return precoBase; }
+    public void setPrecoBase(BigDecimal precoBase) { this.precoBase = precoBase; }
+
+    public BigDecimal getPrecoAtual() { return precoAtual; }
+    public void setPrecoAtual(BigDecimal precoAtual) { this.precoAtual = precoAtual; }
+
+    public BigDecimal getVariacaoPercentual() { return variacaoPercentual; }
+    public void setVariacaoPercentual(BigDecimal variacaoPercentual) { this.variacaoPercentual = variacaoPercentual; }
+
+    public LocalDateTime getUltimaAtualizacaoPreco() { return ultimaAtualizacaoPreco; }
+    public void setUltimaAtualizacaoPreco(LocalDateTime ultimaAtualizacaoPreco) { this.ultimaAtualizacaoPreco = ultimaAtualizacaoPreco; }
 
     public String getDescricao() { return descricao; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
@@ -85,11 +127,23 @@ public class Investimento {
     public String getLiquidez() { return liquidez; }
     public void setLiquidez(String liquidez) { this.liquidez = liquidez; }
 
-    public BigDecimal getTaxaRetorno() { return taxaRetorno; }
-    public void setTaxaRetorno(BigDecimal taxaRetorno) { this.taxaRetorno = taxaRetorno; }
+    public Long getQuantidadeTotal() { return quantidadeTotal; }
+    public void setQuantidadeTotal(Long quantidadeTotal) { this.quantidadeTotal = quantidadeTotal; }
+
+    public Long getQuantidadeDisponivel() { return quantidadeDisponivel; }
+    public void setQuantidadeDisponivel(Long quantidadeDisponivel) { this.quantidadeDisponivel = quantidadeDisponivel; }
+
+    public BigDecimal getDividendYield() { return dividendYield; }
+    public void setDividendYield(BigDecimal dividendYield) { this.dividendYield = dividendYield; }
+
+    public Integer getFrequenciaDividendo() { return frequenciaDividendo; }
+    public void setFrequenciaDividendo(Integer frequenciaDividendo) { this.frequenciaDividendo = frequenciaDividendo; }
 
     public boolean isAtivo() { return ativo; }
     public void setAtivo(boolean ativo) { this.ativo = ativo; }
+
+    public boolean isVisivelParaUsuarios() { return visivelParaUsuarios; }
+    public void setVisivelParaUsuarios(boolean visivelParaUsuarios) { this.visivelParaUsuarios = visivelParaUsuarios; }
 
     public Risco getRisco() { return risco; }
     public void setRisco(Risco risco) { this.risco = risco; }

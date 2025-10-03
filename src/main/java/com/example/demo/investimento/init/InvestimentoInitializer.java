@@ -33,42 +33,66 @@ public class InvestimentoInitializer implements CommandLineRunner {
 
             LocalDateTime now = LocalDateTime.now();
 
+            // Tesouro Direto - Renda Fixa
             Investimento i1 = new Investimento();
             i1.setNome("Tesouro Direto");
+            i1.setSimbolo("TD");
             i1.setCategoria(Categoria.RENDA_FIXA);
-            i1.setValor(new BigDecimal("1000.00"));
+            i1.setPrecoBase(new BigDecimal("100.00"));
+            i1.setPrecoAtual(new BigDecimal("102.50"));
+            i1.setVariacaoPercentual(new BigDecimal("2.50"));
             i1.setDescricao("Investimento seguro em títulos do governo");
             i1.setData(LocalDate.of(2025, 6, 10));
             i1.setLiquidez("Diária");
-            i1.setTaxaRetorno(new BigDecimal("5.5"));
+            i1.setDividendYield(new BigDecimal("0.00")); // Tesouro não paga dividendo
+            i1.setFrequenciaDividendo(0);
             i1.setAtivo(true);
             i1.setRisco(Risco.BAIXO);
+            i1.setQuantidadeTotal(1000000L); // 1 milhão de títulos
+            i1.setQuantidadeDisponivel(850000L); // 850 mil disponíveis
+            i1.setUltimaAtualizacaoPreco(now);
             i1.setCreatedAt(now);
             i1.setUpdatedAt(now);
 
+            // Ações Vale - Renda Variável
             Investimento i2 = new Investimento();
             i2.setNome("Ações Vale");
+            i2.setSimbolo("VALE3");
             i2.setCategoria(Categoria.RENDA_VARIAVEL);
-            i2.setValor(new BigDecimal("5000.00"));
-            i2.setDescricao("Investimento em ações da Vale");
+            i2.setPrecoBase(new BigDecimal("65.00"));
+            i2.setPrecoAtual(new BigDecimal("68.75"));
+            i2.setVariacaoPercentual(new BigDecimal("5.77"));
+            i2.setDescricao("Investimento em ações da Vale do Rio Doce");
             i2.setData(LocalDate.of(2025, 5, 20));
-            i2.setLiquidez("Baixa");
-            i2.setTaxaRetorno(new BigDecimal("12.0"));
+            i2.setLiquidez("Alta");
+            i2.setDividendYield(new BigDecimal("8.50")); // 8.5% ao ano
+            i2.setFrequenciaDividendo(4); // Trimestral
             i2.setAtivo(true);
             i2.setRisco(Risco.ALTO);
+            i2.setQuantidadeTotal(500000L); // 500 mil ações
+            i2.setQuantidadeDisponivel(275000L); // 275 mil disponíveis
+            i2.setUltimaAtualizacaoPreco(now);
             i2.setCreatedAt(now);
             i2.setUpdatedAt(now);
 
+            // Fundo Imobiliário
             Investimento i3 = new Investimento();
-            i3.setNome("Fundo Imobiliário");
+            i3.setNome("Fundo Imobiliário HGLG11");
+            i3.setSimbolo("HGLG11");
             i3.setCategoria(Categoria.FUNDO);
-            i3.setValor(new BigDecimal("3000.00"));
-            i3.setDescricao("Investimento em fundos imobiliários");
+            i3.setPrecoBase(new BigDecimal("160.00"));
+            i3.setPrecoAtual(new BigDecimal("165.20"));
+            i3.setVariacaoPercentual(new BigDecimal("3.25"));
+            i3.setDescricao("Fundo de investimento imobiliário com foco em logística");
             i3.setData(LocalDate.of(2025, 4, 15));
             i3.setLiquidez("Média");
-            i3.setTaxaRetorno(new BigDecimal("8.0"));
+            i3.setDividendYield(new BigDecimal("6.20")); // 6.2% ao ano
+            i3.setFrequenciaDividendo(12); // Mensal
             i3.setAtivo(true);
             i3.setRisco(Risco.MEDIO);
+            i3.setQuantidadeTotal(100000L); // 100 mil cotas
+            i3.setQuantidadeDisponivel(45000L); // 45 mil disponíveis
+            i3.setUltimaAtualizacaoPreco(now);
             i3.setCreatedAt(now);
             i3.setUpdatedAt(now);
 

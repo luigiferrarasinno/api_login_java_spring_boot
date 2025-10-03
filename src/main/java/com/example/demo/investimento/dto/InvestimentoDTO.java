@@ -10,15 +10,21 @@ public class InvestimentoDTO {
 
     private Long id;
     private String nome;
+    private String simbolo;
     private String categoria;   // Usamos String para facilitar JSON, mas vem do Enum Categoria
-    private Double valor;
+    private Double precoBase;
+    private Double precoAtual;
+    private Double variacaoPercentual;
     private String descricao;
     private Set<Long> usuarioIds;  // todos os usuários relacionados
     private String data;          // ISO_LOCAL_DATE
-    private String vencimento;    // ISO_LOCAL_DATE, novo campo
     private String liquidez;      // novo campo
-    private Double taxaRetorno;   // novo campo
+    private Double dividendYield;   // novo campo
+    private Integer frequenciaDividendo; // novo campo
     private boolean ativo;        // novo campo
+    private boolean visivelParaUsuarios; // flag de visibilidade controlada pelo admin
+    private Long quantidadeTotal;     // quantidade total emitida
+    private Long quantidadeDisponivel; // quantidade disponível para compra
     private String risco;         // do Enum Risco
     private String createdAt;     // ISO_LOCAL_DATE_TIME
     private String updatedAt;     // ISO_LOCAL_DATE_TIME
@@ -33,8 +39,11 @@ public class InvestimentoDTO {
     public InvestimentoDTO(Investimento investimento, boolean incluirUsuarioIds) {
         this.id = investimento.getId();
         this.nome = investimento.getNome();
+        this.simbolo = investimento.getSimbolo();
         this.categoria = investimento.getCategoria() != null ? investimento.getCategoria().name() : null;
-        this.valor = investimento.getValor() != null ? investimento.getValor().doubleValue() : null;
+        this.precoBase = investimento.getPrecoBase() != null ? investimento.getPrecoBase().doubleValue() : null;
+        this.precoAtual = investimento.getPrecoAtual() != null ? investimento.getPrecoAtual().doubleValue() : null;
+        this.variacaoPercentual = investimento.getVariacaoPercentual() != null ? investimento.getVariacaoPercentual().doubleValue() : null;
         this.descricao = investimento.getDescricao();
         
         // Só inclui usuarioIds se for permitido
@@ -48,9 +57,13 @@ public class InvestimentoDTO {
         
         this.data = investimento.getData() != null ? investimento.getData().format(DATE_FORMAT) : null;
         this.liquidez = investimento.getLiquidez();
-        this.taxaRetorno = investimento.getTaxaRetorno() != null ? investimento.getTaxaRetorno().doubleValue() : null;
+        this.dividendYield = investimento.getDividendYield() != null ? investimento.getDividendYield().doubleValue() : null;
+        this.frequenciaDividendo = investimento.getFrequenciaDividendo();
         this.ativo = investimento.isAtivo();
+        this.visivelParaUsuarios = investimento.isVisivelParaUsuarios();
         this.risco = investimento.getRisco() != null ? investimento.getRisco().name() : null;
+        this.quantidadeTotal = investimento.getQuantidadeTotal();
+        this.quantidadeDisponivel = investimento.getQuantidadeDisponivel();
         this.createdAt = investimento.getCreatedAt() != null ? investimento.getCreatedAt().format(DATETIME_FORMAT) : null;
         this.updatedAt = investimento.getUpdatedAt() != null ? investimento.getUpdatedAt().format(DATETIME_FORMAT) : null;
     }
@@ -66,8 +79,17 @@ public class InvestimentoDTO {
     public String getCategoria() { return categoria; }
     public void setCategoria(String categoria) { this.categoria = categoria; }
 
-    public Double getValor() { return valor; }
-    public void setValor(Double valor) { this.valor = valor; }
+    public String getSimbolo() { return simbolo; }
+    public void setSimbolo(String simbolo) { this.simbolo = simbolo; }
+
+    public Double getPrecoBase() { return precoBase; }
+    public void setPrecoBase(Double precoBase) { this.precoBase = precoBase; }
+
+    public Double getPrecoAtual() { return precoAtual; }
+    public void setPrecoAtual(Double precoAtual) { this.precoAtual = precoAtual; }
+
+    public Double getVariacaoPercentual() { return variacaoPercentual; }
+    public void setVariacaoPercentual(Double variacaoPercentual) { this.variacaoPercentual = variacaoPercentual; }
 
     public String getDescricao() { return descricao; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
@@ -78,20 +100,29 @@ public class InvestimentoDTO {
     public String getData() { return data; }
     public void setData(String data) { this.data = data; }
 
-    public String getVencimento() { return vencimento; }
-    public void setVencimento(String vencimento) { this.vencimento = vencimento; }
-
     public String getLiquidez() { return liquidez; }
     public void setLiquidez(String liquidez) { this.liquidez = liquidez; }
 
-    public Double getTaxaRetorno() { return taxaRetorno; }
-    public void setTaxaRetorno(Double taxaRetorno) { this.taxaRetorno = taxaRetorno; }
+    public Double getDividendYield() { return dividendYield; }
+    public void setDividendYield(Double dividendYield) { this.dividendYield = dividendYield; }
+
+    public Integer getFrequenciaDividendo() { return frequenciaDividendo; }
+    public void setFrequenciaDividendo(Integer frequenciaDividendo) { this.frequenciaDividendo = frequenciaDividendo; }
 
     public boolean isAtivo() { return ativo; }
     public void setAtivo(boolean ativo) { this.ativo = ativo; }
 
+    public boolean isVisivelParaUsuarios() { return visivelParaUsuarios; }
+    public void setVisivelParaUsuarios(boolean visivelParaUsuarios) { this.visivelParaUsuarios = visivelParaUsuarios; }
+
     public String getRisco() { return risco; }
     public void setRisco(String risco) { this.risco = risco; }
+
+    public Long getQuantidadeTotal() { return quantidadeTotal; }
+    public void setQuantidadeTotal(Long quantidadeTotal) { this.quantidadeTotal = quantidadeTotal; }
+
+    public Long getQuantidadeDisponivel() { return quantidadeDisponivel; }
+    public void setQuantidadeDisponivel(Long quantidadeDisponivel) { this.quantidadeDisponivel = quantidadeDisponivel; }
 
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }

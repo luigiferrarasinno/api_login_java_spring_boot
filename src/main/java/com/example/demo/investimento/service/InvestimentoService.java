@@ -48,6 +48,36 @@ public class InvestimentoService {
         return investimentoRepository.save(investimento);
     }
 
+    /**
+     * Verifica se há estoque disponível para compra
+     * @param investimentoId ID do investimento
+     * @param quantidadeDesejada Quantidade desejada para compra
+     * @return true se há estoque suficiente, false caso contrário
+     */
+    public boolean temEstoqueDisponivel(Long investimentoId, Long quantidadeDesejada) {
+        Investimento investimento = buscarPorId(investimentoId);
+        Long disponivel = investimento.getQuantidadeDisponivel();
+        return disponivel != null && disponivel >= quantidadeDesejada;
+    }
+
+    /**
+     * Retorna informações do estoque de um investimento
+     * @param investimentoId ID do investimento
+     * @return String com informações do estoque
+     */
+    public String getInfoEstoque(Long investimentoId) {
+        Investimento investimento = buscarPorId(investimentoId);
+        Long total = investimento.getQuantidadeTotal();
+        Long disponivel = investimento.getQuantidadeDisponivel();
+        Long vendidas = (total != null && disponivel != null) ? total - disponivel : 0;
+        
+        return String.format("📊 Estoque %s: %d/%d disponíveis (%d vendidas)", 
+                           investimento.getSimbolo(), 
+                           disponivel != null ? disponivel : 0,
+                           total != null ? total : 0,
+                           vendidas);
+    }
+
     public void deletar(Long id) {
         Optional<Investimento> investimento = investimentoRepository.findById(id);
 
@@ -88,6 +118,69 @@ public class InvestimentoService {
 
         // Salva as duas entidades para garantir sincronização
         usuarioRepository.save(usuario);
+        return investimentoRepository.save(investimento);
+    }
+
+    /**
+     * Lista investimentos com filtros opcionais
+     * Se for admin: vê todos os investimentos
+     * Se for usuário comum: vê apenas investimentos visíveis
+     */
+    public List<Investimento> listarComFiltros(String nome, String simbolo, String categoria, 
+                                             String risco, Boolean ativo, Boolean visivel,
+                                             String precoMin, String precoMax, boolean ehAdmin) {
+        try {
+            // Converte strings para enums e BigDecimal
+            com.example.demo.investimento.model.Categoria categoriaEnum = null;
+            if (categoria != null && !categoria.trim().isEmpty()) {
+                categoriaEnum = com.example.demo.investimento.model.Categoria.valueOf(categoria.toUpperCase());
+            }
+            
+            com.example.demo.investimento.model.Risco riscoEnum = null;
+            if (risco != null && !risco.trim().isEmpty()) {
+                riscoEnum = com.example.demo.investimento.model.Risco.valueOf(risco.toUpperCase());
+            }
+            
+            java.math.BigDecimal precoMinDecimal = null;
+            if (precoMin != null && !precoMin.trim().isEmpty()) {
+                precoMinDecimal = new java.math.BigDecimal(precoMin);
+            }
+            
+            java.math.BigDecimal precoMaxDecimal = null;
+            if (precoMax != null && !precoMax.trim().isEmpty()) {
+                precoMaxDecimal = new java.math.BigDecimal(precoMax);
+            }
+            
+            // Se é admin, usa o filtro completo
+            if (ehAdmin) {
+                return investimentoRepository.findInvestimentosComFiltros(
+                    nome, simbolo, categoriaEnum, riscoEnum, ativo, visivel,
+                    precoMinDecimal, precoMaxDecimal
+                );
+            } else {
+                // Se é usuário comum, usa apenas filtro para investimentos visíveis
+                return investimentoRepository.findInvestimentosVisiveis(
+                    nome, simbolo, categoriaEnum, riscoEnum,
+                    precoMinDecimal, precoMaxDecimal
+                );
+            }
+        } catch (Exception e) {
+            // Em caso de erro nos filtros, retorna lista baseada na permissão
+            if (ehAdmin) {
+                return investimentoRepository.findAll();
+            } else {
+                return investimentoRepository.findByVisivelParaUsuariosTrueAndAtivoTrue();
+            }
+        }
+    }
+
+    /**
+     * Toggle da visibilidade do investimento (apenas admin)
+     */
+    @Transactional
+    public Investimento toggleVisibilidade(Long investimentoId) {
+        Investimento investimento = buscarPorId(investimentoId);
+        investimento.setVisivelParaUsuarios(!investimento.isVisivelParaUsuarios());
         return investimentoRepository.save(investimento);
     }
 }

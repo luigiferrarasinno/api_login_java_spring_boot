@@ -199,6 +199,23 @@ public class UsuarioService {
         return usuarioDAO.findAll();
     }
 
+    /**
+     * Lista usuários com filtros opcionais
+     */
+    public java.util.List<Usuario> listarComFiltros(String nomeUsuario, String email, String cpf, 
+                                                   String role, Boolean userIsActive, 
+                                                   String dataInicio, String dataFim) {
+        try {
+            // Nota: campos de data ignorados pois Usuario não tem createdAt
+            return usuarioDAO.findUsuariosComFiltros(
+                nomeUsuario, email, cpf, role, userIsActive
+            );
+        } catch (Exception e) {
+            // Em caso de erro nos filtros, retorna todos os usuários
+            return (java.util.List<Usuario>) usuarioDAO.findAll();
+        }
+    }
+
     //mostrar informações do usuário pelo id
     public Usuario buscarUsuario(Long id) {
     Optional<Usuario> usuarioExistente = usuarioDAO.findbyid(id);

@@ -47,6 +47,9 @@ public class Usuario {
     @Column(name = "tipo_perfil")
     private TipoPerfil tipo;
 
+    @Column(name = "saldo_carteira", precision = 15, scale = 2)
+    private java.math.BigDecimal saldoCarteira = java.math.BigDecimal.ZERO;
+
     @ManyToMany
     @JoinTable(
         name = "usuario_investimento",
@@ -94,4 +97,7 @@ public class Usuario {
 
     public TipoPerfil getTipo() { return tipo; }
     public void setTipo(TipoPerfil tipo) { this.tipo = tipo; }
+
+    public java.math.BigDecimal getSaldoCarteira() { return saldoCarteira; }
+    public void setSaldoCarteira(java.math.BigDecimal saldoCarteira) { this.saldoCarteira = saldoCarteira; }
 }
