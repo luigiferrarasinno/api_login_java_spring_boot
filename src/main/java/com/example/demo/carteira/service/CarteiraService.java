@@ -7,6 +7,7 @@ import com.example.demo.carteira.repository.PosicaoCarteiraRepository;
 import com.example.demo.user.model.Usuario;
 import com.example.demo.user.repository.UsuarioRepository;
 import com.example.demo.investimento.model.Investimento;
+import com.example.demo.investimento.service.CotacaoService;
 import com.example.demo.exception.RecursoNaoEncontradoException;
 
 import org.springframework.stereotype.Service;
@@ -21,11 +22,14 @@ public class CarteiraService {
 
     private final PosicaoCarteiraRepository posicaoCarteiraRepository;
     private final UsuarioRepository usuarioRepository;
+    private final CotacaoService cotacaoService;
 
     public CarteiraService(PosicaoCarteiraRepository posicaoCarteiraRepository,
-                          UsuarioRepository usuarioRepository) {
+                          UsuarioRepository usuarioRepository,
+                          CotacaoService cotacaoService) {
         this.posicaoCarteiraRepository = posicaoCarteiraRepository;
         this.usuarioRepository = usuarioRepository;
+        this.cotacaoService = cotacaoService;
     }
 
     public ResumoCarteiraResponseDTO obterResumoCarteira(String emailUsuario) {
@@ -99,8 +103,8 @@ public class CarteiraService {
         dto.setDataPrimeiraCompra(posicao.getDataPrimeiraCompra());
         dto.setDataUltimaMovimentacao(posicao.getDataUltimaMovimentacao());
         
-        // Simular preço atual (em um sistema real, viria de uma API de mercado)
-        BigDecimal precoAtual = simularPrecoAtual(posicao.getPrecoMedio());
+        // Obter preço atual do investimento via CotacaoService
+        BigDecimal precoAtual = cotacaoService.obterPrecoAtual(investimento.getId());
         dto.setPrecoAtual(precoAtual);
         
         BigDecimal valorAtual = posicao.getQuantidadeTotal().multiply(precoAtual);
@@ -120,12 +124,7 @@ public class CarteiraService {
         return dto;
     }
 
-    private BigDecimal simularPrecoAtual(BigDecimal precoMedio) {
-        // Simula variação entre -20% e +30% do preço médio
-        double variacao = -0.20 + (Math.random() * 0.50); // -20% a +30%
-        BigDecimal multiplicador = BigDecimal.valueOf(1 + variacao);
-        return precoMedio.multiply(multiplicador).setScale(2, RoundingMode.HALF_UP);
-    }
+
 
     private Usuario buscarUsuarioPorEmail(String email) {
         return usuarioRepository.findByEmail(email)

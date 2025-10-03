@@ -58,12 +58,12 @@ public class CotacaoService {
         Investimento investimento = investimentoRepository.findById(investimentoId)
             .orElseThrow(() -> new RuntimeException("Investimento não encontrado"));
             
-        // Se não tem preço atual definido ou está muito desatualizado, atualiza
-        if (investimento.getPrecoAtual() == null || 
-            investimento.getUltimaAtualizacaoPreco() == null ||
-            investimento.getUltimaAtualizacaoPreco().isBefore(LocalDateTime.now().minusHours(1))) {
-            atualizarPrecoMercado(investimentoId);
-            investimento = investimentoRepository.findById(investimentoId).get();
+        // Se não tem preço atual definido, inicializa com preço base
+        if (investimento.getPrecoAtual() == null) {
+            investimento.setPrecoAtual(investimento.getPrecoBase());
+            investimento.setVariacaoPercentual(BigDecimal.ZERO);
+            investimento.setUltimaAtualizacaoPreco(LocalDateTime.now());
+            investimentoRepository.save(investimento);
         }
         
         return investimento.getPrecoAtual();
@@ -92,8 +92,8 @@ public class CotacaoService {
         BigDecimal novoPreco = precoAnterior.add(variacao);
         
         // Garante que o preço não fique negativo ou muito distante do preço base
-        BigDecimal precoMinimo = precoBase.multiply(BigDecimal.valueOf(0.5)); // Mínimo 50% do preço base
-        BigDecimal precoMaximo = precoBase.multiply(BigDecimal.valueOf(2.0)); // Máximo 200% do preço base
+        BigDecimal precoMinimo = precoBase.multiply(BigDecimal.valueOf(0.3)); // Mínimo 30% do preço base
+        BigDecimal precoMaximo = precoBase.multiply(BigDecimal.valueOf(3.0)); // Máximo 300% do preço base
         
         if (novoPreco.compareTo(precoMinimo) < 0) {
             novoPreco = precoMinimo;
@@ -110,13 +110,13 @@ public class CotacaoService {
     private double obterVolatilidadePorTipo(Investimento investimento) {
         switch (investimento.getRisco()) {
             case BAIXO:
-                return 0.005; // 0.5% de volatilidade para risco baixo (ex: Tesouro)
+                return 0.01; // 1% de volatilidade para risco baixo (ex: Tesouro, CDB)
             case MEDIO:
-                return 0.015; // 1.5% para risco médio (ex: Fundos)
+                return 0.03; // 3% para risco médio (ex: Fundos de investimento)
             case ALTO:
-                return 0.035; // 3.5% para risco alto (ex: Ações)
+                return 0.05; // 5% para risco alto (ex: Ações, criptomoedas)
             default:
-                return 0.02; // 2% padrão
+                return 0.025; // 2.5% padrão
         }
     }
     
