@@ -23,6 +23,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import java.util.Map;
 import com.example.demo.user.dto.TrocarEmailRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -30,6 +37,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.HashMap;
 
+@Tag(name = "👤 Usuários", description = "Sistema de autenticação e gerenciamento de usuários com filtros avançados")
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
@@ -40,11 +48,25 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
+    @Operation(summary = "Login de usuário", 
+               description = "Autentica usuário no sistema e retorna token JWT")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Login realizado com sucesso",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"userId\": \"1\"}")))
+    })
     @PostMapping("/login")
     public LoginResponseDTO login(@RequestBody LoginRequestDTO loginRequest) {
         return usuarioService.login(loginRequest.getEmail(), loginRequest.getSenha());
     }
 
+    @Operation(summary = "Criar novo usuário", 
+               description = "Cria uma nova conta de usuário (apenas admins)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Usuário criado com sucesso",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "\"Usuário criado com sucesso!\"")))
+    })
     @PostMapping("/criar")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public String criarConta(@RequestBody CriarUsuarioRequestDTO criarRequest) {
@@ -57,6 +79,13 @@ public class UsuarioController {
         return usuarioService.criarConta(usuario);
     }
 
+    @Operation(summary = "Alterar senha com senha atual", 
+               description = "Permite ao usuário alterar sua senha fornecendo a senha atual")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"mensagem\": \"Senha alterada com sucesso!\"}")))
+    })
     @PutMapping("/alterar-senha")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, String>> alterarSenha(@RequestBody AlterarSenhaRequestDTO alterarSenhaRequest, Authentication auth) {
@@ -77,6 +106,13 @@ public class UsuarioController {
 
 
 
+    @Operation(summary = "Redefinir senha por CPF", 
+               description = "Permite redefinir senha usando CPF, email e data de nascimento")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Senha redefinida com sucesso",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"mensagem\": \"Senha redefinida com sucesso!\"}")))
+    })
     @PostMapping("/criar-senha")
     public ResponseEntity<Map<String, String>> redefinirSenha(@RequestBody CriarSenhaRequestDTO criarSenhaRequest) {
         String resultado = usuarioService.redefinirSenhaPorCpf(criarSenhaRequest.getCpf(), criarSenhaRequest.getSenhaNova());
@@ -92,6 +128,13 @@ public class UsuarioController {
         }
     }
 
+    @Operation(summary = "Trocar email do usuário", 
+               description = "Permite ao usuário alterar seu endereço de email")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Email alterado com sucesso",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"timestamp\": \"2024-10-02T14:30:15\", \"mensagem\": \"Email alterado com sucesso de user@old.com para user@new.com\"}")))
+    })
     @PutMapping("/trocar-email")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> trocarEmail(@RequestBody TrocarEmailRequestDTO trocarEmailRequest, Authentication auth) {
@@ -108,6 +151,13 @@ public class UsuarioController {
 
 
 
+    @Operation(summary = "Deletar conta de usuário", 
+               description = "Remove conta do sistema (próprio usuário ou admin)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Conta deletada com sucesso",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "\"Conta deletada com sucesso!\"")))
+    })
     @DeleteMapping("/{id}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#id, authentication.name)")
     public String deletarConta(@PathVariable Long id) {
@@ -115,6 +165,13 @@ public class UsuarioController {
     }
 
     
+    @Operation(summary = "Listar usuários com filtros", 
+               description = "Lista todos os usuários com filtros opcionais (apenas admins)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de usuários filtrada",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "[{\"id\": 1, \"nomeUsuario\": \"joao.silva\", \"email\": \"joao@email.com\", \"role\": \"USER\", \"userIsActive\": true}]")))
+    })
     // Endpoint para listar usuários com filtros opcionais
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -139,6 +196,13 @@ public class UsuarioController {
         }
     }
 
+    @Operation(summary = "Buscar usuário por ID", 
+               description = "Obtém detalhes de um usuário específico (próprio usuário ou admin)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Usuário encontrado",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"id\": 2, \"nomeUsuario\": \"João da Silva\", \"email\": \"joao@email.com\", \"role\": \"ROLE_USER\", \"cpf\": 12345678909, \"userIsActive\": true}")))
+    })
     @GetMapping("/{id}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#id, authentication.name)")
     public ResponseEntity<Object> buscarUsuario(@PathVariable Long id) {
@@ -150,6 +214,13 @@ public class UsuarioController {
         }
     }
 
+    @Operation(summary = "Alternar status do usuário", 
+               description = "Ativa ou desativa uma conta de usuário (próprio usuário ou admin)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Status alterado com sucesso",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"mensagem\": \"Status de atividade atualizado com sucesso!\", \"ativo\": false}")))
+    })
     @PatchMapping("/{id}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#id, authentication.name)")
     public ResponseEntity<Object> alternarStatusUsuario(@PathVariable Long id) {
@@ -166,6 +237,13 @@ public class UsuarioController {
         }
     }
 
+    @Operation(summary = "Alterar dados do usuário (Admin)", 
+               description = "Permite ao admin alterar todos os dados de qualquer usuário")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Dados alterados com sucesso",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"mensagem\": \"Dados do usuário alterados com sucesso!\", \"timestamp\": \"2024-10-02T14:30:15\", \"status\": \"sucesso\"}")))
+    })
     @PutMapping("/admin/alterar/{usuarioId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> alterarDadosUsuarioPorAdmin(
