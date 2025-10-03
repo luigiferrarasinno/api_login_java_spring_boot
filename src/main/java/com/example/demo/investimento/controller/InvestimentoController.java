@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Tag(name = "📈 Investimentos", description = "Gestão de investimentos com controle de favoritos, visibilidade e filtros avançados")
+@Tag(name = " Investimentos", description = "Gestão de investimentos com controle de favoritos, visibilidade e filtros avançados")
 @RestController
 @RequestMapping("/investimentos")
 public class InvestimentoController {

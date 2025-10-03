@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Tag(name = "📊 Cotações", description = "Sistema de cotações e atualização de preços dos investimentos")
+@Tag(name = " Cotações", description = "Sistema de cotações e atualização de preços dos investimentos")
 @RestController
 @RequestMapping("/cotacao")
 public class CotacaoController {

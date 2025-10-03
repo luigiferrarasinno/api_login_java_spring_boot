@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.HashMap;
 
-@Tag(name = "👤 Usuários", description = "Sistema de autenticação e gerenciamento de usuários com filtros avançados")
+@Tag(name = " Usuários", description = "Sistema de autenticação e gerenciamento de usuários com filtros avançados")
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {

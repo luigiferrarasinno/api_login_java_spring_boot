@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 /**
  * Controller para sistema de comentários sobre investimentos/ações
  */
-@Tag(name = "💬 Comentários", description = "Sistema de comentários sobre investimentos com permissões de usuário e admin")
+@Tag(name = " Comentários", description = "Sistema de comentários sobre investimentos com permissões de usuário e admin")
 @RestController
 @RequestMapping("/comentarios")
 public class ComentarioController {
