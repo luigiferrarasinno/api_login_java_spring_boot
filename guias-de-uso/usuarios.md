@@ -10,7 +10,15 @@ Todos os endpoints protegidos requerem um token JWT no cabeçalho:
 ```
 Authorization: Bearer SEU_TOKEN_JWT
 ```
+## 🧑‍💻 Usuários de Teste
 
+- **Admin**
+    - Email: `admin@admin.com`
+    - Senha: `admin123`
+
+- **Usuário Comum**
+    - Email: `joao.silva@email.com`
+    - Senha: `senha123`
 ---
 
 ## 🧠 Regras de Permissão
