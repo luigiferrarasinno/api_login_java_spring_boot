@@ -28,7 +28,28 @@ Authorization: Bearer SEU_TOKEN_JWT
 
 ---
 
-## 💡 Sistema de Soft Delete
+## � Comentários Criados Automaticamente
+
+> ⚠️ **7 comentários de exemplo criados automaticamente:**
+
+### 📈 **Comentários sobre PETR4:**
+- **Admin Sistema**: "Excelente oportunidade com os preços atuais do petróleo! 📈"
+- **João Silva**: "Boa para dividendos, mas atenção à volatilidade do setor."
+- **Maria Investidora**: "Prefiro manter uma posição pequena, muito risco geopolítico."
+
+### ⛏️ **Comentários sobre VALE3:**
+- **Maria Investidora**: "A demanda por minério está forte, especialmente da China."
+- **Admin Sistema**: "ESG melhorou muito, mas ainda há trabalho a fazer."
+
+### 🏢 **Comentários sobre HGLG11 (FII):**
+- **João Silva**: "Meu primeiro FII! Dividendos mensais são ótimos 💰"
+- **Maria Investidora**: "Shopping centers estão se recuperando bem pós-pandemia."
+
+> 💡 **Comentários têm datas aleatórias dos últimos 30 dias para simular atividade real**
+
+---
+
+## �💡 Sistema de Soft Delete
 
 - **Comentários deletados** não são removidos do banco de dados
 - São marcados com `ativo=false`

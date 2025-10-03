@@ -10,15 +10,17 @@ Todos os endpoints protegidos requerem um token JWT no cabeçalho:
 ```
 Authorization: Bearer SEU_TOKEN_JWT
 ```
-## 🧑‍💻 Usuários de Teste
+## 🧑‍💻 Usuários de Teste Criados Automaticamente
 
-- **Admin**
-    - Email: `admin@admin.com`
-    - Senha: `admin123`
+> ⚠️ **3 personas criadas automaticamente pelo sistema:**
 
-- **Usuário Comum**
-    - Email: `usuario@teste.com`
-    - Senha: `teste123`
+| Persona | Nome | Email | Senha | Role | CPF | Perfil |
+|---------|------|-------|--------|------|-----|--------|
+| **👨‍💼 Admin Sistema** | Admin Sistema | `admin@admin.com` | `123456` | ADMIN | 11111111111 | Arrojado |
+| **👤 João Silva** | João Silva | `user@user.com` | `123456` | USER | 22222222222 | Moderado |
+| **👩‍💼 Maria Investidora** | Maria Investidora | `maria@investidora.com` | `123456` | USER | 33333333333 | Conservador |
+
+> 💡 **Todas as personas têm a mesma senha: `123456` para facilitar os testes**
 ---
 
 ## 🧠 Regras de Permissão
@@ -43,11 +45,29 @@ Authorization: Bearer SEU_TOKEN_JWT
 **POST** `/usuarios/login`  
 **Acesso**: Público
 
-#### Requisição:
+#### Requisições de Exemplo:
+
+**Login como Admin:**
 ```json
 {
-  "email": "usuario@teste.com",
-  "senha": "teste123"
+  "email": "admin@admin.com",
+  "senha": "123456"
+}
+```
+
+**Login como João Silva (USER):**
+```json
+{
+  "email": "user@user.com", 
+  "senha": "123456"
+}
+```
+
+**Login como Maria Investidora (USER):**
+```json
+{
+  "email": "maria@investidora.com",
+  "senha": "123456"
 }
 ```
 
@@ -55,7 +75,12 @@ Authorization: Bearer SEU_TOKEN_JWT
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "userId": 1
+  "user": {
+    "id": 1,
+    "nomeUsuario": "Admin Sistema",
+    "email": "admin@admin.com",
+    "role": "ROLE_ADMIN"
+  }
 }
 ```
 
@@ -68,10 +93,10 @@ Authorization: Bearer SEU_TOKEN_JWT
 #### Requisição:
 ```json
 {
-  "nomeUsuario": "Usuário Comum",
-  "senha": "teste123",
-  "email": "usuario@teste.com",
-  "cpf": 88888888888,
+  "nomeUsuario": "Novo Usuário",
+  "senha": "123456",
+  "email": "novo@usuario.com",
+  "cpf": 44444444444,
   "dt_nascimento": "2000-05-15"
 }
 ```
@@ -140,8 +165,8 @@ GET /usuarios?nomeUsuario=silva&email=gmail&role=ROLE_USER
 ```json
 {
   "id": 2,
-  "nomeUsuario": "Usuário Comum",
-  "email": "usuario@teste.com",
+  "nomeUsuario": "João Silva",
+  "email": "joao@exemplo.com",
   "role": "ROLE_USER",
   "cpf": 88888888888,
   "dt_nascimento": "2000-05-15",
@@ -161,8 +186,8 @@ GET /usuarios?nomeUsuario=silva&email=gmail&role=ROLE_USER
 #### Requisição:
 ```json
 {
-  "email": "usuario@teste.com",
-  "senhaAntiga": "teste123",
+  "email": "joao@exemplo.com",
+  "senhaAntiga": "123456",
   "senhaNova": "novaSenha456"
 }
 ```
@@ -177,7 +202,7 @@ GET /usuarios?nomeUsuario=silva&email=gmail&role=ROLE_USER
 ```json
 {
   "cpf": 88888888888,
-  "email": "usuario@teste.com",
+  "email": "joao@exemplo.com",
   "dt_nascimento": "2000-05-15",
   "senhaNova": "minhaNovaSenhaSegura"
 }
@@ -232,7 +257,7 @@ Content-Type: application/json
 
 {
   "email": "admin@admin.com",
-  "senha": "admin123"
+  "senha": "123456"
 }
 ```
 

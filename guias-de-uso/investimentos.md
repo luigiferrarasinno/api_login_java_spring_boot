@@ -13,6 +13,37 @@ Authorization: Bearer SEU_TOKEN_JWT
 
 ---
 
+## 💰 Investimentos Criados Automaticamente
+
+> ⚠️ **11 investimentos criados automaticamente pelo sistema:**
+
+### 📈 **Ações Brasileiras** (Categoria: RENDA_VARIAVEL)
+| Símbolo | Nome | Preço Base | Risco | Dividend Yield | Frequência |
+|---------|------|------------|-------|----------------|-----------|
+| **PETR4** | Petróleo Brasileiro S.A. | R$ 28,50 | MEDIO | 8,5% | Trimestral |
+| **VALE3** | Vale S.A. | R$ 65,20 | ALTO | 12,3% | Semestral |
+| **ITUB4** | Itaú Unibanco Holding S.A. | R$ 32,40 | MEDIO | 6,8% | Trimestral |
+| **BBAS3** | Banco do Brasil S.A. | R$ 45,30 | MEDIO | 9,2% | Trimestral |
+| **ABEV3** | Ambev S.A. | R$ 14,80 | BAIXO | 4,5% | Semestral |
+
+### 🏢 **Fundos Imobiliários** (Categoria: FUNDO_IMOBILIARIO)
+| Símbolo | Nome | Preço Base | Risco | Dividend Yield | Frequência |
+|---------|------|------------|-------|----------------|-----------|
+| **HGLG11** | CSHG Real Estate Fund | R$ 105,40 | MEDIO | 0,85 | Mensal |
+| **MXRF11** | Maxi Renda | R$ 9,85 | MEDIO | 0,08 | Mensal |
+| **XPLG11** | XP Log | R$ 98,50 | MEDIO | 0,75 | Mensal |
+
+### 💎 **Renda Fixa** (Categoria: RENDA_FIXA)
+| Símbolo | Nome | Preço Base | Risco | Dividend Yield |
+|---------|------|------------|-------|----------------|
+| **TD-SELIC** | Tesouro Direto Selic | R$ 102,50 | BAIXO | 0,0% |
+| **CDB-INTER** | CDB Banco Inter | R$ 1.000,00 | BAIXO | 0,0% |
+| **LCI-NU** | LCI Nubank | R$ 5.000,00 | BAIXO | 0,0% |
+
+> 💡 **Todos os investimentos estão ativos e visíveis para usuários por padrão**
+
+---
+
 ## 🧠 Regras de Permissão
 
 | Endpoint                                    | USER            | ADMIN           |
@@ -47,7 +78,7 @@ Authorization: Bearer SEU_TOKEN_JWT
 **Para Usuários Comuns:**
 - `nome` - Busca parcial no nome (case-insensitive)
 - `simbolo` - Busca parcial no símbolo (case-insensitive)
-- `categoria` - Filtro por categoria (ACAO, FII, TESOURO_DIRETO)
+- `categoria` - Filtro por categoria (RENDA_VARIAVEL, FUNDO_IMOBILIARIO, RENDA_FIXA)
 - `risco` - Filtro por risco (BAIXO, MEDIO, ALTO)
 - `precoMin` - Preço mínimo
 - `precoMax` - Preço máximo

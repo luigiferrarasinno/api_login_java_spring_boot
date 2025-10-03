@@ -26,7 +26,23 @@ Authorization: Bearer SEU_TOKEN_JWT
 
 ---
 
-## 💡 Sistema Brasileiro de Ações
+## � Usuários e Saldos Iniciais
+
+> ⚠️ **3 usuários criados com carteiras vazias:**
+
+| Usuário | Email | Saldo Inicial | Posições Iniciais | Observação |
+|---------|-------|---------------|-------------------|-------------|
+| **Admin Sistema** | admin@admin.com | R$ 0,00 | Vazia | Para testes administrativos |
+| **João Silva** | user@user.com | R$ 0,00 | Vazia | Usuário para testes de compra |
+| **Maria Investidora** | maria@investidora.com | R$ 0,00 | Vazia | Usuário experiente para testes |
+
+> 💡 **Para testar compras**: Use endpoint de alteração de saldo (ADMIN) ou implemente funcionalidade de depósito
+
+> 📊 **Dados Disponíveis**: 11 investimentos com preços variados (R$ 9,85 a R$ 5.000,00)
+
+---
+
+## �💡 Sistema Brasileiro de Ações
 
 ### Regras Implementadas:
 - ✅ **Números Inteiros**: Só é possível comprar/vender quantidades inteiras

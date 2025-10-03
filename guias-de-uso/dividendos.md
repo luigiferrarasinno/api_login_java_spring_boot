@@ -26,7 +26,34 @@ Authorization: Bearer SEU_TOKEN_JWT
 
 ---
 
-## 💡 Como Funciona o Sistema
+## � Investimentos que Pagam Dividendos
+
+> ⚠️ **8 investimentos configurados para pagar dividendos:**
+
+### 📈 **Ações (RENDA_VARIAVEL):**
+| Símbolo | Nome | Yield | Frequência | Valor por Ação* |
+|---------|------|--------|------------|------------------|
+| **PETR4** | Petróleo Brasileiro | 8,5% | Trimestral (4x/ano) | R$ 0,61 |
+| **VALE3** | Vale S.A. | 12,3% | Semestral (2x/ano) | R$ 4,01 |
+| **ITUB4** | Itaú Unibanco | 6,8% | Trimestral (4x/ano) | R$ 0,55 |
+| **BBAS3** | Banco do Brasil | 9,2% | Trimestral (4x/ano) | R$ 1,04 |
+| **ABEV3** | Ambev S.A. | 4,5% | Semestral (2x/ano) | R$ 0,33 |
+
+### 🏢 **FIIs (FUNDO_IMOBILIARIO):**
+| Símbolo | Nome | Yield | Frequência | Valor por Cota* |
+|---------|------|--------|------------|------------------|
+| **HGLG11** | CSHG Real Estate | R$ 0,85 | Mensal (12x/ano) | R$ 0,85 |
+| **MXRF11** | Maxi Renda | R$ 0,08 | Mensal (12x/ano) | R$ 0,08 |
+| **XPLG11** | XP Log | R$ 0,75 | Mensal (12x/ano) | R$ 0,75 |
+
+> 💡 ***Valor por Ação/Cota**: Calculado automaticamente baseado no preço atual e yield configurado*
+
+### 💎 **Renda Fixa** (Não paga dividendos):
+- TD-SELIC, CDB-INTER, LCI-NU têm `dividendYield: 0` e `frequencia: 0`
+
+---
+
+## �💡 Como Funciona o Sistema
 
 ### Processo de Dividendos:
 1. **Investimentos** têm `dividendYield` e `frequenciaDividendo` configurados

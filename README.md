@@ -2,7 +2,7 @@
 
 Uma API RESTful completa para gestão de investimentos com autenticação JWT, construída com **Spring Boot 3.2.2** e **Java 17**. 
 
-**Sistema totalmente adaptado às regras do mercado brasileiro** com números inteiros de ações, controle administrativo de dividendos, sistema de comentários e filtros avançados.
+**Sistema totalmente adaptado às regras do mercado brasileiro** com números inteiros de ações, controle administrativo de dividendos, sistema de comentários e o inovador sistema de playlists sociais.
 
 ---
 
@@ -16,54 +16,80 @@ Uma API RESTful completa para gestão de investimentos com autenticação JWT, c
 - 🔍 **Filtros Avançados** em todos os endpoints GET
 - ⚙️ **Controle de Visibilidade** de investimentos para usuários
 - 📊 **Preços Dinâmicos** com simulação de volatilidade por risco
+- 🎵 **Sistema de Playlists Sociais** - "Spotify para investimentos"
+
+---
+
+## 🎵 **NOVO! Sistema de Playlists Sociais**
+
+> **"Crie, compartilhe e descubra playlists de investimentos como no Spotify!"**
+
+### 🌟 Funcionalidades Sociais:
+- 📝 **Criar playlists** personalizadas de investimentos
+- 👥 **Seguir usuários** e suas playlists públicas
+- 🤝 **Colaboração** - permita que outros contribuam
+- 🔒 **Controle de privacidade** (públicas ou privadas)
+- 🔍 **Descoberta** - explore playlists da comunidade
+- 📤 **Compartilhamento direto** com usuários específicos
+
+### 🎯 Sistema de Permissões:
+- **🎨 Criador**: Controle total da playlist
+- **🤝 Colaborador**: Pode adicionar/remover investimentos
+- **👀 Seguidor**: Visualização e acompanhamento
+
+📖 **[Ver Guia Completo de Playlists](GUIA-PLAYLIST.md)**
 
 ---
 
 ## 🚀 Como Rodar o Projeto
 
 ### Pré-requisitos
-- **Java 17** ou superior instalado
+- **Java 17** ou superior
 - **Maven** instalado
-- IDE de sua preferência (VS Code, IntelliJ...)
+- IDE de sua preferência
 
-### Passos para Executar
+### Execução Rápida
 
-**1. Clone o repositório:**
+**1. Clone e acesse:**
 ```bash
 git clone https://github.com/luigiferrarasinno/api_login_java_spring_boot.git
 cd api_login_java_spring_boot
 ```
 
 **2. Execute a aplicação:**
-
-**Windows (PowerShell):**
 ```powershell
+# Windows
 .\mvnw.cmd spring-boot:run
-```
 
-**Linux/Mac:**
-```bash
+# Linux/Mac
 ./mvnw spring-boot:run
 ```
 
-**3. Acesse a aplicação:**
-- **API Base URL**: `http://localhost:8080`
+**3. Acesse:**
+- **API**: `http://localhost:8080`
+- **Swagger**: `http://localhost:8080/swagger-ui.html`
 
 ---
 
-## 🧪 Dados de Teste Automáticos
+## 🧪 Dados Automáticos Inicializados
 
-> ⚠️ **Usuários criados automaticamente:**
+### 👥 Usuários Criados:
+| Persona | Email | Senha | Role | Descrição |
+|---------|-------|-------|------|-----------|
+| **Admin Sistema** | admin@admin.com | 123456 | ADMIN | Acesso completo ao sistema |
+| **João Silva** | user@user.com | 123456 | USER | Investidor iniciante |
+| **Maria Investidora** | maria@investidora.com | 123456 | USER | Investidora experiente |
 
-| Usuário | Email | Senha | Role | CPF |
-|---------|-------|-------|------|-----|
-| **admin** | admin@admin.com | admin123 | ADMIN | 12345678901 |
-| **usuario** | usuario@teste.com | teste123 | USER | 98765432100 |
+### 📈 Portfólio Completo:
+- **Ações**: PETR4, VALE3, ITUB4, BBAS3, ABEV3
+- **FIIs**: HGLG11, MXRF11, XPLG11  
+- **Renda Fixa**: TD-SELIC, CDB-INTER, LCI-NU
 
-> 📈 **Investimentos criados automaticamente:**
-- **Tesouro Direto (TD)** - Baixo risco, sem dividendos
-- **Ações Vale (VALE3)** - Alto risco, 8,5% dividendos trimestrais
-- **FII HGLG11** - Médio risco, 6,2% dividendos mensais
+### 🎵 Playlists Sociais:
+- **"Top Dividendos 2024 💰"** (Admin - Pública)
+- **"Minha Carteira Conservadora 🛡️"** (Maria - Privada)
+- **"FIIs para Iniciantes 🏢"** (Admin - Colaborativa)
+- **"Apostas Arriscadas 🚀"** (João - Pública)
 
 ---
 
@@ -72,7 +98,7 @@ cd api_login_java_spring_boot
 ### 🧪 Swagger (Documentação Interativa)
 Teste todos os endpoints diretamente no navegador:
 ```
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8080/swagger-ui.html
 ```
 
 ### 🛢️ Console do Banco H2
@@ -91,26 +117,21 @@ http://localhost:8080/h2-console
 > - `SELECT * FROM INVESTIMENTO;` - Ver todos os investimentos
 > - `SELECT * FROM COMENTARIO;` - Ver todos os comentários
 > - `SELECT * FROM POSICAO_CARTEIRA;` - Ver posições dos usuários
+> - `SELECT * FROM PLAYLIST;` - Ver todas as playlists
+> - `SELECT * FROM PLAYLIST_SEGUIDORES;` - Ver relacionamentos sociais
 
 ---
 
-## 🔑 Login Rápido para Testes
+## 🔑 Exemplo Prático no Postman
 
-**Admin (acesso total):**
-```json
-POST /usuarios/login
+### Login Básico:
+```http
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
 {
   "email": "admin@admin.com",
-  "senha": "admin123"
-}
-```
-
-**Usuário comum:**
-```json
-POST /usuarios/login
-{
-  "email": "usuario@teste.com", 
-  "senha": "teste123"
+  "senha": "123456"
 }
 ```
 
@@ -118,219 +139,201 @@ POST /usuarios/login
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "userId": "1"
+  "user": {
+    "id": 1,
+    "nomeUsuario": "Admin Sistema",
+    "email": "admin@admin.com",
+    "role": "ROLE_ADMIN"
+  }
 }
 ```
 
+### Usando o Token:
+```http
+GET http://localhost:8080/playlists/publicas
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+> 💡 **Para exemplos completos:** Consulte o **Swagger** ou os **guias específicos** abaixo!
+
 ---
 
-## 📖 Documentação Detalhada por Funcionalidade
+## 📖 Guias Detalhados por Módulo
 
-### 📚 Guias Completos de Uso
+### 📚 Documentação Completa:
 
-| 📋 Guia | 🎯 Funcionalidades | 📎 Link |
-|---------|-------------------|---------|
-| 👤 **Usuários** | Login, cadastro, alteração de dados, filtros por role/email/CPF | [usuarios.md](guias-de-uso/usuarios.md) |
-| 📈 **Investimentos** | CRUD, favoritos, filtros avançados, controle de visibilidade | [investimentos.md](guias-de-uso/investimentos.md) |
-| 💬 **Comentários** | Sistema completo de comentários com moderação admin | [comentarios.md](guias-de-uso/comentarios.md) |
-| 💰 **Dividendos** | Liberação administrativa manual, cálculos automáticos, histórico | [dividendos.md](guias-de-uso/dividendos.md) |
-| 💼 **Carteira & Extrato** | Compra/venda com validações brasileiras, posições, extrato completo | [carteira-extrato.md](guias-de-uso/carteira-extrato.md) |
+| 📋 Módulo | 🎯 Funcionalidades | 📎 Guia |
+|-----------|-------------------|---------|
+| 👤 **Usuários** | Login, cadastro, alteração de dados, filtros avançados | [usuarios.md](guias-de-uso/usuarios.md) |
+| 📈 **Investimentos** | CRUD, favoritos, filtros, controle de visibilidade | [investimentos.md](guias-de-uso/investimentos.md) |
+| 💬 **Comentários** | Sistema completo com moderação admin | [comentarios.md](guias-de-uso/comentarios.md) |
+| 💰 **Dividendos** | Liberação manual, cálculos automáticos, histórico | [dividendos.md](guias-de-uso/dividendos.md) |
+| 💼 **Carteira & Extrato** | Compra/venda brasileira, posições, extrato | [carteira-extrato.md](guias-de-uso/carteira-extrato.md) |
+| 🎵 **Playlists Sociais** | Sistema completo tipo Spotify | **[GUIA-PLAYLIST.md](GUIA-PLAYLIST.md)** |
 
 > 💡 **Cada guia contém:**
 > - Exemplos completos para Postman
-> - Todas as validações e regras de negócio
-> - Diferenças de permissão entre USER e ADMIN
-> - Tratamento de erros detalhado
+> - Regras de negócio detalhadas
+> - Diferenças USER vs ADMIN
+> - Tratamento de erros
+> - Casos de uso práticos
 
 ---
 
-## 🎯 Sistema Brasileiro de Ações
-
-### Regras do Mercado Nacional Implementadas:
-- ✅ **Números Inteiros**: Sistema não permite comprar 0,5 ações (como no Brasil)
-- ✅ **Estoque Limitado**: Investimentos têm `quantidadeDisponivel` finita e realista
-- ✅ **Validações Rigorosas**: Saldo do usuário, estoque disponível, permissões por role
-- ✅ **Preços Dinâmicos**: Simulação de mercado com volatilidade baseada no risco
-
-### Exemplo Prático:
-```json
-// ✅ VÁLIDO - Sistema brasileiro aceita
-POST /carteira/comprar
-{
-  "usuarioId": 2,
-  "investimentoId": 1, 
-  "quantidade": 10  // ← Número inteiro
-}
-
-// ❌ INVÁLIDO - Sistema rejeita
-{
-  "quantidade": 10.5  // ← Fração não permitida no Brasil
-}
-```
-
----
-
-## 🌟 Diferenças de Acesso por Role
-
-| 🎯 Funcionalidade | 👤 USER | 👑 ADMIN |
-|-------------------|---------|----------|
-| Ver investimentos | ✅ Apenas visíveis (`visivelParaUsuarios=true`) | ✅ Todos (incluindo ocultos) |
-| Criar/Editar investimentos | ❌ | ✅ |
-| Controlar visibilidade | ❌ | ✅ |
-| Liberar dividendos | ❌ | ✅ |
-| Moderar comentários | ❌ | ✅ |
-| Filtros avançados | ✅ Básicos (nome, categoria, preço) | ✅ Completos (+ ativo, visível) |
-| Ver carteiras | ✅ Apenas própria | ✅ Qualquer usuário |
-| Gerenciar usuários | ❌ | ✅ |
-
----
-
-## 🛠️ Tecnologias Utilizadas
-
-- **Java 17** + **Spring Boot 3.2.2**
-- **Spring Security 6** (JWT Authentication)
-- **Spring Data JPA** + **H2 Database** (em memória)
-- **Bean Validation** + **Maven**
-- **Swagger/OpenAPI** (documentação interativa)
-
----
-
-## 📁 Estrutura Detalhada do Projeto
+## 📁 Arquitetura do Projeto
 
 ```bash
-src
-└── main
-    └── java
-        └── com.example.demo
-            ├── 🔧 DemoApplication.java
-            ├── ⚠️ exception/              # Tratamento global de erros e exceções personalizadas
-            ├── 🛡️ security/               # Lógica de autenticação, JWT e segurança
-            ├── � logging/                # Filtro para log de requisições e respostas da API
-            ├── �👤 user/                   # Sistema completo de usuários
-            │   ├── controller/            # Endpoints da API (login, CRUD usuários)
-            │   ├── dao/                   # Classe auxiliar para operações complexas
-            │   ├── dto/                   # DTOs de entrada e saída
-            │   ├── init/                  # Inicializador com criação do usuário admin
-            │   ├── model/                 # Entidade Usuario e enums
-            │   ├── repository/            # Interfaces para acesso ao banco
-            │   └── service/               # Lógica de negócio (cadastro, login, etc.)
-            ├── 📈 investimento/           # Sistema de gestão de investimentos
-            │   ├── controller/            # Endpoints CRUD, favoritos, visibilidade
-            │   ├── dto/                   # DTOs para investimentos e respostas
-            │   ├── init/                  # Inicializador de investimentos padrão
-            │   ├── model/                 # Entidades Investimento, Categoria, Risco
-            │   ├── repository/            # Queries personalizadas com filtros
-            │   └── service/               # Regras de negócio e validações
-            ├── 💬 comentarios/            # Sistema de comentários nas ações
-            │   ├── controller/            # CRUD comentários, moderação admin
-            │   ├── dto/                   # DTOs de comentários
-            │   ├── model/                 # Entidade Comentario com auditoria
-            │   ├── repository/            # Queries com soft delete
-            │   └── service/               # Regras de permissão por usuário/admin
-            ├── 💰 dividendo/              # Sistema administrativo de dividendos
-            │   ├── controller/            # Liberação manual pelo admin
-            │   ├── model/                 # Entidade DividendoPendente
-            │   ├── repository/            # Consultas de dividendos
-            │   └── service/               # Cálculos automáticos e distribuição
-            ├── 💼 carteira/               # Sistema de carteira de investimentos
-            │   ├── controller/            # Compra, venda, consulta posições
-            │   ├── dto/                   # DTOs de carteira e resumos
-            │   ├── model/                 # Entidade PosicaoCarteira
-            │   ├── repository/            # Consultas de posições
-            │   └── service/               # Cálculos de preço médio e ganhos
-            └── 📊 extrato/                # Sistema de extrato financeiro
-                ├── controller/            # Consulta de transações
-                ├── dto/                   # DTOs de extrato
-                ├── model/                 # Entidade Extrato e tipos de transação
-                ├── repository/            # Histórico de transações
-                └── service/               # Consolidação de extratos
+src/main/java/com/example/demo
+├── 🚀 DemoApplication.java               # Aplicação principal
+├── 🔧 init/                              # Sistema de inicialização centralizado
+│   └── SystemInitializer.java           # Cria usuários, investimentos e playlists
+├── 🛡️ security/                          # Segurança e autenticação
+│   ├── JwtAuthenticationFilter.java     # Filtro JWT para requisições
+│   ├── JwtUtil.java                     # Utilitários para geração/validação JWT
+│   ├── SecurityConfig.java              # Configuração geral de segurança
+│   └── CustomAccessDeniedHandler.java   # Tratamento de acesso negado
+├── ⚠️ exception/                         # Tratamento de erros
+│   ├── GlobalExceptionHandler.java      # Handler global de exceções
+│   ├── EmailJaCadastradoException.java  # Exceção para email duplicado
+│   └── RecursoNaoEncontradoException.java # Exceção para recursos não encontrados
+├── 📝 logging/                           # Sistema de logs
+│   └── PreSecurityLoggingFilter.java    # Log de requisições antes da autenticação
+├── 👤 user/                              # Módulo de usuários
+│   ├── controller/UsuarioController.java # Endpoints da API de usuários
+│   ├── service/UsuarioService.java      # Lógica de negócio de usuários
+│   ├── repository/UsuarioRepository.java # Acesso ao banco (usuários)
+│   ├── dao/UsuarioDAO.java              # Operações complexas no banco
+│   ├── model/Usuario.java               # Entidade JPA usuário
+│   └── dto/                             # DTOs de entrada e saída
+│       ├── UsuarioDTO.java              # DTO principal de usuário
+│       ├── LoginResponseDTO.java        # Resposta do login
+│       └── AlterarSenhaComSenhaAntiga.java # DTO para alteração de senha
+├── 📈 investimento/                      # Módulo de investimentos
+│   ├── controller/InvestimentoController.java # Endpoints CRUD investimentos
+│   ├── service/InvestimentoService.java # Regras de negócio e validações
+│   ├── repository/InvestimentoRepository.java # Queries personalizadas
+│   ├── model/                           # Entidades do domínio
+│   │   ├── Investimento.java            # Entidade principal
+│   │   ├── Categoria.java               # Enum de categorias
+│   │   └── Risco.java                   # Enum de níveis de risco
+│   └── dto/                             # DTOs específicos
+│       └── InvestimentoDTO.java         # DTO de investimento
+├── 🎵 playlist/                          # Módulo de playlists sociais
+│   ├── controller/PlaylistController.java # 13 endpoints REST completos
+│   ├── service/PlaylistService.java     # Lógica social e colaborativa
+│   ├── repository/PlaylistRepository.java # Queries específicas de playlist
+│   ├── model/Playlist.java              # Entidade com relacionamentos M:N
+│   └── dto/                             # DTOs de request e response
+│       ├── request/                     # DTOs de entrada
+│       │   ├── CriarPlaylistRequestDTO.java
+│       │   ├── AdicionarInvestimentoRequestDTO.java
+│       │   └── CompartilharPlaylistRequestDTO.java
+│       └── response/                    # DTOs de saída
+│           ├── PlaylistResumoResponseDTO.java
+│           ├── PlaylistDetalhadaResponseDTO.java
+│           └── PlaylistOperacaoResponseDTO.java
+├── 💬 comentarios/                       # Sistema de comentários
+│   ├── controller/ComentarioController.java # CRUD e moderação
+│   ├── service/ComentarioService.java   # Regras de permissão
+│   ├── repository/ComentarioRepository.java # Soft delete
+│   └── model/Comentario.java            # Entidade com auditoria
+├── 💼 carteira/                          # Sistema de carteira
+│   ├── controller/CarteiraController.java # Compra, venda, posições
+│   ├── service/CarteiraService.java     # Cálculos brasileiros
+│   ├── repository/PosicaoCarteiraRepository.java # Posições
+│   └── model/PosicaoCarteira.java       # Entidade de posições
+├── 📊 extrato/                           # Sistema de extrato
+│   ├── controller/ExtratoController.java # Consulta de transações
+│   ├── service/ExtratoService.java      # Consolidação
+│   └── model/Extrato.java               # Histórico de transações
+└── 💰 dividendo/                         # Sistema de dividendos
+    ├── controller/DividendoController.java # Liberação administrativa
+    ├── service/DividendoService.java    # Cálculos automáticos
+    └── model/DividendoPendente.java     # Entidade de dividendos
 ```
 
----
+### 🏗️ Padrão Arquitetural MVC:
 
-## 🔧 Camadas da Arquitetura
-
-| 🏗️ Camada | 📝 Função |
-|-----------|-----------|
-| **Controller** | Define os endpoints públicos e protegidos da API REST |
-| **Service** | Contém as regras de negócio (validações, cálculos, etc.) |
-| **Repository** | Acesso ao banco de dados via Spring Data JPA |
-| **DAO** | Consultas personalizadas e operações complexas no banco |
-| **DTO** | Objetos de transferência (entrada/saída) - evita expor entidades |
-| **Model** | Entidades JPA que representam as tabelas no banco |
-| **Security** | Configuração JWT, autenticação e autorização |
-| **Exception** | Tratamento global de erros com mensagens personalizadas |
-| **Init** | Inicializadores automáticos (usuários e investimentos padrão) |
+| Camada | Responsabilidade | Exemplo |
+|--------|------------------|---------|
+| **Controller** | Receber requisições HTTP e retornar respostas | `@RestController`, endpoints REST |
+| **Service** | Regras de negócio e validações | Cálculos, validações, orquestração |
+| **Repository** | Acesso ao banco de dados | Queries JPA, operações CRUD |
+| **Model** | Entidades do domínio | Classes JPA, relacionamentos |
+| **DTO** | Objetos de transferência | Request/Response, evitar exposição de entidades |
 
 ---
 
-## 🏛️ Fluxo de uma Requisição Protegida
+## 🛠️ Tecnologias e Dependências
 
-```mermaid
-sequenceDiagram
-    participant Cliente as 🌐 Cliente
-    participant Filter as 🔒 JWT Filter
-    participant Controller as 🎯 Controller
-    participant Service as ⚙️ Service
-    participant Repository as 💾 Repository
-    participant DB as 🗄️ H2 Database
-    
-    Cliente->>Filter: 1. HTTP Request + JWT Token
-    Filter->>Filter: 2. Validar JWT Token
-    Filter->>Controller: 3. Token válido - prosseguir
-    Controller->>Service: 4. Chamar método do Service
-    Service->>Service: 5. Aplicar regras de negócio
-    Service->>Repository: 6. Solicitar dados do Repository
-    Repository->>DB: 7. Executar query SQL
-    DB->>Repository: 8. Retornar resultados
-    Repository->>Service: 9. Dados como Entity
-    Service->>Controller: 10. Converter para DTO
-    Controller->>Cliente: 11. HTTP Response (JSON)
-```
-
----
-
-## 📞 Como Usar Esta Documentação
-
-### 🎯 **Para Começar Rapidamente:**
-1. Use os **logins rápidos** acima para obter tokens JWT
-2. Teste no **Swagger** (`/swagger-ui/index.html`)
-3. Verifique dados no **H2 Console** (`/h2-console`)
-
-### 🔍 **Para Funcionalidades Específicas:**
-- Consulte o **guia específico** da funcionalidade desejada
-- Cada guia tem **exemplos completos** para Postman
-- **Validações e permissões** explicadas detalhadamente
-
-### 🧪 **Para Desenvolvimento:**
-- Veja a **estrutura completa** do projeto acima
-- **Fluxo da arquitetura** em camadas
-- **Dados de teste** já inicializados
+- **☕ Java 17** - Linguagem base
+- **🍃 Spring Boot 3.2.2** - Framework principal
+- **🔐 Spring Security 6** - Autenticação JWT
+- **💾 Spring Data JPA** - Persistência de dados
+- **🗄️ H2 Database** - Banco em memória
+- **📝 Bean Validation** - Validações automáticas
+- **📚 Swagger/OpenAPI** - Documentação interativa
+- **🔧 Maven** - Gerenciador de dependências
 
 ---
 
 ## 🏆 Principais Diferenciais
 
-- 🇧🇷 **100% Brasileiro**: Regras específicas do mercado nacional
-- 🔐 **Segurança Robusta**: JWT + validações granulares por role
-- 📊 **Sistema Completo**: 30+ endpoints cobrindo todo o ciclo de investimentos
-- 💬 **Interação Social**: Sistema de comentários com moderação
-- 📖 **Documentação Rica**: Guias específicos + Swagger + exemplos Postman
-- 🧪 **Pronto para Teste**: Dados iniciais e ambiente completo configurado
+### 🇧🇷 **Regras Brasileiras:**
+- ✅ Números inteiros de ações (sem frações)
+- ✅ Validações de CPF e dados brasileiros
+- ✅ Sistema de dividendos administrativo
+- ✅ Controle de estoque realista
+
+### 🔐 **Segurança Robusta:**
+- ✅ JWT com expiração configurável
+- ✅ Roles diferenciadas (USER/ADMIN)
+- ✅ Validações granulares por endpoint
+- ✅ Proteção contra exposição de dados
+
+### 🎵 **Inovação Social:**
+- ✅ Sistema de playlists tipo Spotify
+- ✅ Colaboração em tempo real
+- ✅ Descoberta de conteúdo
+- ✅ Controles de privacidade avançados
 
 ---
 
-## 👨‍💻 Autores
+## 👨‍💻 Equipe de Desenvolvimento
 
 Desenvolvido por:
-- **Luigi Ferrara Sinno** - RM98047
-- **Davi Passanha de Sousa Guerra** - RM551605  
-- **Cauã Gonçalves de Jesus** - RM97648
-- **Luan Silveira Macea** - RM98290
-- **Rui Amorim Siqueira** - RM98436
 
-**GitHub:** [api_login_java_spring_boot](https://github.com/luigiferrarasinno/api_login_java_spring_boot.git)
+| Nome | RM | GitHub |
+|------|-------|---------|
+| **Luigi Ferrara Sinno** | RM98047 | [@luigiferrarasinno](https://github.com/luigiferrarasinno) |
+| **Davi Passanha de Sousa Guerra** | RM551605 | |
+| **Cauã Gonçalves de Jesus** | RM97648 | |
+| **Luan Silveira Macea** | RM98290 | |
+| **Rui Amorim Siqueira** | RM98436 | |
+
+**🔗 Repositório:** [api_login_java_spring_boot](https://github.com/luigiferrarasinno/api_login_java_spring_boot)
 
 ---
 
-**📚 Consulte os guias específicos para instruções detalhadas de cada funcionalidade!** 🚀
+## 🎯 Como Usar Esta Documentação
+
+### 🚀 **Para Começar Rapidamente:**
+1. **Execute** a aplicação: `mvnw spring-boot:run`
+2. **Teste login** no Postman com as credenciais acima
+3. **Explore** no Swagger: `http://localhost:8080/swagger-ui.html`
+
+### 📚 **Para Aprender Específico:**
+1. **Escolha o módulo** na tabela de guias
+2. **Siga os exemplos** completos no guia
+3. **Teste** no Postman ou Swagger
+
+### 🔍 **Para Desenvolver:**
+1. **Analise** a estrutura de pastas acima
+2. **Entenda** o padrão MVC implementado
+3. **Veja** os dados inicializados automaticamente
+
+---
+
+**🚀 Sistema completo, documentado e pronto para uso!**
+
+**📖 Consulte os guias específicos para instruções detalhadas de cada funcionalidade.**
