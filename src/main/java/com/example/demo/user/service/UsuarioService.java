@@ -79,6 +79,12 @@ public class UsuarioService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Conta desativada!");
         }
 
+        // Verifica se o usuário tem senha cadastrada
+        if (user.getSenha() == null || user.getSenha().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                "Usuário não possui senha cadastrada. Por favor, cadastre uma senha antes de fazer login!");
+        }
+
         // Verifica senha
         if (!passwordEncoder.matches(senha, user.getSenha())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "CPF ou senha inválidos!");

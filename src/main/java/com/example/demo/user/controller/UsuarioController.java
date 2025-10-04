@@ -8,6 +8,7 @@ import com.example.demo.user.dto.CriarSenhaRequestDTO;
 import com.example.demo.user.dto.TrocarEmailRequestDTO;
 import com.example.demo.user.dto.AlterarSenhaRequestDTO;
 import com.example.demo.user.dto.AlterarUsuarioAdminRequestDTO;
+import com.example.demo.user.dto.AlterarUsuarioAdminSeguroRequestDTO;
 import com.example.demo.user.dto.Responses.LoginResponseDTO;
 import com.example.demo.user.dto.Responses.LoginAdminResponseDTO;
 import com.example.demo.user.dto.Responses.StatusAtivoResponseDTO;
@@ -56,9 +57,12 @@ public class UsuarioController {
         @ApiResponse(responseCode = "200", description = "Login realizado com sucesso",
             content = @Content(mediaType = "application/json",
             examples = @ExampleObject(value = "{\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"userId\": \"2\", \"firstLogin\": false}"))),
-        @ApiResponse(responseCode = "400", description = "Dados inválidos",
+        @ApiResponse(responseCode = "400", description = "Dados inválidos ou usuário sem senha",
             content = @Content(mediaType = "application/json",
-            examples = @ExampleObject(value = "{\"error\": \"CPF deve conter apenas números!\"}"))),
+            examples = {
+                @ExampleObject(name = "CPF inválido", value = "{\"error\": \"CPF deve conter apenas números!\"}"),
+                @ExampleObject(name = "Usuário sem senha", value = "{\"error\": \"Usuário não possui senha cadastrada. Por favor, cadastre uma senha antes de fazer login!\"}")
+            })),
         @ApiResponse(responseCode = "401", description = "Credenciais inválidas",
             content = @Content(mediaType = "application/json",
             examples = @ExampleObject(value = "{\"error\": \"CPF ou senha inválidos!\"}")))
@@ -81,6 +85,7 @@ public class UsuarioController {
                 e.getMessage().contains("Conta desativada")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
             } else {
+                // Inclui erros de validação (CPF inválido, senha vazia, usuário sem senha)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
             }
         }
@@ -382,25 +387,33 @@ public class UsuarioController {
     }
 
     @Operation(summary = "Alterar dados do usuário (Admin)", 
-               description = "Permite ao admin alterar todos os dados de qualquer usuário")
+               description = "Permite ao admin alterar dados do usuário (EXCETO senha e CPF por segurança)")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Dados alterados com sucesso",
             content = @Content(mediaType = "application/json",
-            examples = @ExampleObject(value = "{\"mensagem\": \"Dados do usuário alterados com sucesso!\", \"timestamp\": \"2024-10-02T14:30:15\", \"status\": \"sucesso\"}")))
+            examples = @ExampleObject(value = "{\"mensagem\": \"Dados do usuário alterados com sucesso!\", \"timestamp\": \"2024-10-02T14:30:15\", \"status\": \"sucesso\"}"))),
+        @ApiResponse(responseCode = "400", description = "Tentativa de alterar campos restritos",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"erro\": \"Por segurança, admin não pode alterar senha ou CPF de outros usuários\", \"timestamp\": \"2024-10-02T14:30:15\"}")))
     })
     @PutMapping("/admin/alterar/{usuarioId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> alterarDadosUsuarioPorAdmin(
+            @Parameter(description = "ID do usuário a ser alterado", required = true)
             @PathVariable Long usuarioId,
-            @RequestBody AlterarUsuarioAdminRequestDTO request) {
+            @Parameter(description = "Dados do usuário para alterar (senha e CPF são bloqueados por segurança)", required = true)
+            @RequestBody AlterarUsuarioAdminSeguroRequestDTO requestSeguro) {
         try {
+            // Converter DTO seguro para DTO completo (campos restritos ficam null)
+            AlterarUsuarioAdminRequestDTO request = requestSeguro.toFullDTO();
+            
             String mensagem = usuarioService.alterarDadosUsuarioPorAdmin(
                 usuarioId,
                 request.getNomeUsuario(),
                 request.getEmail(),
-                request.getCpf(),
+                null, // CPF sempre null (não altera por segurança)
                 request.getDt_nascimento(),
-                request.getSenha(),
+                null, // Senha sempre null (não altera por segurança)
                 request.getUserIsActive(),
                 request.getRole(),
                 request.getTipo()
