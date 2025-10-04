@@ -1,6 +1,31 @@
-# 👥 Guia de Usuários - Endpoints
+# 👥 Guia de## 🧑‍💻 Usuários de Teste Criados Automaticamente
+
+> ⚠️ **3 personas criadas automaticamente pelo sistema:**
+
+| Persona | Nome | Email | **CPF (Login)** | Senha | Role | Perfil |
+|---------|------|-------|-----------------|--------|------|--------|
+| **👨‍💼 Admin Sistema** | Admin Sistema | `admin@admin.com` | **11111111111** | `123456` | ADMIN | Arrojado |
+| **👤 João Silva** | João Silva | `user@user.com` | **22222222222** | `123456` | USER | Moderado |
+| **👩‍💼 Maria Investidora** | Maria Investidora | `maria@investidora.com` | **33333333333** | `123456` | USER | Conservador |
+
+> 🔑 **IMPORTANTE: Login agora usa CPF + Senha (não mais email + senha)**  
+> 💡 **Todas as personas têm a mesma senha: `123456` para facilitar os testes** Endpoints
 
 Este guia cobre todos os endpoints relacionados ao gerenciamento de usuários.
+
+---
+
+## 🚨 Mudanças Recentes
+
+### 🔄 Login Atualizado
+- **ANTES**: Login com `email` + `senha`
+- **AGORA**: Login com `cpf` + `senha`
+- **Endpoints afetados**: `/usuarios/login` e `/usuarios/login-admin`
+
+### 📋 Criação de Usuário Melhorada
+- **ANTES**: Retornava apenas mensagem de sucesso
+- **AGORA**: Retorna dados completos do usuário criado (sem senha)
+- **Campos automáticos**: role, tipo, saldoCarteira, userIsActive
 
 ---
 
@@ -41,16 +66,17 @@ Authorization: Bearer SEU_TOKEN_JWT
 
 ## 📋 Endpoints
 
-### 1. Login
+### 1. Login com CPF
 **POST** `/usuarios/login`  
-**Acesso**: Público
+**Acesso**: Público  
+**🔄 MUDANÇA: Agora usa CPF + Senha (não mais email)**
 
 #### Requisições de Exemplo:
 
 **Login como Admin:**
 ```json
 {
-  "email": "admin@admin.com",
+  "cpf": "11111111111",
   "senha": "123456"
 }
 ```
@@ -58,7 +84,7 @@ Authorization: Bearer SEU_TOKEN_JWT
 **Login como João Silva (USER):**
 ```json
 {
-  "email": "user@user.com", 
+  "cpf": "22222222222", 
   "senha": "123456"
 }
 ```
@@ -66,7 +92,7 @@ Authorization: Bearer SEU_TOKEN_JWT
 **Login como Maria Investidora (USER):**
 ```json
 {
-  "email": "maria@investidora.com",
+  "cpf": "33333333333",
   "senha": "123456"
 }
 ```
@@ -75,39 +101,116 @@ Authorization: Bearer SEU_TOKEN_JWT
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": 1,
-    "nomeUsuario": "Admin Sistema",
-    "email": "admin@admin.com",
-    "role": "ROLE_ADMIN"
-  }
+  "userId": "1",
+  "firstLogin": false
 }
 ```
 
 ---
 
-### 2. Criar Conta
-**POST** `/usuarios/criar`  
-**Acesso**: Apenas ADMIN
+### 1.1. Login Exclusivo para Administradores
+**POST** `/usuarios/login-admin`  
+**Acesso**: Apenas usuários com ROLE_ADMIN
+
+> ⚡ **Login restrito**: Usuários comuns recebem erro 401 se tentarem usar este endpoint
 
 #### Requisição:
 ```json
 {
-  "nomeUsuario": "Novo Usuário",
-  "senha": "123456",
-  "email": "novo@usuario.com",
-  "cpf": 44444444444,
-  "dt_nascimento": "2000-05-15"
+  "cpf": "11111111111",
+  "senha": "123456"
 }
 ```
 
 #### Resposta:
-- **201 Created**: Usuário criado com sucesso
-- **400 Bad Request**: Dados inválidos ou usuário já existe
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "adminId": "1",
+  "nomeAdmin": "Admin Sistema",
+  "role": "ROLE_ADMIN"
+}
+```
 
 ---
 
-### 3. Listar Usuários com Filtros
+### 2. Obter Dados do Usuário Logado
+**GET** `/usuarios/logged`  
+**Acesso**: Usuário autenticado  
+**🆕 NOVO: Retorna dados completos do usuário pelo token**
+
+#### Como usar:
+```
+GET /usuarios/logged
+Authorization: Bearer SEU_TOKEN_JWT
+Content-Type: application/json
+```
+
+#### Resposta de Sucesso (200 OK):
+```json
+{
+  "id": 2,
+  "nomeUsuario": "João Silva",
+  "email": "user@user.com",
+  "role": "ROLE_USER",
+  "cpf": 22222222222,
+  "userIsActive": true,
+  "dt_nascimento": "1990-05-15",
+  "tipo": "PERFIL_MODERADO",
+  "saldoCarteira": 25000.00
+}
+```
+
+#### Possíveis Erros:
+- **401 Unauthorized**: Token inválido, expirado ou ausente
+- **404 Not Found**: Usuário não encontrado no sistema
+- **500 Internal Server Error**: Erro interno do servidor
+
+---
+
+### 3. Criar Conta
+**POST** `/usuarios/criar`  
+**Acesso**: Apenas ADMIN  
+**🆕 NOVO: Retorna dados completos do usuário criado (sem senha)**
+
+#### Requisição Testada e Funcional:
+```json
+{
+  "nomeUsuario": "João da Silva",
+  "senha": "123456",
+  "email": "joao.silva@email.com",
+  "cpf": 12345678909,
+  "dt_nascimento": "2006-05-20"
+}
+```
+
+#### Resposta de Sucesso (200 OK):
+```json
+{
+  "id": 4,
+  "nomeUsuario": "João da Silva",
+  "email": "joao.silva@email.com",
+  "role": "ROLE_USER",
+  "cpf": 12345678909,
+  "userIsActive": true,
+  "dt_nascimento": "2006-05-20",
+  "tipo": "PERFIL_CONSERVADOR",
+  "saldoCarteira": 1000.00
+}
+```
+
+#### Campos Automáticos:
+- **role**: `"ROLE_USER"` (padrão para novos usuários)
+- **tipo**: `"PERFIL_CONSERVADOR"` (perfil de investimento padrão)
+- **saldoCarteira**: `1000.00` (saldo inicial)
+- **userIsActive**: `true` (conta ativa por padrão)
+
+#### Possíveis Erros:
+- **400 Bad Request**: Dados inválidos, email já existe, CPF inválido, menor de 18 anos
+
+---
+
+### 4. Listar Usuários com Filtros
 **GET** `/usuarios`  
 **Acesso**: Apenas ADMIN
 
@@ -157,7 +260,7 @@ GET /usuarios?nomeUsuario=silva&email=gmail&role=ROLE_USER
 
 ---
 
-### 4. Buscar Usuário por ID
+### 5. Buscar Usuário por ID
 **GET** `/usuarios/{id}`  
 **Acesso**: Próprio usuário ou ADMIN
 
@@ -179,7 +282,7 @@ GET /usuarios?nomeUsuario=silva&email=gmail&role=ROLE_USER
 
 ---
 
-### 5. Alterar Senha
+### 6. Alterar Senha
 **PUT** `/usuarios/alterar-senha`  
 **Acesso**: Próprio usuário ou ADMIN
 
@@ -194,7 +297,7 @@ GET /usuarios?nomeUsuario=silva&email=gmail&role=ROLE_USER
 
 ---
 
-### 6. Criar/Redefinir Senha
+### 7. Criar/Redefinir Senha
 **PUT** `/usuarios/criar-senha`  
 **Acesso**: Público
 
@@ -210,7 +313,7 @@ GET /usuarios?nomeUsuario=silva&email=gmail&role=ROLE_USER
 
 ---
 
-### 7. Trocar Email
+### 8. Trocar Email
 **PUT** `/usuarios/trocar-email`  
 **Acesso**: Apenas ADMIN
 
@@ -224,7 +327,7 @@ GET /usuarios?nomeUsuario=silva&email=gmail&role=ROLE_USER
 
 ---
 
-### 8. Alternar Status de Atividade
+### 9. Alternar Status de Atividade
 **PATCH** `/usuarios/{id}`  
 **Acesso**: Próprio usuário ou ADMIN
 
@@ -238,7 +341,7 @@ GET /usuarios?nomeUsuario=silva&email=gmail&role=ROLE_USER
 
 ---
 
-### 9. Deletar Usuário
+### 10. Deletar Usuário
 **DELETE** `/usuarios/{id}`  
 **Acesso**: Próprio usuário ou ADMIN
 
@@ -256,7 +359,7 @@ POST /usuarios/login
 Content-Type: application/json
 
 {
-  "email": "admin@admin.com",
+  "cpf": "11111111111",
   "senha": "123456"
 }
 ```
@@ -264,8 +367,16 @@ Content-Type: application/json
 ### 2. Copiar o Token da Resposta
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "userId": "1",
+  "firstLogin": false
 }
+```
+
+### 2.1. Obter Dados do Usuário Logado
+```
+GET /usuarios/logged
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 ### 3. Criar Novo Usuário (com token)
@@ -275,11 +386,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 Content-Type: application/json
 
 {
-  "nomeUsuario": "Novo Usuário",
-  "senha": "novasenha123",
-  "email": "novo.usuario@email.com",
-  "cpf": 11111111111,
-  "dt_nascimento": "1995-03-10"
+  "nomeUsuario": "João da Silva",
+  "senha": "123456",
+  "email": "joao.silva@email.com",
+  "cpf": 12345678909,
+  "dt_nascimento": "2006-05-20"
 }
 ```
 
@@ -320,4 +431,57 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   "erro": "Email já cadastrado",
   "status": 400
 }
+```
+
+---
+
+## 💡 Dicas Importantes para Testes
+
+### ✅ JSON Testado e Funcional (Criar Usuário)
+```json
+{
+  "nomeUsuario": "João da Silva",
+  "senha": "123456",
+  "email": "joao.silva@email.com",
+  "cpf": 12345678909,
+  "dt_nascimento": "2006-05-20"
+}
+```
+
+### 🔑 CPFs para Login Rápido
+- **Admin**: `11111111111` + senha `123456`
+- **Usuário 1**: `22222222222` + senha `123456` 
+- **Usuário 2**: `33333333333` + senha `123456`
+
+### 📝 Validações Ativas
+- ✅ CPF deve ser válido (algoritmo brasileiro)
+- ✅ Email deve ter formato válido (@domain.com)
+- ✅ Usuário deve ter +18 anos
+- ✅ Email não pode estar cadastrado
+- ✅ Senha não pode ser vazia
+
+### 🎯 Resposta de Criação
+O endpoint `/usuarios/criar` agora retorna:
+```json
+{
+  "id": 4,
+  "nomeUsuario": "Nome do Usuário",
+  "email": "email@dominio.com",
+  "role": "ROLE_USER",
+  "cpf": 12345678909,
+  "userIsActive": true,
+  "dt_nascimento": "YYYY-MM-DD",
+  "tipo": "PERFIL_CONSERVADOR",
+  "saldoCarteira": 1000.00
+}
+```
+
+### 🔍 Endpoint /logged
+**Uso**: Obter dados do usuário autenticado
+**Token**: Obrigatório no header Authorization
+**Resposta**: Dados completos (sem senha)
+
+```bash
+# Exemplo de uso
+curl -H "Authorization: Bearer SEU_TOKEN" http://localhost:8080/usuarios/logged
 ```

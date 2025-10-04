@@ -2,6 +2,7 @@ package com.example.demo.user.service;
 
 import com.example.demo.user.dao.UsuarioDAO;
 import com.example.demo.user.dto.Responses.LoginResponseDTO;
+import com.example.demo.user.dto.Responses.LoginAdminResponseDTO;
 import com.example.demo.user.model.Usuario;
 import org.springframework.stereotype.Service;
 
@@ -47,27 +48,115 @@ public class UsuarioService {
     
     
     
-    public LoginResponseDTO login(String email, String senha) {
-        Optional<Usuario> usuario = usuarioDAO.findByEmail(email);
-        //verifica se a senha é vazia
-        if (senha == null || senha.isEmpty()) {
+    public LoginResponseDTO login(String cpf, String senha) {
+        // Validações básicas
+        if (cpf == null || cpf.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CPF não pode ser vazio!");
+        }
+        if (senha == null || senha.trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Senha não pode ser vazia!");
         }
-        if (usuario.isPresent() && passwordEncoder.matches(senha, usuario.get().getSenha())) {
-            Usuario user = usuario.get();
-            boolean wasFirstLogin = user.isFirstLogin(); // guarda valor original
 
-            // Se for o primeiro login, atualizar para false no banco
-            if (wasFirstLogin) {
-                user.setFirstLogin(false);
-                usuarioDAO.save(user);
-            }
-
-            String token = JwtUtil.gerarToken(email);
-            return new LoginResponseDTO(token, user.getId(), wasFirstLogin);
-        } else {
-            throw new RuntimeException("Email ou senha inválidos!");
+        // Converte CPF para Long
+        Long cpfLong;
+        try {
+            cpfLong = Long.parseLong(cpf.replaceAll("[^0-9]", "")); // Remove caracteres não numéricos
+        } catch (NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CPF deve conter apenas números!");
         }
+
+        // Busca usuário por CPF
+        Optional<Usuario> usuario = usuarioDAO.findByCpf(cpfLong);
+        
+        if (usuario.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "CPF não encontrado!");
+        }
+
+        Usuario user = usuario.get();
+
+        // Verifica se está ativo
+        if (!user.isUserIsActive()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Conta desativada!");
+        }
+
+        // Verifica senha
+        if (!passwordEncoder.matches(senha, user.getSenha())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "CPF ou senha inválidos!");
+        }
+
+        // Se for o primeiro login, atualizar para false no banco
+        boolean wasFirstLogin = user.isFirstLogin();
+        if (wasFirstLogin) {
+            user.setFirstLogin(false);
+            usuarioDAO.save(user);
+        }
+
+        // Gera token usando email (padrão do sistema JWT)
+        String token = JwtUtil.gerarToken(user.getEmail());
+        return new LoginResponseDTO(token, user.getId(), wasFirstLogin);
+    }
+
+    /**
+     * Login exclusivo para administradores usando CPF
+     * Apenas usuários com ROLE_ADMIN podem utilizar este endpoint
+     */
+    public LoginAdminResponseDTO loginAdmin(String cpf, String senha) {
+        // Validações básicas
+        if (cpf == null || cpf.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CPF não pode ser vazio!");
+        }
+        if (senha == null || senha.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Senha não pode ser vazia!");
+        }
+
+        // Converte CPF para Long
+        Long cpfLong;
+        try {
+            cpfLong = Long.parseLong(cpf.replaceAll("[^0-9]", "")); // Remove caracteres não numéricos
+        } catch (NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CPF deve conter apenas números!");
+        }
+
+        // Busca usuário por CPF
+        Optional<Usuario> usuario = usuarioDAO.findByCpf(cpfLong);
+        
+        if (usuario.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "CPF não encontrado!");
+        }
+
+        Usuario user = usuario.get();
+
+        // Verifica se é administrador
+        if (!"ROLE_ADMIN".equals(user.getRole())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, 
+                "Acesso negado! Este login é exclusivo para administradores.");
+        }
+
+        // Verifica se está ativo
+        if (!user.isUserIsActive()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Conta de administrador desativada!");
+        }
+
+        // Verifica senha
+        if (!passwordEncoder.matches(senha, user.getSenha())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "CPF ou senha inválidos!");
+        }
+
+        // Se for primeiro login, atualizar
+        if (user.isFirstLogin()) {
+            user.setFirstLogin(false);
+            usuarioDAO.save(user);
+        }
+
+        // Gera token usando email (padrão do sistema)
+        String token = JwtUtil.gerarToken(user.getEmail());
+        
+        return new LoginAdminResponseDTO(
+            token, 
+            user.getId().toString(), 
+            user.getNomeUsuario(), 
+            user.getRole()
+        );
     }
 
     // Método para validar CPF

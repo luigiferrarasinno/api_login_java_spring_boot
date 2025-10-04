@@ -752,3 +752,92 @@
 (vazio)
 --------------------------------------
 
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-04T12:20:39.358393
+➡️  POST /usuarios/login-admin
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - user-agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.26100.6584
+ - content-type: application/json
+ - host: localhost:8080
+ - content-length: 56
+ - expect: 100-continue
+ - connection: Keep-Alive
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-04T12:23:07.211134900
+➡️  POST /usuarios/login-admin
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - host: localhost:8080
+ - connection: keep-alive
+ - content-length: 48
+ - sec-ch-ua-platform: "Windows"
+ - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0
+ - accept: application/json
+ - sec-ch-ua: "Chromium";v="140", "Not=A?Brand";v="24", "Microsoft Edge";v="140"
+ - content-type: application/json
+ - sec-ch-ua-mobile: ?0
+ - origin: http://localhost:8080
+ - sec-fetch-site: same-origin
+ - sec-fetch-mode: cors
+ - sec-fetch-dest: empty
+ - referer: http://localhost:8080/swagger-ui/index.html
+ - accept-encoding: gzip, deflate, br, zstd
+ - accept-language: pt-BR,pt;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-04T12:26:19.005934500
+➡️  POST /usuarios/login-admin
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - user-agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.26100.6584
+ - content-type: application/json
+ - host: localhost:8080
+ - content-length: 56
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-04T12:26:31.183172200
+➡️  POST /usuarios/login-admin
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - user-agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.26100.6584
+ - content-type: application/json
+ - host: localhost:8080
+ - content-length: 56
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-04T12:42:34.210443300
+➡️  GET /usuarios/logged
+🔐 Status: 401 (Unauthorized)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - content-type: application/json
+ - authorization: Bearer token_invalido_123
+ - user-agent: Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.26100.6584
+ - host: localhost:8080
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+

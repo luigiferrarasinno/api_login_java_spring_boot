@@ -2,12 +2,14 @@ package com.example.demo.user.controller;
 
 import com.example.demo.user.dto.UsuarioDTO;
 import com.example.demo.user.dto.LoginRequestDTO;
+import com.example.demo.user.dto.LoginAdminRequestDTO;
 import com.example.demo.user.dto.CriarUsuarioRequestDTO;
 import com.example.demo.user.dto.CriarSenhaRequestDTO;
 import com.example.demo.user.dto.TrocarEmailRequestDTO;
 import com.example.demo.user.dto.AlterarSenhaRequestDTO;
 import com.example.demo.user.dto.AlterarUsuarioAdminRequestDTO;
 import com.example.demo.user.dto.Responses.LoginResponseDTO;
+import com.example.demo.user.dto.Responses.LoginAdminResponseDTO;
 import com.example.demo.user.dto.Responses.StatusAtivoResponseDTO;
 import com.example.demo.user.dto.Responses.UsuarioResponseDTO;
 import com.example.demo.user.dto.Responses.UsuarioListaResponseDTO;
@@ -48,35 +50,177 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    @Operation(summary = "Login de usuário", 
-               description = "Autentica usuário no sistema e retorna token JWT")
+    @Operation(summary = "Login de usuário com CPF", 
+               description = "Autentica usuário no sistema usando CPF e senha, retorna token JWT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Login realizado com sucesso",
             content = @Content(mediaType = "application/json",
-            examples = @ExampleObject(value = "{\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"userId\": \"1\"}")))
+            examples = @ExampleObject(value = "{\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"userId\": \"2\", \"firstLogin\": false}"))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"error\": \"CPF deve conter apenas números!\"}"))),
+        @ApiResponse(responseCode = "401", description = "Credenciais inválidas",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"error\": \"CPF ou senha inválidos!\"}")))
     })
     @PostMapping("/login")
-    public LoginResponseDTO login(@RequestBody LoginRequestDTO loginRequest) {
-        return usuarioService.login(loginRequest.getEmail(), loginRequest.getSenha());
+    public ResponseEntity<?> login(
+            @Parameter(description = "Dados de login do usuário", required = true)
+            @RequestBody LoginRequestDTO loginRequest) {
+        try {
+            LoginResponseDTO response = usuarioService.login(loginRequest.getCpf(), loginRequest.getSenha());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("timestamp", LocalDateTime.now().toString());
+            
+            // Retorna status baseado no tipo de erro
+            if (e.getMessage().contains("CPF não encontrado") ||
+                e.getMessage().contains("CPF ou senha inválidos") ||
+                e.getMessage().contains("Conta desativada")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+        }
+    }
+
+    @Operation(summary = "Login exclusivo para administradores", 
+               description = "Autentica administradores no sistema usando CPF e senha. Usuários comuns receberão erro 401.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Login de administrador realizado com sucesso",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", \"adminId\": \"1\", \"nomeAdmin\": \"Admin Sistema\", \"role\": \"ROLE_ADMIN\"}"))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"error\": \"CPF deve conter apenas números!\"}"))),
+        @ApiResponse(responseCode = "401", description = "Não autorizado - Acesso exclusivo para administradores",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"error\": \"Acesso negado! Este login é exclusivo para administradores.\"}")))
+    })
+    @PostMapping("/login-admin")
+    public ResponseEntity<?> loginAdmin(
+            @Parameter(description = "Dados de login do administrador", required = true)
+            @RequestBody LoginAdminRequestDTO loginAdminRequest) {
+        try {
+            LoginAdminResponseDTO response = usuarioService.loginAdmin(
+                loginAdminRequest.getCpf(), 
+                loginAdminRequest.getSenha()
+            );
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("timestamp", LocalDateTime.now().toString());
+            
+            // Retorna status baseado no tipo de erro
+            if (e.getMessage().contains("Acesso negado") || 
+                e.getMessage().contains("CPF não encontrado") ||
+                e.getMessage().contains("CPF ou senha inválidos") ||
+                e.getMessage().contains("Conta de administrador desativada")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+        }
+    }
+
+    @Operation(summary = "Obter dados do usuário logado", 
+               description = "Retorna todos os dados do usuário autenticado (exceto senha)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Dados do usuário obtidos com sucesso",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"id\": 2, \"nomeUsuario\": \"João Silva\", \"email\": \"joao@email.com\", \"role\": \"ROLE_USER\", \"cpf\": 22222222222, \"userIsActive\": true, \"dt_nascimento\": \"1990-05-15\", \"tipo\": \"PERFIL_MODERADO\", \"saldoCarteira\": 25000.00}"))),
+        @ApiResponse(responseCode = "401", description = "Token inválido ou expirado",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"error\": \"Token JWT inválido ou expirado\", \"timestamp\": \"2024-10-04T14:30:15\"}"))),
+        @ApiResponse(responseCode = "404", description = "Usuário não encontrado",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"error\": \"Usuário não encontrado\", \"timestamp\": \"2024-10-04T14:30:15\"}")))
+    })
+    @GetMapping("/logged")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> obterDadosUsuarioLogado(Authentication auth) {
+        try {
+            String emailUsuario = auth.getName(); // Email do usuário logado (extraído do token)
+            
+            // Busca o usuário pelo email
+            Usuario usuario = usuarioService.buscarPorEmail(emailUsuario);
+            
+            // Retorna os dados completos (sem senha) usando UsuarioResponseDTO
+            UsuarioResponseDTO responseDTO = new UsuarioResponseDTO(usuario);
+            return ResponseEntity.ok(responseDTO);
+            
+        } catch (RuntimeException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Usuário não encontrado");
+            errorResponse.put("timestamp", LocalDateTime.now().toString());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Erro interno: " + e.getMessage());
+            errorResponse.put("timestamp", LocalDateTime.now().toString());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 
     @Operation(summary = "Criar novo usuário", 
-               description = "Cria uma nova conta de usuário (apenas admins)")
+               description = "Cria uma nova conta de usuário e retorna os dados do usuário criado (apenas admins)")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Usuário criado com sucesso",
             content = @Content(mediaType = "application/json",
-            examples = @ExampleObject(value = "\"Usuário criado com sucesso!\"")))
+            examples = @ExampleObject(value = "{\"id\": 4, \"nomeUsuario\": \"Novo Usuario\", \"email\": \"novo@email.com\", \"role\": \"ROLE_USER\", \"cpf\": 44444444444, \"userIsActive\": true, \"dt_nascimento\": \"1990-05-15\", \"tipo\": \"PERFIL_CONSERVADOR\"}"))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos ou usuário já existe",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"error\": \"Email já cadastrado!\", \"timestamp\": \"2024-10-04T14:30:15\"}")))
     })
     @PostMapping("/criar")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public String criarConta(@RequestBody CriarUsuarioRequestDTO criarRequest) {
-        Usuario usuario = new Usuario();
-        usuario.setNomeUsuario(criarRequest.getNomeUsuario());
-        usuario.setSenha(criarRequest.getSenha());
-        usuario.setEmail(criarRequest.getEmail());
-        usuario.setDt_nascimento(criarRequest.getDt_nascimento());
-        usuario.setCpf(criarRequest.getCpf());
-        return usuarioService.criarConta(usuario);
+    public ResponseEntity<?> criarConta(
+            @Parameter(description = "Dados do novo usuário", required = true)
+            @RequestBody CriarUsuarioRequestDTO criarRequest) {
+        try {
+            Usuario usuario = new Usuario();
+            usuario.setNomeUsuario(criarRequest.getNomeUsuario());
+            usuario.setSenha(criarRequest.getSenha());
+            usuario.setEmail(criarRequest.getEmail());
+            usuario.setDt_nascimento(criarRequest.getDt_nascimento());
+            usuario.setCpf(criarRequest.getCpf());
+            // Campos obrigatórios com valores padrão
+            usuario.setRole("ROLE_USER"); // Novo usuário sempre é USER
+            usuario.setTipo(com.example.demo.user.model.TipoPerfil.PERFIL_CONSERVADOR); // Perfil padrão
+            usuario.setSaldoCarteira(new java.math.BigDecimal("1000.00")); // Saldo inicial padrão
+            
+            String resultadoCriacao = usuarioService.criarConta(usuario);
+            
+            // Se a criação foi bem-sucedida, busca o usuário criado
+            if ("Conta criada com sucesso!".equals(resultadoCriacao)) {
+                try {
+                    Usuario usuarioCriado = usuarioService.buscarPorEmail(criarRequest.getEmail());
+                    UsuarioResponseDTO responseDTO = new UsuarioResponseDTO(usuarioCriado);
+                    return ResponseEntity.ok(responseDTO);
+                } catch (Exception buscarException) {
+                    // Se falhou ao buscar, retorna pelo menos confirmação de criação
+                    Map<String, String> successResponse = new HashMap<>();
+                    successResponse.put("message", resultadoCriacao);
+                    successResponse.put("email", criarRequest.getEmail());
+                    successResponse.put("timestamp", LocalDateTime.now().toString());
+                    return ResponseEntity.ok(successResponse);
+                }
+            } else {
+                // Retorna erro se a criação falhou
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", resultadoCriacao);
+                errorResponse.put("timestamp", LocalDateTime.now().toString());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Erro interno ao criar usuário: " + e.getMessage());
+            errorResponse.put("timestamp", LocalDateTime.now().toString());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 
     @Operation(summary = "Alterar senha com senha atual", 

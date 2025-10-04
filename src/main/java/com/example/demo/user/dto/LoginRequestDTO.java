@@ -1,24 +1,38 @@
 package com.example.demo.user.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "DTO para login de usuários usando CPF e senha")
 public class LoginRequestDTO {
-    private String email;
+    
+    @Schema(description = "CPF do usuário (apenas números)", 
+            example = "12345678901", 
+            required = true)
+    private String cpf;
+    
+    @Schema(description = "Senha do usuário", 
+            example = "minhasenha123", 
+            required = true)
     private String senha;
+    
+    @Schema(description = "Indica se é o primeiro login", 
+            example = "false")
     private boolean firstLogin = false; // Campo opcional
 
     public LoginRequestDTO() {}
 
-    public LoginRequestDTO(String email, String senha, boolean firstLogin) {
-        this.email = email;
+    public LoginRequestDTO(String cpf, String senha, boolean firstLogin) {
+        this.cpf = cpf;
         this.senha = senha;
         this.firstLogin = firstLogin;
     }
 
-    public String getEmail() {
-        return email;
+    public String getCpf() {
+        return cpf;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
     }
 
     public String getSenha() {
