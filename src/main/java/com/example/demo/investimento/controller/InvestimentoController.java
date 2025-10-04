@@ -96,11 +96,39 @@ public class InvestimentoController {
 
 
     @Operation(summary = "Buscar investimento por ID", 
-               description = "Obtém detalhes de um investimento específico")
+               description = "Obtém detalhes completos de um investimento específico com todas as informações disponíveis")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Investimento encontrado",
+        @ApiResponse(responseCode = "200", description = "Investimento encontrado com detalhes completos",
             content = @Content(mediaType = "application/json",
-            examples = @ExampleObject(value = "{\"id\": 1, \"nome\": \"Tesouro Direto\", \"simbolo\": \"TD\", \"categoria\": \"TESOURO_DIRETO\", \"precoAtual\": 102.50, \"descricao\": \"Investimento de renda fixa\"}")))
+            examples = @ExampleObject(value = "{\n" +
+                "  \"id\": 1,\n" +
+                "  \"nome\": \"Petróleo Brasileiro S.A.\",\n" +
+                "  \"simbolo\": \"PETR4\",\n" +
+                "  \"categoria\": \"RENDA_VARIAVEL\",\n" +
+                "  \"precoBase\": 28.50,\n" +
+                "  \"precoAtual\": 28.50,\n" +
+                "  \"variacaoPercentual\": 2.35,\n" +
+                "  \"descricao\": \"Maior empresa de energia do Brasil\",\n" +
+                "  \"usuarioIds\": [1, 2, 3],\n" +
+                "  \"data\": \"2024-09-04\",\n" +
+                "  \"liquidez\": \"D+2\",\n" +
+                "  \"dividendYield\": 8.5,\n" +
+                "  \"frequenciaDividendo\": 4,\n" +
+                "  \"ativo\": true,\n" +
+                "  \"visivelParaUsuarios\": true,\n" +
+                "  \"quantidadeTotal\": 100000,\n" +
+                "  \"quantidadeDisponivel\": 45000,\n" +
+                "  \"risco\": \"MEDIO\",\n" +
+                "  \"ultimaAtualizacaoPreco\": \"2024-10-04T14:30:15\",\n" +
+                "  \"createdAt\": \"2024-09-04T10:00:00\",\n" +
+                "  \"updatedAt\": \"2024-10-04T14:30:15\"\n" +
+                "}"))),
+        @ApiResponse(responseCode = "404", description = "Investimento não encontrado",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"error\": \"Investimento não encontrado com ID: 999\"}"))),
+        @ApiResponse(responseCode = "401", description = "Usuário não autenticado",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "{\"error\": \"Token JWT inválido ou expirado\"}")))
     })
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
