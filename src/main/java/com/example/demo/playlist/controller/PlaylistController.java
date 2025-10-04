@@ -443,4 +443,34 @@ public class PlaylistController {
         PlaylistOperacaoResponseDTO response = playlistService.removerSeguidor(authentication.getName(), id, emailSeguidor);
         return ResponseEntity.ok(response);
     }
+
+    /**
+     * 👥 Toggle usuários comuns na playlist (Admin)
+     */
+    @Operation(
+        summary = "Vincular/Desvincular todos os usuários comuns de uma playlist (Admin)",
+        description = "Permite ao admin alternar entre vincular todos os usuários comuns (ROLE_USER) a uma playlist ou desvinculá-los. Funciona como um toggle: se todos estão vinculados, desvincula; se nem todos estão vinculados, vincula todos.",
+        tags = { "Playlists" }
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Toggle realizado com sucesso",
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    value = "{\"mensagem\": \"15 usuários comuns foram vinculados à playlist 'Carteira Modelo Iniciante'\", \"playlistId\": 1, \"nomePlaylist\": \"Carteira Modelo Iniciante\", \"acao\": \"vinculados\", \"totalUsuarios\": 15, \"timestamp\": \"2024-10-04T14:30:15\", \"status\": \"sucesso\"}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "403", description = "Acesso restrito apenas para administradores"),
+        @ApiResponse(responseCode = "404", description = "Playlist não encontrada")
+    })
+    @PostMapping("/{id}/admin/toggle-usuarios")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<PlaylistOperacaoResponseDTO> toggleUsuariosComunsPlaylist(@PathVariable Long id, 
+                                                                                   Authentication authentication) {
+        PlaylistOperacaoResponseDTO response = playlistService.toggleUsuariosComunsPlaylist(authentication.getName(), id);
+        return ResponseEntity.ok(response);
+    }
 }

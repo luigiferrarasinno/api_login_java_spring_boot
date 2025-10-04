@@ -23,6 +23,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     @Query("SELECT u FROM Usuario u WHERE CAST(u.cpf AS string) LIKE CONCAT('%', :cpf, '%')")
     List<Usuario> findByCpfContaining(@Param("cpf") String cpf);
     
+    // Busca usuários por role e status ativo
+    List<Usuario> findByRoleAndUserIsActiveTrue(String role);
+    
     // Filtro combinado para admin (sem filtros de data pois não temos createdAt no Usuario)
     @Query("SELECT u FROM Usuario u WHERE " +
            "(:nomeUsuario IS NULL OR LOWER(u.nomeUsuario) LIKE LOWER(CONCAT('%', :nomeUsuario, '%'))) AND " +

@@ -9,6 +9,8 @@ public class PlaylistOperacaoResponseDTO {
     private String nomePlaylist;
     private LocalDateTime timestamp;
     private String status;
+    private String acao;
+    private Integer totalUsuarios;
 
     public PlaylistOperacaoResponseDTO() {
         this.timestamp = LocalDateTime.now();
@@ -20,6 +22,15 @@ public class PlaylistOperacaoResponseDTO {
         this.mensagem = mensagem;
         this.playlistId = playlistId;
         this.nomePlaylist = nomePlaylist;
+    }
+
+    public PlaylistOperacaoResponseDTO(String mensagem, Long playlistId, String nomePlaylist, String acao, Integer totalUsuarios) {
+        this();
+        this.mensagem = mensagem;
+        this.playlistId = playlistId;
+        this.nomePlaylist = nomePlaylist;
+        this.acao = acao;
+        this.totalUsuarios = totalUsuarios;
     }
 
     // Getters e Setters
@@ -61,5 +72,21 @@ public class PlaylistOperacaoResponseDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getAcao() {
+        return acao;
+    }
+
+    public void setAcao(String acao) {
+        this.acao = acao;
+    }
+
+    public Integer getTotalUsuarios() {
+        return totalUsuarios;
+    }
+
+    public void setTotalUsuarios(Integer totalUsuarios) {
+        this.totalUsuarios = totalUsuarios;
     }
 }

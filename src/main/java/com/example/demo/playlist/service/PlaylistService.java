@@ -412,4 +412,78 @@ public class PlaylistService {
             usuario.getEmail()
         );
     }
+
+    /**
+     * Toggle de usuários comuns na playlist (Admin)
+     * Verifica se todos os usuários comuns estão na playlist:
+     * - Se todos estão: remove todos
+     * - Se nem todos estão: adiciona todos
+     */
+    @Transactional
+    public PlaylistOperacaoResponseDTO toggleUsuariosComunsPlaylist(String emailAdmin, Long playlistId) {
+        // Verifica se o usuário é admin
+        Usuario admin = buscarUsuarioPorEmail(emailAdmin);
+        if (!"ROLE_ADMIN".equals(admin.getRole())) {
+            throw new RuntimeException("Acesso negado! Apenas administradores podem usar esta funcionalidade.");
+        }
+
+        // Busca a playlist
+        Playlist playlist = playlistRepository.findById(playlistId)
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Playlist não encontrada com ID: " + playlistId));
+
+        // Busca todos os usuários comuns (ROLE_USER) ativos
+        List<Usuario> usuariosComuns = usuarioRepository.findByRoleAndUserIsActiveTrue("ROLE_USER");
+
+        if (usuariosComuns.isEmpty()) {
+            return new PlaylistOperacaoResponseDTO(
+                "Nenhum usuário comum encontrado no sistema",
+                playlist.getId(),
+                playlist.getNome(),
+                "nenhum_usuario",
+                0
+            );
+        }
+
+        // Verifica quantos usuários comuns já seguem a playlist
+        List<Usuario> seguidoresComuns = playlist.getSeguidores().stream()
+            .filter(seguidor -> "ROLE_USER".equals(seguidor.getRole()))
+            .collect(Collectors.toList());
+
+        String acao;
+        int totalAfetados;
+
+        // Se todos os usuários comuns já seguem, remove todos
+        if (seguidoresComuns.size() == usuariosComuns.size()) {
+            // Remove todos os usuários comuns da playlist
+            for (Usuario usuario : seguidoresComuns) {
+                playlist.getSeguidores().remove(usuario);
+            }
+            acao = "desvinculados";
+            totalAfetados = seguidoresComuns.size();
+        } else {
+            // Adiciona todos os usuários comuns que ainda não seguem
+            int adicionados = 0;
+            for (Usuario usuario : usuariosComuns) {
+                if (!playlist.getSeguidores().contains(usuario)) {
+                    playlist.getSeguidores().add(usuario);
+                    adicionados++;
+                }
+            }
+            acao = "vinculados";
+            totalAfetados = adicionados;
+        }
+
+        playlistRepository.save(playlist);
+
+        String mensagem = String.format("%d usuários comuns foram %s à playlist '%s'", 
+                                      totalAfetados, acao, playlist.getNome());
+
+        return new PlaylistOperacaoResponseDTO(
+            mensagem,
+            playlist.getId(),
+            playlist.getNome(),
+            acao,
+            totalAfetados
+        );
+    }
 }
