@@ -170,6 +170,7 @@ public class SystemInitializer implements CommandLineRunner {
         acao.setPrecoBase(preco);
         acao.setPrecoAtual(preco);
         acao.setVariacaoPercentual(variacao); // 📈 Variação específica da última semana
+        acao.setUltimaAtualizacaoPreco(LocalDateTime.now().minusHours((long)(Math.random() * 72))); // ⏰ Última atualização há 1-3 dias
         acao.setDescricao(descricao);
         acao.setData(LocalDate.now().minusDays(30));
         acao.setLiquidez("D+2");
@@ -190,6 +191,7 @@ public class SystemInitializer implements CommandLineRunner {
         fii.setPrecoBase(preco);
         fii.setPrecoAtual(preco);
         fii.setVariacaoPercentual(variacao); // 📈 Variação específica da última semana
+        fii.setUltimaAtualizacaoPreco(LocalDateTime.now().minusHours((long)(Math.random() * 48))); // ⏰ Última atualização há 1-2 dias
         fii.setDescricao(descricao);
         fii.setData(LocalDate.now().minusDays(20));
         fii.setLiquidez("D+1");
@@ -210,6 +212,7 @@ public class SystemInitializer implements CommandLineRunner {
         rf.setPrecoBase(preco);
         rf.setPrecoAtual(preco);
         rf.setVariacaoPercentual(variacao); // 📈 Variação específica (menor para renda fixa)
+        rf.setUltimaAtualizacaoPreco(LocalDateTime.now().minusHours((long)(Math.random() * 24))); // ⏰ Última atualização há 1 dia
         rf.setDescricao(descricao);
         rf.setData(LocalDate.now().minusDays(10));
         rf.setLiquidez("Diária");
