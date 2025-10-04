@@ -143,33 +143,33 @@ public class SystemInitializer implements CommandLineRunner {
         }
 
         // 📈 AÇÕES BRASILEIRAS
-        criarAcao("Petróleo Brasileiro S.A.", "PETR4", new BigDecimal("28.50"), "Maior empresa de energia do Brasil", Risco.MEDIO, new BigDecimal("8.5"), 4);
-        criarAcao("Vale S.A.", "VALE3", new BigDecimal("65.20"), "Maior mineradora das Américas", Risco.ALTO, new BigDecimal("12.3"), 2);
-        criarAcao("Itaú Unibanco Holding S.A.", "ITUB4", new BigDecimal("32.40"), "Maior banco privado do Brasil", Risco.MEDIO, new BigDecimal("6.8"), 4);
-        criarAcao("Banco do Brasil S.A.", "BBAS3", new BigDecimal("45.30"), "Maior banco público do país", Risco.MEDIO, new BigDecimal("9.2"), 4);
-        criarAcao("Ambev S.A.", "ABEV3", new BigDecimal("14.80"), "Maior cervejaria da América Latina", Risco.BAIXO, new BigDecimal("4.5"), 2);
+        criarAcao("Petróleo Brasileiro S.A.", "PETR4", new BigDecimal("28.50"), "Maior empresa de energia do Brasil", Risco.MEDIO, new BigDecimal("8.5"), 4, new BigDecimal("2.35"), 100000L, 45000L);
+        criarAcao("Vale S.A.", "VALE3", new BigDecimal("65.20"), "Maior mineradora das Américas", Risco.ALTO, new BigDecimal("12.3"), 2, new BigDecimal("-1.80"), 80000L, 25000L);
+        criarAcao("Itaú Unibanco Holding S.A.", "ITUB4", new BigDecimal("32.40"), "Maior banco privado do Brasil", Risco.MEDIO, new BigDecimal("6.8"), 4, new BigDecimal("0.95"), 150000L, 75000L);
+        criarAcao("Banco do Brasil S.A.", "BBAS3", new BigDecimal("45.30"), "Maior banco público do país", Risco.MEDIO, new BigDecimal("9.2"), 4, new BigDecimal("1.45"), 90000L, 40000L);
+        criarAcao("Ambev S.A.", "ABEV3", new BigDecimal("14.80"), "Maior cervejaria da América Latina", Risco.BAIXO, new BigDecimal("4.5"), 2, new BigDecimal("0.65"), 200000L, 85000L);
         
         // 🏢 FUNDOS IMOBILIÁRIOS
-        criarFII("CSHG Real Estate Fund", "HGLG11", new BigDecimal("105.40"), "FII de shoppings centers", new BigDecimal("10.2"), 12);
-        criarFII("Maxi Renda", "MXRF11", new BigDecimal("9.85"), "FII diversificado de renda", new BigDecimal("9.6"), 12);
-        criarFII("XP Log", "XPLG11", new BigDecimal("98.50"), "FII de galpões logísticos", new BigDecimal("8.8"), 12);
+        criarFII("CSHG Real Estate Fund", "HGLG11", new BigDecimal("105.40"), "FII de shoppings centers", new BigDecimal("10.2"), 12, new BigDecimal("0.85"), 50000L, 18000L);
+        criarFII("Maxi Renda", "MXRF11", new BigDecimal("9.85"), "FII diversificado de renda", new BigDecimal("9.6"), 12, new BigDecimal("-0.45"), 30000L, 12000L);
+        criarFII("XP Log", "XPLG11", new BigDecimal("98.50"), "FII de galpões logísticos", new BigDecimal("8.8"), 12, new BigDecimal("1.25"), 40000L, 15000L);
         
         // 💎 RENDA FIXA
-        criarRendaFixa("Tesouro Direto Selic", "TD-SELIC", new BigDecimal("102.50"), "Título público indexado à Selic", Risco.BAIXO);
-        criarRendaFixa("CDB Banco Inter", "CDB-INTER", new BigDecimal("1000.00"), "CDB com liquidez diária", Risco.BAIXO);
-        criarRendaFixa("LCI Nubank", "LCI-NU", new BigDecimal("5000.00"), "Letra de Crédito Imobiliário", Risco.BAIXO);
+        criarRendaFixa("Tesouro Direto Selic", "TD-SELIC", new BigDecimal("102.50"), "Título público indexado à Selic", Risco.BAIXO, new BigDecimal("0.15"), 1000000L, 800000L);
+        criarRendaFixa("CDB Banco Inter", "CDB-INTER", new BigDecimal("1000.00"), "CDB com liquidez diária", Risco.BAIXO, new BigDecimal("0.08"), 500000L, 350000L);
+        criarRendaFixa("LCI Nubank", "LCI-NU", new BigDecimal("5000.00"), "Letra de Crédito Imobiliário", Risco.BAIXO, new BigDecimal("0.12"), 200000L, 150000L);
         
         System.out.println("✅ " + investimentoRepository.count() + " investimentos criados com sucesso!");
     }
 
-    private void criarAcao(String nome, String simbolo, BigDecimal preco, String descricao, Risco risco, BigDecimal yield, int frequencia) {
+    private void criarAcao(String nome, String simbolo, BigDecimal preco, String descricao, Risco risco, BigDecimal yield, int frequencia, BigDecimal variacao, Long quantidadeTotal, Long quantidadeDisponivel) {
         Investimento acao = new Investimento();
         acao.setNome(nome);
         acao.setSimbolo(simbolo);
         acao.setCategoria(Categoria.RENDA_VARIAVEL);
         acao.setPrecoBase(preco);
         acao.setPrecoAtual(preco);
-        acao.setVariacaoPercentual(BigDecimal.ZERO);
+        acao.setVariacaoPercentual(variacao); // 📈 Variação específica da última semana
         acao.setDescricao(descricao);
         acao.setData(LocalDate.now().minusDays(30));
         acao.setLiquidez("D+2");
@@ -177,19 +177,19 @@ public class SystemInitializer implements CommandLineRunner {
         acao.setFrequenciaDividendo(frequencia);
         acao.setAtivo(true);
         acao.setRisco(risco);
-        acao.setQuantidadeTotal(50000L); // 📊 Total de 50.000 ações emitidas
-        acao.setQuantidadeDisponivel(25000L); // 🔥 Disponibilizar 25.000 ações para compra
+        acao.setQuantidadeTotal(quantidadeTotal); // 📊 Quantidade total específica
+        acao.setQuantidadeDisponivel(quantidadeDisponivel); // 🔥 Quantidade disponível específica
         investimentoRepository.save(acao);
     }
 
-    private void criarFII(String nome, String simbolo, BigDecimal preco, String descricao, BigDecimal yield, int frequencia) {
+    private void criarFII(String nome, String simbolo, BigDecimal preco, String descricao, BigDecimal yield, int frequencia, BigDecimal variacao, Long quantidadeTotal, Long quantidadeDisponivel) {
         Investimento fii = new Investimento();
         fii.setNome(nome);
         fii.setSimbolo(simbolo);
         fii.setCategoria(Categoria.FUNDO_IMOBILIARIO);
         fii.setPrecoBase(preco);
         fii.setPrecoAtual(preco);
-        fii.setVariacaoPercentual(BigDecimal.ZERO);
+        fii.setVariacaoPercentual(variacao); // 📈 Variação específica da última semana
         fii.setDescricao(descricao);
         fii.setData(LocalDate.now().minusDays(20));
         fii.setLiquidez("D+1");
@@ -197,19 +197,19 @@ public class SystemInitializer implements CommandLineRunner {
         fii.setFrequenciaDividendo(frequencia);
         fii.setAtivo(true);
         fii.setRisco(Risco.MEDIO);
-        fii.setQuantidadeTotal(20000L); // 📊 Total de 20.000 cotas emitidas
-        fii.setQuantidadeDisponivel(10000L); // 🔥 Disponibilizar 10.000 cotas para compra
+        fii.setQuantidadeTotal(quantidadeTotal); // 📊 Quantidade total específica
+        fii.setQuantidadeDisponivel(quantidadeDisponivel); // 🔥 Quantidade disponível específica
         investimentoRepository.save(fii);
     }
 
-    private void criarRendaFixa(String nome, String simbolo, BigDecimal preco, String descricao, Risco risco) {
+    private void criarRendaFixa(String nome, String simbolo, BigDecimal preco, String descricao, Risco risco, BigDecimal variacao, Long quantidadeTotal, Long quantidadeDisponivel) {
         Investimento rf = new Investimento();
         rf.setNome(nome);
         rf.setSimbolo(simbolo);
         rf.setCategoria(Categoria.RENDA_FIXA);
         rf.setPrecoBase(preco);
         rf.setPrecoAtual(preco);
-        rf.setVariacaoPercentual(BigDecimal.ZERO);
+        rf.setVariacaoPercentual(variacao); // 📈 Variação específica (menor para renda fixa)
         rf.setDescricao(descricao);
         rf.setData(LocalDate.now().minusDays(10));
         rf.setLiquidez("Diária");
@@ -217,8 +217,8 @@ public class SystemInitializer implements CommandLineRunner {
         rf.setFrequenciaDividendo(0);
         rf.setAtivo(true);
         rf.setRisco(risco);
-        rf.setQuantidadeTotal(100000L); // 📊 Total disponível para aplicação
-        rf.setQuantidadeDisponivel(100000L); // 🔥 Toda quantidade disponível
+        rf.setQuantidadeTotal(quantidadeTotal); // 📊 Quantidade total específica
+        rf.setQuantidadeDisponivel(quantidadeDisponivel); // 🔥 Quantidade disponível específica
         investimentoRepository.save(rf);
     }
 
