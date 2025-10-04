@@ -69,7 +69,7 @@ public class UsuarioService {
         Optional<Usuario> usuario = usuarioDAO.findByCpf(cpfLong);
         
         if (usuario.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "CPF não encontrado!");
+            throw new RuntimeException("CPF ou senha inválidos!");
         }
 
         Usuario user = usuario.get();
@@ -127,7 +127,7 @@ public class UsuarioService {
         Optional<Usuario> usuario = usuarioDAO.findByCpf(cpfLong);
         
         if (usuario.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "CPF não encontrado!");
+            throw new RuntimeException("CPF ou senha inválidos!");
         }
 
         Usuario user = usuario.get();

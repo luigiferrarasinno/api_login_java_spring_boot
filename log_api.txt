@@ -916,3 +916,63 @@
 }
 --------------------------------------
 
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-04T18:13:50.744257900
+➡️  POST /usuarios/login
+🔐 Status: 401 (Unauthorized)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - host: localhost:8080
+ - connection: keep-alive
+ - content-length: 46
+ - sec-ch-ua-platform: "Windows"
+ - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0
+ - accept: application/json
+ - sec-ch-ua: "Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"
+ - content-type: application/json
+ - sec-ch-ua-mobile: ?0
+ - origin: http://localhost:8080
+ - sec-fetch-site: same-origin
+ - sec-fetch-mode: cors
+ - sec-fetch-dest: empty
+ - referer: http://localhost:8080/swagger-ui/index.html
+ - accept-encoding: gzip, deflate, br, zstd
+ - accept-language: pt-BR,pt;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+
+📥 Body da Requisição:
+{
+  "cpf": "1111111111",
+  "senha": "123456"
+}
+--------------------------------------
+
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-04T18:17:27.416387
+➡️  POST /usuarios/login
+🔐 Status: 401 (Unauthorized)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - host: localhost:8080
+ - connection: keep-alive
+ - content-length: 45
+ - sec-ch-ua-platform: "Windows"
+ - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0
+ - accept: application/json
+ - sec-ch-ua: "Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"
+ - content-type: application/json
+ - sec-ch-ua-mobile: ?0
+ - origin: http://localhost:8080
+ - sec-fetch-site: same-origin
+ - sec-fetch-mode: cors
+ - sec-fetch-dest: empty
+ - referer: http://localhost:8080/swagger-ui/index.html
+ - accept-encoding: gzip, deflate, br, zstd
+ - accept-language: pt-BR,pt;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+
+📥 Body da Requisição:
+{
+  "cpf": "111111111",
+  "senha": "123456"
+}
+--------------------------------------
+
