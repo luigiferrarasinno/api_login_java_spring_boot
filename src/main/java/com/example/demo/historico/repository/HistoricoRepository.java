@@ -22,8 +22,14 @@ public interface HistoricoRepository extends JpaRepository<Historico, Long> {
     // Buscar histórico por usuário e investimento
     List<Historico> findByUsuarioIdAndInvestimentoId(Long usuarioId, Long investimentoId);
     
+    // Buscar histórico por investimento e usuário
+    List<Historico> findByInvestimentoIdAndUsuarioId(Long investimentoId, Long usuarioId);
+    
     // Buscar histórico por mês/ano
     List<Historico> findByMesAnoRegistro(YearMonth mesAnoRegistro);
+    
+    // Buscar histórico por mês/ano e usuário
+    List<Historico> findByMesAnoRegistroAndUsuarioId(YearMonth mesAnoRegistro, Long usuarioId);
     
     // Buscar histórico por usuário e mês/ano
     List<Historico> findByUsuarioIdAndMesAnoRegistro(Long usuarioId, YearMonth mesAnoRegistro);

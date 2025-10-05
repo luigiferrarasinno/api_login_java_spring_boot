@@ -386,4 +386,77 @@ public class HistoricoService {
         ResumoHistoricoDTO resumo = calcularResumoHistoricos(historicos);
         return new HistoricoComResumoDTO(historicos, resumo);
     }
+    
+    // Métodos que obtêm o usuário pelo token (email/nome)
+    
+    /**
+     * Busca histórico do usuário logado identificado pelo token
+     */
+    public List<HistoricoResponseDTO> buscarHistoricoDoUsuario(String emailUsuario) {
+        Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        return buscarHistoricoPorUsuario(usuario.getId(), emailUsuario);
+    }
+    
+    /**
+     * Busca histórico por investimento específico do usuário logado
+     */
+    public List<HistoricoResponseDTO> buscarHistoricoPorInvestimentoDoUsuario(Long investimentoId, String emailUsuario) {
+        Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        
+        List<Historico> historicos = historicoRepository.findByInvestimentoIdAndUsuarioId(investimentoId, usuario.getId());
+        return historicos.stream()
+                .map(this::converterParaResponseDTO)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Busca histórico por mês/ano do usuário logado
+     */
+    public List<HistoricoResponseDTO> buscarHistoricoPorMesAnoDoUsuario(YearMonth mesAno, String emailUsuario) {
+        Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        
+        List<Historico> historicos = historicoRepository.findByMesAnoRegistroAndUsuarioId(mesAno, usuario.getId());
+        return historicos.stream()
+                .map(this::converterParaResponseDTO)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Busca histórico dos últimos 12 meses do usuário logado
+     */
+    public List<HistoricoResponseDTO> buscarHistoricoUltimos12MesesDoUsuario(String emailUsuario) {
+        Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        return buscarHistoricoUltimos12Meses(usuario.getId(), emailUsuario);
+    }
+    
+    /**
+     * Busca histórico por período do usuário logado
+     */
+    public List<HistoricoResponseDTO> buscarHistoricoPorPeriodoDoUsuario(YearMonth dataInicio, YearMonth dataFim, String emailUsuario) {
+        Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        return buscarHistoricoPorUsuarioEPeriodo(usuario.getId(), dataInicio, dataFim, emailUsuario);
+    }
+    
+    /**
+     * Busca investimentos com lucro do usuário logado
+     */
+    public List<HistoricoResponseDTO> buscarInvestimentosComLucroDoUsuario(String emailUsuario) {
+        Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        return buscarInvestimentosComLucro(usuario.getId(), emailUsuario);
+    }
+    
+    /**
+     * Busca investimentos com prejuízo do usuário logado
+     */
+    public List<HistoricoResponseDTO> buscarInvestimentosComPrejuizoDoUsuario(String emailUsuario) {
+        Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        return buscarInvestimentosComPrejuizo(usuario.getId(), emailUsuario);
+    }
 }

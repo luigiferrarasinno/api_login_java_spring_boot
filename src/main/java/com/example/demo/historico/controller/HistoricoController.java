@@ -62,106 +62,83 @@ public class HistoricoController {
         return ResponseEntity.ok(response);
     }
     
-    @GetMapping("/usuario/{usuarioId}")
-    @PreAuthorize("@historicoService.canAccessUserData(#usuarioId, authentication.name)")
-    @Operation(summary = "Buscar histórico por usuário", 
-               description = "Busca todo o histórico de investimentos de um usuário com resumo consolidado. Retorna lista de históricos + resumo geral com totais consolidados, quantidade de investimentos, e indicador geral de lucro/prejuízo")
+    @GetMapping("/consultar")
+    @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Consultar histórico com filtros", 
+               description = "Endpoint unificado para consultar histórico com diferentes filtros: período, tipo (lucro/prejuízo), últimos 12 meses, mês específico, ou por ID específico. O usuário é identificado automaticamente pelo token. Sempre retorna resumo consolidado com análise completa dos dados")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Histórico encontrado com resumo consolidado incluindo: totalInvestido, totalRetornando, retornoGeral, percentualRetornoGeral, lucroPrejuizoGeral e quantidadeInvestimentos"),
+            @ApiResponse(responseCode = "200", description = "Histórico encontrado com resumo consolidado: lista de investimentos + resumo geral (totalInvestido, totalRetornando, retornoGeral, percentualRetornoGeral, lucroPrejuizoGeral, quantidadeInvestimentos)"),
             @ApiResponse(responseCode = "403", description = "Acesso negado"),
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
-    public ResponseEntity<HistoricoComResumoDTO> buscarPorUsuario(
-            @Parameter(description = "ID do usuário") @PathVariable Long usuarioId,
+    public ResponseEntity<HistoricoComResumoDTO> consultarHistorico(
+            @Parameter(description = "ID específico do histórico") 
+            @RequestParam(required = false) Long id,
+            @Parameter(description = "Data de início do período (formato: YYYY-MM)") 
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth dataInicio,
+            @Parameter(description = "Data de fim do período (formato: YYYY-MM)") 
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth dataFim,
+            @Parameter(description = "Filtrar por tipo: 'lucro' ou 'prejuizo'") 
+            @RequestParam(required = false) String tipo,
+            @Parameter(description = "Buscar apenas os últimos 12 meses (true/false)") 
+            @RequestParam(required = false, defaultValue = "false") Boolean ultimos12Meses,
+            @Parameter(description = "Mês/Ano específico (formato: YYYY-MM)") 
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth mesAno,
+            @Parameter(description = "ID do investimento específico") 
+            @RequestParam(required = false) Long investimentoId,
             Authentication authentication) {
-        List<HistoricoResponseDTO> historicos = historicoService.buscarHistoricoPorUsuario(usuarioId, authentication.getName());
+        
+        List<HistoricoResponseDTO> historicos;
+        
+        // Buscar por ID específico do histórico
+        if (id != null) {
+            HistoricoResponseDTO historico = historicoService.buscarPorId(id, authentication.getName());
+            historicos = List.of(historico);
+        }
+        // Buscar por investimento específico
+        else if (investimentoId != null) {
+            historicos = historicoService.buscarHistoricoPorInvestimentoDoUsuario(investimentoId, authentication.getName());
+        }
+        // Buscar por mês/ano específico
+        else if (mesAno != null) {
+            historicos = historicoService.buscarHistoricoPorMesAnoDoUsuario(mesAno, authentication.getName());
+        }
+        // Buscar últimos 12 meses
+        else if (ultimos12Meses) {
+            historicos = historicoService.buscarHistoricoUltimos12MesesDoUsuario(authentication.getName());
+        }
+        // Buscar por período
+        else if (dataInicio != null && dataFim != null) {
+            historicos = historicoService.buscarHistoricoPorPeriodoDoUsuario(dataInicio, dataFim, authentication.getName());
+        }
+        // Buscar por tipo (lucro/prejuízo)
+        else if (tipo != null) {
+            if ("lucro".equalsIgnoreCase(tipo)) {
+                historicos = historicoService.buscarInvestimentosComLucroDoUsuario(authentication.getName());
+            } else if ("prejuizo".equalsIgnoreCase(tipo)) {
+                historicos = historicoService.buscarInvestimentosComPrejuizoDoUsuario(authentication.getName());
+            } else {
+                throw new RuntimeException("Tipo inválido. Use 'lucro' ou 'prejuizo'");
+            }
+        }
+        // Buscar todos os históricos do usuário
+        else {
+            historicos = historicoService.buscarHistoricoDoUsuario(authentication.getName());
+        }
+        
         HistoricoComResumoDTO response = historicoService.criarHistoricoComResumo(historicos);
         return ResponseEntity.ok(response);
     }
     
-    @GetMapping("/investimento/{investimentoId}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @Operation(summary = "Buscar histórico por investimento", 
-               description = "Busca todo o histórico de um investimento específico (apenas admins)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Histórico encontrado"),
-            @ApiResponse(responseCode = "403", description = "Acesso negado - apenas admins"),
-            @ApiResponse(responseCode = "404", description = "Investimento não encontrado")
-    })
-    public ResponseEntity<List<HistoricoResponseDTO>> buscarPorInvestimento(
-            @Parameter(description = "ID do investimento") @PathVariable Long investimentoId) {
-        List<HistoricoResponseDTO> response = historicoService.buscarHistoricoPorInvestimento(investimentoId);
-        return ResponseEntity.ok(response);
-    }
+
     
-    @GetMapping("/periodo")
-    @PreAuthorize("@historicoService.canAccessUserData(#usuarioId, authentication.name)")
-    @Operation(summary = "Buscar histórico por período", 
-               description = "Busca histórico de um usuário em um período específico com resumo consolidado. Inclui análise financeira completa do período com totais e indicadores de performance")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Histórico do período encontrado com resumo financeiro consolidado: valores totais, rendimento percentual e classificação geral de lucro/prejuízo"),
-            @ApiResponse(responseCode = "403", description = "Acesso negado"),
-            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
-    })
-    public ResponseEntity<HistoricoComResumoDTO> buscarPorPeriodo(
-            @Parameter(description = "ID do usuário") @RequestParam Long usuarioId,
-            @Parameter(description = "Data de início (formato: YYYY-MM)") 
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth dataInicio,
-            @Parameter(description = "Data de fim (formato: YYYY-MM)") 
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth dataFim,
-            Authentication authentication) {
-        List<HistoricoResponseDTO> historicos = historicoService.buscarHistoricoPorUsuarioEPeriodo(
-                usuarioId, dataInicio, dataFim, authentication.getName());
-        HistoricoComResumoDTO response = historicoService.criarHistoricoComResumo(historicos);
-        return ResponseEntity.ok(response);
-    }
+
     
-    @GetMapping("/mes-ano/{mesAno}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @Operation(summary = "Buscar histórico por mês/ano", 
-               description = "Busca todos os registros de histórico de um mês/ano específico (apenas admins)")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Histórico encontrado"),
-            @ApiResponse(responseCode = "403", description = "Acesso negado - apenas admins")
-    })
-    public ResponseEntity<List<HistoricoResponseDTO>> buscarPorMesAno(
-            @Parameter(description = "Mês/Ano (formato: YYYY-MM)") 
-            @PathVariable @DateTimeFormat(pattern = "yyyy-MM") YearMonth mesAno) {
-        List<HistoricoResponseDTO> response = historicoService.buscarHistoricoPorMesAno(mesAno);
-        return ResponseEntity.ok(response);
-    }
+
     
-    @GetMapping("/lucro/{usuarioId}")
-    @PreAuthorize("@historicoService.canAccessUserData(#usuarioId, authentication.name)")
-    @Operation(summary = "Buscar investimentos com lucro", 
-               description = "Busca todos os investimentos que tiveram lucro para um usuário")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Histórico de lucros encontrado"),
-            @ApiResponse(responseCode = "403", description = "Acesso negado"),
-            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
-    })
-    public ResponseEntity<List<HistoricoResponseDTO>> buscarInvestimentosComLucro(
-            @Parameter(description = "ID do usuário") @PathVariable Long usuarioId,
-            Authentication authentication) {
-        List<HistoricoResponseDTO> response = historicoService.buscarInvestimentosComLucro(usuarioId, authentication.getName());
-        return ResponseEntity.ok(response);
-    }
+
     
-    @GetMapping("/prejuizo/{usuarioId}")
-    @PreAuthorize("@historicoService.canAccessUserData(#usuarioId, authentication.name)")
-    @Operation(summary = "Buscar investimentos com prejuízo", 
-               description = "Busca todos os investimentos que tiveram prejuízo para um usuário")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Histórico de prejuízos encontrado"),
-            @ApiResponse(responseCode = "403", description = "Acesso negado"),
-            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
-    })
-    public ResponseEntity<List<HistoricoResponseDTO>> buscarInvestimentosComPrejuizo(
-            @Parameter(description = "ID do usuário") @PathVariable Long usuarioId,
-            Authentication authentication) {
-        List<HistoricoResponseDTO> response = historicoService.buscarInvestimentosComPrejuizo(usuarioId, authentication.getName());
-        return ResponseEntity.ok(response);
-    }
+
     
     @PutMapping("/{id}")
     @PreAuthorize("@historicoService.canAccessHistorico(#id, authentication.name)")
@@ -197,20 +174,5 @@ public class HistoricoController {
         return ResponseEntity.noContent().build();
     }
     
-    @GetMapping("/ultimos12meses/{usuarioId}")
-    @PreAuthorize("@historicoService.canAccessUserData(#usuarioId, authentication.name)")
-    @Operation(summary = "Buscar histórico dos últimos 12 meses", 
-               description = "Busca o histórico de investimentos de um usuário nos últimos 12 meses com resumo consolidado e indicador de lucro/prejuízo. Fornece análise completa da performance anual com métricas financeiras detalhadas")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Histórico dos últimos 12 meses com resumo completo: soma de todos os investimentos e retornos, performance geral percentual, classificação de lucro/prejuízo consolidada e contagem total de investimentos realizados"),
-            @ApiResponse(responseCode = "403", description = "Acesso negado"),
-            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
-    })
-    public ResponseEntity<HistoricoComResumoDTO> buscarHistoricoUltimos12Meses(
-            @Parameter(description = "ID do usuário") @PathVariable Long usuarioId,
-            Authentication authentication) {
-        List<HistoricoResponseDTO> historicos = historicoService.buscarHistoricoUltimos12Meses(usuarioId, authentication.getName());
-        HistoricoComResumoDTO response = historicoService.criarHistoricoComResumo(historicos);
-        return ResponseEntity.ok(response);
-    }
+
 }
