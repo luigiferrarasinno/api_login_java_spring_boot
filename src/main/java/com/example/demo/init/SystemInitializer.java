@@ -2,6 +2,8 @@ package com.example.demo.init;
 
 import com.example.demo.comentarios.model.Comentario;
 import com.example.demo.comentarios.repository.ComentarioRepository;
+import com.example.demo.historico.model.Historico;
+import com.example.demo.historico.repository.HistoricoRepository;
 import com.example.demo.investimento.model.Investimento;
 import com.example.demo.investimento.model.Categoria;
 import com.example.demo.investimento.model.Risco;
@@ -21,7 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Random;
 
 /**
  * 🚀 Inicializador Centralizado do Sistema
@@ -31,7 +35,8 @@ import java.util.List;
  * 2. Investimentos (ações, FIIs, renda fixa)
  * 3. Playlists de exemplo
  * 4. Comentários iniciais
- * 5. Relacionamentos entre entidades
+ * 5. Históricos de investimentos (12 meses)
+ * 6. Relacionamentos entre entidades
  */
 @Component
 @Order(1) // Executa primeiro
@@ -51,6 +56,9 @@ public class SystemInitializer implements CommandLineRunner {
     
     @Autowired
     private ComentarioRepository comentarioRepository;
+    
+    @Autowired
+    private HistoricoRepository historicoRepository;
 
     @Override
     @Transactional
@@ -71,6 +79,9 @@ public class SystemInitializer implements CommandLineRunner {
         
         // 5. Criar comentários (precisa de usuários e investimentos)
         criarComentariosIniciais();
+        
+        // 6. Criar históricos de investimentos (precisa de usuários e investimentos)
+        criarHistoricosIniciais();
         
         System.out.println("✅ ===== SISTEMA INICIALIZADO COM SUCESSO! ===== ✅\n");
         imprimirResumoInicializacao();
@@ -426,7 +437,128 @@ public class SystemInitializer implements CommandLineRunner {
     }
 
     /**
-     * 📊 Imprimir Resumo da Inicialização
+     * � ETAPA 6: Criar Históricos de Investimentos
+     */
+    private void criarHistoricosIniciais() {
+        System.out.println("\n📈 Inicializando históricos de investimentos...");
+        
+        if (historicoRepository.count() > 0) {
+            System.out.println("⏭️  Históricos já existem, pulando criação...");
+            return;
+        }
+
+        try {
+            Usuario user = usuarioDAO.findByEmail("user@user.com").orElse(null);
+            Usuario maria = usuarioDAO.findByEmail("maria@investidora.com").orElse(null);
+            Usuario admin = usuarioDAO.findByEmail("admin@admin.com").orElse(null);
+            List<Investimento> investimentos = investimentoRepository.findAll();
+
+            if (user == null || maria == null || admin == null || investimentos.isEmpty()) {
+                System.out.println("⚠️  Dados insuficientes para criar históricos");
+                return;
+            }
+
+            Random random = new Random();
+            YearMonth mesAtual = YearMonth.now();
+            
+            // Criar históricos para os últimos 12 meses
+            for (int mesesAtras = 11; mesesAtras >= 0; mesesAtras--) {
+                YearMonth mesReferencia = mesAtual.minusMonths(mesesAtras);
+                
+                // 📊 Históricos para João Silva (user@user.com)
+                criarHistoricosParaUsuario(user, investimentos, mesReferencia, random, "conservador");
+                
+                // 📊 Históricos para Maria Investidora
+                criarHistoricosParaUsuario(maria, investimentos, mesReferencia, random, "moderado");
+                
+                // 📊 Históricos para Admin (mais diversificado)
+                criarHistoricosParaUsuario(admin, investimentos, mesReferencia, random, "agressivo");
+            }
+
+            System.out.println("✅ " + historicoRepository.count() + " registros de histórico criados!");
+            
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao criar históricos: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Cria múltiplos históricos para um usuário em um mês específico
+     */
+    private void criarHistoricosParaUsuario(Usuario usuario, List<Investimento> investimentos, 
+                                           YearMonth mesReferencia, Random random, String perfil) {
+        
+        // Determinar quantos investimentos este usuário terá neste mês
+        int maxInvestimentos = switch (perfil) {
+            case "conservador" -> Math.min(3, investimentos.size()); // João - mais conservador
+            case "moderado" -> Math.min(5, investimentos.size());    // Maria - moderado
+            case "agressivo" -> Math.min(8, investimentos.size());   // Admin - mais diversificado
+            default -> 3;
+        };
+        
+        // Selecionar investimentos aleatórios para este usuário neste mês
+        List<Investimento> investimentosEscolhidos = investimentos.stream()
+            .limit(maxInvestimentos)
+            .toList();
+        
+        for (int i = 0; i < Math.min(random.nextInt(3) + 2, maxInvestimentos); i++) { // 2 a 4 registros por mês
+            Investimento investimento = investimentosEscolhidos.get(random.nextInt(investimentosEscolhidos.size()));
+            
+            // Calcular valores baseados no perfil e mês
+            BigDecimal valorBase = switch (perfil) {
+                case "conservador" -> new BigDecimal(random.nextDouble(1000, 5000)); // R$ 1.000 - 5.000
+                case "moderado" -> new BigDecimal(random.nextDouble(2000, 8000));    // R$ 2.000 - 8.000  
+                case "agressivo" -> new BigDecimal(random.nextDouble(5000, 15000));  // R$ 5.000 - 15.000
+                default -> new BigDecimal(1000);
+            };
+            
+            // Simular variação de mercado (alguns meses bons, outros ruins)
+            double variacaoMercado = switch (mesReferencia.getMonthValue()) {
+                case 1, 2, 11, 12 -> random.nextDouble(-0.15, 0.10); // Inverno: mais volátil
+                case 3, 4, 9, 10 -> random.nextDouble(-0.08, 0.15);   // Primavera/Outono: moderado
+                case 5, 6, 7, 8 -> random.nextDouble(-0.05, 0.12);    // Verão: mais estável
+                default -> random.nextDouble(-0.10, 0.10);
+            };
+            
+            // Ajustar variação baseada no tipo de investimento
+            if (investimento.getCategoria() == Categoria.RENDA_FIXA) {
+                variacaoMercado = Math.abs(variacaoMercado) * 0.3; // Renda fixa sempre positiva e menor
+            } else if (investimento.getRisco() == Risco.ALTO) {
+                variacaoMercado *= 1.5; // Alto risco = maior variação
+            }
+            
+            BigDecimal totalInvestido = valorBase.setScale(2, java.math.RoundingMode.HALF_UP);
+            BigDecimal totalRetornando = totalInvestido
+                .multiply(BigDecimal.valueOf(1 + variacaoMercado))
+                .setScale(2, java.math.RoundingMode.HALF_UP);
+            
+            // Verificar se já existe histórico para este usuário, investimento e mês
+            if (historicoRepository.findByUsuarioIdAndInvestimentoIdAndMesAnoRegistro(
+                    usuario.getId(), investimento.getId(), mesReferencia).isEmpty()) {
+                
+                Historico historico = new Historico(investimento, usuario, totalInvestido, 
+                                                   totalRetornando, mesReferencia);
+                
+                // Definir data de registro variada dentro do mês (simular quando foi feito o registro)
+                LocalDate dataRegistro = mesReferencia.atDay(random.nextInt(28) + 1);
+                historico.setDataRegistro(dataRegistro);
+                
+                historicoRepository.save(historico);
+                
+                // Log detalhado para debug
+                if (random.nextInt(10) == 0) { // Log apenas 10% para não poluir
+                    System.out.printf("📊 %s - %s (%s): R$ %.2f → R$ %.2f (%.1f%%)%n", 
+                        usuario.getNomeUsuario(), investimento.getSimbolo(), 
+                        mesReferencia, totalInvestido, totalRetornando, 
+                        variacaoMercado * 100);
+                }
+            }
+        }
+    }
+
+    /**
+     * �📊 Imprimir Resumo da Inicialização
      */
     private void imprimirResumoInicializacao() {
         System.out.println("📊 ===== RESUMO DA INICIALIZAÇÃO ===== 📊");
@@ -434,6 +566,7 @@ public class SystemInitializer implements CommandLineRunner {
         System.out.println("💰 Investimentos: " + investimentoRepository.count());
         System.out.println("🎵 Playlists: " + playlistRepository.count());
         System.out.println("💬 Comentários: " + comentarioRepository.count());
+        System.out.println("📈 Históricos: " + historicoRepository.count() + " (últimos 12 meses)");
         System.out.println("");
         System.out.println("🔑 CREDENCIAIS DE ACESSO:");
         System.out.println("   👨‍💼 Admin: admin@admin.com / 123456 (R$ 50.000)");
@@ -448,7 +581,14 @@ public class SystemInitializer implements CommandLineRunner {
         System.out.println("🌐 Swagger UI: http://localhost:8080/swagger-ui.html");
         System.out.println("🎵 Teste as playlists após fazer login!");
         System.out.println("");
-        System.out.println("🛢️ Console do Banco H2:");
+        System.out.println("� HISTÓRICOS GERADOS:");
+        System.out.println("   📊 12 meses de dados para cada usuário");
+        System.out.println("   👤 João Silva: 2-4 investimentos por mês (conservador)");
+        System.out.println("   👩‍💼 Maria: 2-5 investimentos por mês (moderado)");  
+        System.out.println("   👨‍💼 Admin: 2-8 investimentos por mês (agressivo)");
+        System.out.println("   💡 Use /api/historico/usuario/{id} para ver o histórico completo!");
+        System.out.println("");
+        System.out.println("�🛢️ Console do Banco H2:");
         System.out.println("Acesse o banco de dados em memória para consultas SQL:");
         System.out.println("   📡 URL: http://localhost:8080/h2-console");
         System.out.println("");

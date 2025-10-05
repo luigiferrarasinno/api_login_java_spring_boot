@@ -178,3 +178,27 @@
 (vazio)
 --------------------------------------
 
+---------- PRE-SECURITY LOG ----------
+⏱️  2025-10-05T18:07:03.762616900
+➡️  GET /api/historico/ultimos12meses/1
+🔐 Status: 403 (Forbidden)
+🌐 IP do Cliente: 0:0:0:0:0:0:0:1
+📋 Headers:
+ - host: localhost:8080
+ - connection: keep-alive
+ - sec-ch-ua-platform: "Windows"
+ - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0
+ - accept: */*
+ - sec-ch-ua: "Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"
+ - sec-ch-ua-mobile: ?0
+ - sec-fetch-site: same-origin
+ - sec-fetch-mode: cors
+ - sec-fetch-dest: empty
+ - referer: http://localhost:8080/swagger-ui/index.html
+ - accept-encoding: gzip, deflate, br, zstd
+ - accept-language: pt-BR,pt;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+
+📥 Body da Requisição:
+(vazio)
+--------------------------------------
+
