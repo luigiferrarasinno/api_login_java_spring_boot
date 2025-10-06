@@ -131,6 +131,10 @@ public class PlaylistService {
 
         verificarSeEhCriador(playlist, usuario);
 
+        // Rastreia se mudou para PRIVADA para remover seguidores
+        PlaylistTipo tipoAnterior = playlist.getTipo();
+        int totalSeguidoresRemovidos = 0;
+
         if (request.getNome() != null) {
             playlist.setNome(request.getNome());
         }
@@ -138,6 +142,13 @@ public class PlaylistService {
             playlist.setDescricao(request.getDescricao());
         }
         if (request.getTipo() != null) {
+            // Se mudar para PRIVADA, remove todos os seguidores
+            if (request.getTipo() == PlaylistTipo.PRIVADA && tipoAnterior != PlaylistTipo.PRIVADA) {
+                if (!playlist.getSeguidores().isEmpty()) {
+                    totalSeguidoresRemovidos = playlist.getSeguidores().size();
+                    playlist.getSeguidores().clear();
+                }
+            }
             playlist.setTipo(request.getTipo());
         }
         if (request.getPermiteColaboracao() != null) {
@@ -146,8 +157,20 @@ public class PlaylistService {
 
         playlist = playlistRepository.save(playlist);
 
+        // Mensagem personalizada se removeu seguidores
+        String mensagem;
+        if (totalSeguidoresRemovidos > 0) {
+            mensagem = String.format(
+                "Playlist '%s' atualizada com sucesso! %d seguidor(es) foram removidos ao alterar para Privada.",
+                playlist.getNome(),
+                totalSeguidoresRemovidos
+            );
+        } else {
+            mensagem = "Playlist '" + playlist.getNome() + "' atualizada com sucesso!";
+        }
+
         return new PlaylistOperacaoResponseDTO(
-            "Playlist '" + playlist.getNome() + "' atualizada com sucesso!",
+            mensagem,
             playlist.getId(),
             playlist.getNome()
         );
@@ -272,7 +295,8 @@ public class PlaylistService {
     }
 
     /**
-     * Compartilhar playlist com usuário (adicionar como seguidor)
+     * Compartilhar playlist com usuário específico
+     * Valida se a playlist não é PRIVADA antes de compartilhar
      */
     @Transactional
     public PlaylistOperacaoResponseDTO compartilharPlaylist(String emailUsuario, Long playlistId, CompartilharPlaylistRequestDTO request) {
@@ -282,8 +306,16 @@ public class PlaylistService {
 
         verificarSeEhCriador(playlist, usuario);
 
+        // Validação: não permite compartilhar playlist PRIVADA
+        if (playlist.getTipo() == PlaylistTipo.PRIVADA) {
+            throw new IllegalArgumentException(
+                "Não é possível compartilhar uma playlist PRIVADA. " +
+                "Altere o tipo da playlist para PUBLICA ou COMPARTILHADA primeiro usando o endpoint PUT /playlists/" + playlistId + "/alterar-tipo"
+            );
+        }
+
         if (playlist.isSeguidor(usuarioDestino)) {
-            throw new IllegalArgumentException("Usuário já segue esta playlist");
+            throw new IllegalArgumentException("Usuário já tem acesso a esta playlist");
         }
 
         if (playlist.isCriador(usuarioDestino)) {
@@ -326,54 +358,59 @@ public class PlaylistService {
     }
 
     /**
-     * Tornar playlist compartilhada (muda tipo para COMPARTILHADA)
+     * Alterar tipo da playlist com remoção automática de seguidores se virar PRIVADA
      */
     @Transactional
-    public PlaylistOperacaoResponseDTO tornarPlaylistCompartilhada(String emailUsuario, Long playlistId) {
+    public PlaylistOperacaoResponseDTO alterarTipoPlaylist(String emailUsuario, Long playlistId, AlterarTipoPlaylistRequestDTO request) {
         Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
         Playlist playlist = buscarPlaylistPorId(playlistId);
 
         verificarSeEhCriador(playlist, usuario);
 
-        playlist.setTipo(PlaylistTipo.COMPARTILHADA);
+        PlaylistTipo tipoAnterior = playlist.getTipo();
+        PlaylistTipo novoTipo = request.getNovoTipo();
+
+        // Se o tipo não mudou, retorna sem fazer nada
+        if (tipoAnterior == novoTipo) {
+            return new PlaylistOperacaoResponseDTO(
+                "A playlist já é do tipo " + novoTipo.getDescricao(),
+                playlist.getId(),
+                playlist.getNome()
+            );
+        }
+
+        // Contar seguidores antes da alteração
+        int totalSeguidoresRemovidos = 0;
+
+        // Se mudar para PRIVADA, remove todos os seguidores
+        if (novoTipo == PlaylistTipo.PRIVADA && !playlist.getSeguidores().isEmpty()) {
+            totalSeguidoresRemovidos = playlist.getSeguidores().size();
+            playlist.getSeguidores().clear();
+        }
+
+        // Atualiza o tipo da playlist
+        playlist.setTipo(novoTipo);
         playlistRepository.save(playlist);
 
-        return new PlaylistOperacaoResponseDTO(
-            "Playlist '" + playlist.getNome() + "' agora é do tipo compartilhada",
-            playlist.getId(),
-            playlist.getNome()
-        );
-    }
-
-    /**
-     * Compartilhar playlist com usuário específico e definir como COMPARTILHADA
-     */
-    @Transactional
-    public PlaylistOperacaoResponseDTO compartilharComUsuario(String emailUsuario, Long playlistId, CompartilharPlaylistRequestDTO request) {
-        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
-        Playlist playlist = buscarPlaylistPorId(playlistId);
-        Usuario usuarioDestino = buscarUsuarioPorEmail(request.getEmailUsuario());
-
-        verificarSeEhCriador(playlist, usuario);
-
-        if (playlist.isSeguidor(usuarioDestino)) {
-            throw new IllegalArgumentException("Usuário já tem acesso a esta playlist");
+        // Mensagem personalizada baseada na ação
+        String mensagem;
+        if (totalSeguidoresRemovidos > 0) {
+            mensagem = String.format(
+                "Playlist '%s' alterada para %s. %d seguidor(es) foram removidos automaticamente.",
+                playlist.getNome(),
+                novoTipo.getDescricao(),
+                totalSeguidoresRemovidos
+            );
+        } else {
+            mensagem = String.format(
+                "Playlist '%s' alterada para %s com sucesso!",
+                playlist.getNome(),
+                novoTipo.getDescricao()
+            );
         }
-
-        if (playlist.isCriador(usuarioDestino)) {
-            throw new IllegalArgumentException("Não é possível compartilhar playlist com o próprio criador");
-        }
-
-        // Muda o tipo para COMPARTILHADA se ainda não for
-        if (playlist.getTipo() != PlaylistTipo.COMPARTILHADA) {
-            playlist.setTipo(PlaylistTipo.COMPARTILHADA);
-        }
-
-        playlist.adicionarSeguidor(usuarioDestino);
-        playlistRepository.save(playlist);
 
         return new PlaylistOperacaoResponseDTO(
-            "Playlist '" + playlist.getNome() + "' compartilhada com " + usuarioDestino.getNomeUsuario(),
+            mensagem,
             playlist.getId(),
             playlist.getNome()
         );

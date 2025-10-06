@@ -453,7 +453,27 @@ public class SystemInitializer implements CommandLineRunner {
             vip.getSeguidores().add(maria); // Maria tem acesso VIP
             playlistRepository.save(vip);
 
-            System.out.println("✅ " + playlistRepository.count() + " playlists criadas (incluindo COMPARTILHADA)!");
+            // 🎵 Playlist 6: "Estratégia Dividendos Mensais" (Maria - Compartilhada)
+            Playlist dividendosMensais = new Playlist();
+            dividendosMensais.setNome("Estratégia Dividendos Mensais 📅💰");
+            dividendosMensais.setDescricao("FIIs e ações selecionadas para gerar renda passiva mensal. Compartilhado exclusivamente com investidores alinhados.");
+            dividendosMensais.setCriador(maria);
+            dividendosMensais.setTipo(PlaylistTipo.COMPARTILHADA);
+            dividendosMensais.setPermiteColaboracao(false);
+            dividendosMensais.setDataCriacao(LocalDateTime.now().minusDays(2));
+            
+            // Adicionar FIIs e ações de alto dividend yield
+            investimentos.stream()
+                .filter(inv -> inv.getDividendYield() != null && 
+                              inv.getDividendYield().compareTo(new BigDecimal("8.0")) >= 0)
+                .forEach(inv -> dividendosMensais.getInvestimentos().add(inv));
+            
+            // Compartilhar com Admin e João
+            dividendosMensais.getSeguidores().add(admin);
+            dividendosMensais.getSeguidores().add(user);
+            playlistRepository.save(dividendosMensais);
+
+            System.out.println("✅ " + playlistRepository.count() + " playlists criadas (incluindo 2 COMPARTILHADAS)!");
             
         } catch (Exception e) {
             System.err.println("❌ Erro ao criar playlists: " + e.getMessage());

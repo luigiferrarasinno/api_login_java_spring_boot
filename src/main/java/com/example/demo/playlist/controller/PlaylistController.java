@@ -387,7 +387,8 @@ public class PlaylistController {
      */
     @Operation(
         summary = "Compartilhar playlist com usuário",
-        description = "Permite ao criador da playlist compartilhá-la diretamente com outro usuário (adiciona como seguidor).",
+        description = "Permite ao criador da playlist compartilhá-la diretamente com outro usuário (adiciona como seguidor). " +
+                     "IMPORTANTE: Não é possível compartilhar playlists PRIVADAS. Para compartilhar, altere primeiro o tipo da playlist para PUBLICA ou COMPARTILHADA usando o endpoint PUT /playlists/{id}/alterar-tipo.",
         tags = { "Playlists" }
     )
     @ApiResponses(value = {
@@ -401,7 +402,16 @@ public class PlaylistController {
                 )
             )
         ),
-        @ApiResponse(responseCode = "400", description = "Usuário já segue a playlist ou dados inválidos"),
+        @ApiResponse(
+            responseCode = "400", 
+            description = "Usuário já segue a playlist, dados inválidos ou playlist é PRIVADA",
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    value = "{\"error\": \"Não é possível compartilhar uma playlist PRIVADA. Altere o tipo da playlist para PUBLICA ou COMPARTILHADA primeiro usando o endpoint PUT /playlists/1/alterar-tipo\"}"
+                )
+            )
+        ),
         @ApiResponse(responseCode = "403", description = "Apenas o criador pode compartilhar a playlist")
     })
     @PostMapping("/{id}/compartilhar")
@@ -445,11 +455,14 @@ public class PlaylistController {
     }
 
     /**
-     * � Listar playlists compartilhadas comigo
+     * 📋 Listar playlists compartilhadas comigo
      */
     @Operation(
-        summary = "Listar playlists compartilhadas",
-        description = "Retorna todas as playlists do tipo COMPARTILHADA que foram compartilhadas especificamente com o usuário autenticado.",
+        summary = "Listar playlists compartilhadas comigo",
+        description = "Retorna playlists do tipo COMPARTILHADA que OUTROS USUÁRIOS compartilharam especificamente COM VOCÊ. " +
+                     "Essas são playlists privadas que alguém te deu acesso exclusivo. " +
+                     "Diferente das playlists públicas (que todos veem) ou das suas próprias playlists. " +
+                     "Pense nisso como uma 'caixa de entrada' de playlists que pessoas compartilharam com você.",
         tags = { "Playlists" }
     )
     @ApiResponses(value = {
@@ -495,49 +508,18 @@ public class PlaylistController {
         @ApiResponse(responseCode = "403", description = "Apenas o criador pode alterar o tipo da playlist"),
         @ApiResponse(responseCode = "404", description = "Playlist não encontrada")
     })
-    @PutMapping("/{id}/tornar-compartilhada")
+    @PutMapping("/{id}/alterar-tipo")
     @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<PlaylistOperacaoResponseDTO> tornarPlaylistCompartilhada(@PathVariable Long id, 
-                                                                                  Authentication authentication) {
+    public ResponseEntity<PlaylistOperacaoResponseDTO> alterarTipoPlaylist(@PathVariable Long id,
+                                                                          @Valid @RequestBody AlterarTipoPlaylistRequestDTO request,
+                                                                          Authentication authentication) {
         String email = authentication.getName();
-        PlaylistOperacaoResponseDTO response = playlistService.tornarPlaylistCompartilhada(email, id);
+        PlaylistOperacaoResponseDTO response = playlistService.alterarTipoPlaylist(email, id, request);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * 📤 Compartilhar com usuário específico
-     */
-    @Operation(
-        summary = "Compartilhar playlist com usuário específico",
-        description = "Compartilha a playlist com um usuário específico, convertendo-a automaticamente para o tipo COMPARTILHADA se necessário.",
-        tags = { "Playlists" }
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Playlist compartilhada com sucesso",
-            content = @io.swagger.v3.oas.annotations.media.Content(
-                mediaType = "application/json",
-                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
-                    value = "{\"mensagem\": \"Playlist 'Estratégias Premium' compartilhada com João Silva\", \"playlistId\": 1, \"nomePlaylist\": \"Estratégias Premium\", \"status\": \"sucesso\"}"
-                )
-            )
-        ),
-        @ApiResponse(responseCode = "400", description = "Usuário já tem acesso à playlist ou dados inválidos"),
-        @ApiResponse(responseCode = "403", description = "Apenas o criador pode compartilhar a playlist")
-    })
-    @PostMapping("/{id}/compartilhar-com")
-    @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<PlaylistOperacaoResponseDTO> compartilharComUsuario(@PathVariable Long id, 
-                                                                             @Valid @RequestBody CompartilharPlaylistRequestDTO request,
-                                                                             Authentication authentication) {
-        String email = authentication.getName();
-        PlaylistOperacaoResponseDTO response = playlistService.compartilharComUsuario(email, id, request);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * �👥 Toggle usuários comuns na playlist (Admin)
+     * 👥 Toggle usuários comuns na playlist (Admin)
      */
     @Operation(
         summary = "Vincular/Desvincular todos os usuários comuns de uma playlist (Admin)",
