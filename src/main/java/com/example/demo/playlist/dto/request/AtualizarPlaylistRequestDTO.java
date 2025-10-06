@@ -1,5 +1,6 @@
 package com.example.demo.playlist.dto.request;
 
+import com.example.demo.playlist.model.PlaylistTipo;
 import jakarta.validation.constraints.Size;
 
 public class AtualizarPlaylistRequestDTO {
@@ -10,7 +11,7 @@ public class AtualizarPlaylistRequestDTO {
     @Size(max = 500, message = "Descrição deve ter no máximo 500 caracteres")
     private String descricao;
 
-    private Boolean publica;
+    private PlaylistTipo tipo;
 
     private Boolean permiteColaboracao;
 
@@ -33,12 +34,12 @@ public class AtualizarPlaylistRequestDTO {
         this.descricao = descricao;
     }
 
-    public Boolean getPublica() {
-        return publica;
+    public PlaylistTipo getTipo() {
+        return tipo;
     }
 
-    public void setPublica(Boolean publica) {
-        this.publica = publica;
+    public void setTipo(PlaylistTipo tipo) {
+        this.tipo = tipo;
     }
 
     public Boolean getPermiteColaboracao() {

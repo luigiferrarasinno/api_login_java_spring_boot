@@ -12,6 +12,7 @@ import com.example.demo.investimento.model.Categoria;
 import com.example.demo.investimento.model.Risco;
 import com.example.demo.investimento.repository.InvestimentoRepository;
 import com.example.demo.playlist.model.Playlist;
+import com.example.demo.playlist.model.PlaylistTipo;
 import com.example.demo.playlist.repository.PlaylistRepository;
 import com.example.demo.user.dao.UsuarioDAO;
 import com.example.demo.user.model.Usuario;
@@ -369,7 +370,7 @@ public class SystemInitializer implements CommandLineRunner {
             topDividendos.setNome("Top Dividendos 2024 💰");
             topDividendos.setDescricao("As melhores ações e FIIs pagadores de dividendos para 2024. Seleção cuidadosa com foco em yield e consistência.");
             topDividendos.setCriador(admin);
-            topDividendos.setPublica(true);
+            topDividendos.setTipo(PlaylistTipo.PUBLICA);
             topDividendos.setPermiteColaboracao(false);
             topDividendos.setDataCriacao(LocalDateTime.now().minusDays(15));
             
@@ -383,7 +384,7 @@ public class SystemInitializer implements CommandLineRunner {
             conservadora.setNome("Minha Carteira Conservadora 🛡️");
             conservadora.setDescricao("Investimentos de baixo risco para preservação de capital e renda passiva estável.");
             conservadora.setCriador(maria);
-            conservadora.setPublica(false);
+            conservadora.setTipo(PlaylistTipo.PRIVADA);
             conservadora.setPermiteColaboracao(false);
             conservadora.setDataCriacao(LocalDateTime.now().minusDays(10));
             
@@ -397,7 +398,7 @@ public class SystemInitializer implements CommandLineRunner {
             fiis.setNome("FIIs para Iniciantes 🏢");
             fiis.setDescricao("Os melhores Fundos Imobiliários para quem está começando. Colaboração aberta!");
             fiis.setCriador(admin);
-            fiis.setPublica(true);
+            fiis.setTipo(PlaylistTipo.PUBLICA);
             fiis.setPermiteColaboracao(true);
             fiis.setDataCriacao(LocalDateTime.now().minusDays(5));
             
@@ -412,7 +413,7 @@ public class SystemInitializer implements CommandLineRunner {
             arriscadas.setNome("Apostas Arriscadas 🚀");
             arriscadas.setDescricao("Para quem gosta de adrenalina! Alto risco, alto retorno. Invista por sua conta e risco!");
             arriscadas.setCriador(user);
-            arriscadas.setPublica(true);
+            arriscadas.setTipo(PlaylistTipo.PUBLICA);
             arriscadas.setPermiteColaboracao(true);
             arriscadas.setDataCriacao(LocalDateTime.now().minusDays(3));
             
@@ -434,7 +435,25 @@ public class SystemInitializer implements CommandLineRunner {
             arriscadas.getSeguidores().add(admin);
             playlistRepository.save(arriscadas);
 
-            System.out.println("✅ " + playlistRepository.count() + " playlists criadas com relacionamentos!");
+            // 🎵 Playlist 5: "Carteira VIP Exclusiva" (Admin - Compartilhada)
+            Playlist vip = new Playlist();
+            vip.setNome("Carteira VIP Exclusiva 💎");
+            vip.setDescricao("Estratégias premium e análises exclusivas para usuários selecionados. Acesso restrito!");
+            vip.setCriador(admin);
+            vip.setTipo(PlaylistTipo.COMPARTILHADA);
+            vip.setPermiteColaboracao(false);
+            vip.setDataCriacao(LocalDateTime.now().minusDays(1));
+            
+            // Adicionar alguns investimentos premium
+            if (investimentos.size() >= 6) {
+                vip.getInvestimentos().addAll(investimentos.subList(0, 6));
+            }
+            
+            // Compartilhar apenas com usuários específicos
+            vip.getSeguidores().add(maria); // Maria tem acesso VIP
+            playlistRepository.save(vip);
+
+            System.out.println("✅ " + playlistRepository.count() + " playlists criadas (incluindo COMPARTILHADA)!");
             
         } catch (Exception e) {
             System.err.println("❌ Erro ao criar playlists: " + e.getMessage());

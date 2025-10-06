@@ -21,25 +21,26 @@ public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
     List<Playlist> findPlaylistsSeguidasPorUsuario(@Param("usuario") Usuario usuario);
 
     // Buscar playlists públicas
-    List<Playlist> findByPublicaTrueAndAtivaTrue();
+    @Query("SELECT p FROM Playlist p WHERE p.tipo = 'PUBLICA' AND p.ativa = true")
+    List<Playlist> findByTipoPublicaAndAtivaTrue();
 
     // Buscar playlist por ID e verificar se está ativa
     Optional<Playlist> findByIdAndAtivaTrue(Long id);
 
-    // Buscar playlists por nome (busca parcial, case-insensitive)
-    @Query("SELECT p FROM Playlist p WHERE LOWER(p.nome) LIKE LOWER(CONCAT('%', :nome, '%')) AND p.ativa = true AND p.publica = true")
-    List<Playlist> findByNomeContainingIgnoreCaseAndPublicaTrueAndAtivaTrue(@Param("nome") String nome);
+    // Buscar playlists por nome (busca parcial, case-insensitive) - apenas públicas
+    @Query("SELECT p FROM Playlist p WHERE LOWER(p.nome) LIKE LOWER(CONCAT('%', :nome, '%')) AND p.ativa = true AND p.tipo = 'PUBLICA'")
+    List<Playlist> findByNomeContainingIgnoreCaseAndTipoPublicaAndAtivaTrue(@Param("nome") String nome);
 
-    // Verificar se usuário tem acesso à playlist (é criador ou seguidor)
+    // Verificar se usuário tem acesso à playlist (é criador, seguidor ou é pública)
     @Query("SELECT p FROM Playlist p WHERE p.id = :playlistId AND p.ativa = true AND " +
-           "(p.criador = :usuario OR :usuario MEMBER OF p.seguidores OR p.publica = true)")
+           "(p.criador = :usuario OR :usuario MEMBER OF p.seguidores OR p.tipo = 'PUBLICA')")
     Optional<Playlist> findPlaylistComAcesso(@Param("playlistId") Long playlistId, @Param("usuario") Usuario usuario);
 
     // Contar playlists do usuário
     long countByCriadorAndAtivaTrue(Usuario criador);
 
     // Playlists mais seguidas (top playlists públicas)
-    @Query("SELECT p FROM Playlist p WHERE p.publica = true AND p.ativa = true ORDER BY SIZE(p.seguidores) DESC")
+    @Query("SELECT p FROM Playlist p WHERE p.tipo = 'PUBLICA' AND p.ativa = true ORDER BY SIZE(p.seguidores) DESC")
     List<Playlist> findTopPlaylistsPublicas();
 
     // Verificar se usuário já segue uma playlist
@@ -47,7 +48,11 @@ public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
            "WHERE p.id = :playlistId AND :usuario MEMBER OF p.seguidores")
     boolean usuarioSeguePlaylist(@Param("playlistId") Long playlistId, @Param("usuario") Usuario usuario);
 
-    // Buscar playlists que contêm um investimento específico
-    @Query("SELECT p FROM Playlist p JOIN p.investimentos i WHERE i.id = :investimentoId AND p.publica = true AND p.ativa = true")
+    // Buscar playlists que contêm um investimento específico (apenas públicas)
+    @Query("SELECT p FROM Playlist p JOIN p.investimentos i WHERE i.id = :investimentoId AND p.tipo = 'PUBLICA' AND p.ativa = true")
     List<Playlist> findPlaylistsComInvestimento(@Param("investimentoId") Long investimentoId);
+
+    // Buscar playlists compartilhadas
+    @Query("SELECT p FROM Playlist p WHERE p.tipo = 'COMPARTILHADA' AND p.ativa = true AND :usuario MEMBER OF p.seguidores")
+    List<Playlist> findPlaylistsCompartilhadasPorUsuario(@Param("usuario") Usuario usuario);
 }

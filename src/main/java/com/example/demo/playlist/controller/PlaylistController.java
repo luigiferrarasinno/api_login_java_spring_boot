@@ -445,7 +445,99 @@ public class PlaylistController {
     }
 
     /**
-     * 👥 Toggle usuários comuns na playlist (Admin)
+     * � Listar playlists compartilhadas comigo
+     */
+    @Operation(
+        summary = "Listar playlists compartilhadas",
+        description = "Retorna todas as playlists do tipo COMPARTILHADA que foram compartilhadas especificamente com o usuário autenticado.",
+        tags = { "Playlists" }
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Lista de playlists compartilhadas retornada com sucesso",
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    value = "[{\"id\": 5, \"nome\": \"Carteira VIP Exclusiva\", \"criadorNome\": \"Admin Sistema\", \"tipo\": \"COMPARTILHADA\", \"totalInvestimentos\": 10, \"totalSeguidores\": 3, \"isCriador\": false, \"isFollowing\": true}]"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "401", description = "Usuário não autenticado")
+    })
+    @GetMapping("/compartilhadas")
+    @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<PlaylistResumoResponseDTO>> listarPlaylistsCompartilhadas(Authentication authentication) {
+        String email = authentication.getName();
+        List<PlaylistResumoResponseDTO> playlists = playlistService.listarPlaylistsCompartilhadas(email);
+        return ResponseEntity.ok(playlists);
+    }
+
+    /**
+     * 🔄 Tornar playlist compartilhada
+     */
+    @Operation(
+        summary = "Tornar playlist compartilhada",
+        description = "Converte uma playlist privada ou pública para o tipo COMPARTILHADA, permitindo compartilhamento seletivo com usuários específicos.",
+        tags = { "Playlists" }
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Playlist convertida para compartilhada com sucesso",
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    value = "{\"mensagem\": \"Playlist 'Minha Carteira Especial' agora é do tipo compartilhada\", \"playlistId\": 1, \"nomePlaylist\": \"Minha Carteira Especial\", \"status\": \"sucesso\"}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "403", description = "Apenas o criador pode alterar o tipo da playlist"),
+        @ApiResponse(responseCode = "404", description = "Playlist não encontrada")
+    })
+    @PutMapping("/{id}/tornar-compartilhada")
+    @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<PlaylistOperacaoResponseDTO> tornarPlaylistCompartilhada(@PathVariable Long id, 
+                                                                                  Authentication authentication) {
+        String email = authentication.getName();
+        PlaylistOperacaoResponseDTO response = playlistService.tornarPlaylistCompartilhada(email, id);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 📤 Compartilhar com usuário específico
+     */
+    @Operation(
+        summary = "Compartilhar playlist com usuário específico",
+        description = "Compartilha a playlist com um usuário específico, convertendo-a automaticamente para o tipo COMPARTILHADA se necessário.",
+        tags = { "Playlists" }
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Playlist compartilhada com sucesso",
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    value = "{\"mensagem\": \"Playlist 'Estratégias Premium' compartilhada com João Silva\", \"playlistId\": 1, \"nomePlaylist\": \"Estratégias Premium\", \"status\": \"sucesso\"}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "400", description = "Usuário já tem acesso à playlist ou dados inválidos"),
+        @ApiResponse(responseCode = "403", description = "Apenas o criador pode compartilhar a playlist")
+    })
+    @PostMapping("/{id}/compartilhar-com")
+    @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<PlaylistOperacaoResponseDTO> compartilharComUsuario(@PathVariable Long id, 
+                                                                             @Valid @RequestBody CompartilharPlaylistRequestDTO request,
+                                                                             Authentication authentication) {
+        String email = authentication.getName();
+        PlaylistOperacaoResponseDTO response = playlistService.compartilharComUsuario(email, id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * �👥 Toggle usuários comuns na playlist (Admin)
      */
     @Operation(
         summary = "Vincular/Desvincular todos os usuários comuns de uma playlist (Admin)",

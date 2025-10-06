@@ -25,8 +25,9 @@ public class Playlist {
     @JoinColumn(name = "criador_id", nullable = false)
     private Usuario criador;
 
-    @Column(name = "publica")
-    private Boolean publica = false; // Playlist pública ou privada
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo", nullable = false)
+    private PlaylistTipo tipo = PlaylistTipo.PRIVADA; // Tipo da playlist: PUBLICA, PRIVADA ou COMPARTILHADA
 
     @Column(name = "permite_colaboracao")
     private Boolean permiteColaboracao = true; // Outros usuários podem adicionar/remover investimentos
@@ -69,6 +70,14 @@ public class Playlist {
         this.nome = nome;
         this.descricao = descricao;
         this.criador = criador;
+    }
+
+    public Playlist(String nome, String descricao, Usuario criador, PlaylistTipo tipo) {
+        this();
+        this.nome = nome;
+        this.descricao = descricao;
+        this.criador = criador;
+        this.tipo = tipo;
     }
 
     // Métodos de conveniência
@@ -143,13 +152,28 @@ public class Playlist {
         this.criador = criador;
     }
 
-    public Boolean getPublica() {
-        return publica;
+    public PlaylistTipo getTipo() {
+        return tipo;
     }
 
-    public void setPublica(Boolean publica) {
-        this.publica = publica;
+    public void setTipo(PlaylistTipo tipo) {
+        this.tipo = tipo;
         this.dataAtualizacao = LocalDateTime.now();
+    }
+
+    /**
+     * Métodos de conveniência para verificar tipo da playlist
+     */
+    public boolean isPublica() {
+        return this.tipo == PlaylistTipo.PUBLICA;
+    }
+
+    public boolean isPrivada() {
+        return this.tipo == PlaylistTipo.PRIVADA;
+    }
+
+    public boolean isCompartilhada() {
+        return this.tipo == PlaylistTipo.COMPARTILHADA;
     }
 
     public Boolean getPermiteColaboracao() {

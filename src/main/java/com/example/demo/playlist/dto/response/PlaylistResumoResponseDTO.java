@@ -1,5 +1,6 @@
 package com.example.demo.playlist.dto.response;
 
+import com.example.demo.playlist.model.PlaylistTipo;
 import java.time.LocalDateTime;
 
 public class PlaylistResumoResponseDTO {
@@ -9,7 +10,7 @@ public class PlaylistResumoResponseDTO {
     private String descricao;
     private String criadorNome;
     private String criadorEmail;
-    private Boolean publica;
+    private PlaylistTipo tipo;
     private Boolean permiteColaboracao;
     private Integer totalInvestimentos;
     private Integer totalSeguidores;
@@ -61,12 +62,31 @@ public class PlaylistResumoResponseDTO {
         this.criadorEmail = criadorEmail;
     }
 
-    public Boolean getPublica() {
-        return publica;
+    public PlaylistTipo getTipo() {
+        return tipo;
     }
 
-    public void setPublica(Boolean publica) {
-        this.publica = publica;
+    public void setTipo(PlaylistTipo tipo) {
+        this.tipo = tipo;
+    }
+
+    /**
+     * Métodos de conveniência para compatibilidade
+     */
+    public Boolean getPublica() {
+        return tipo == PlaylistTipo.PUBLICA;
+    }
+
+    public Boolean isPublica() {
+        return tipo == PlaylistTipo.PUBLICA;
+    }
+
+    public Boolean isPrivada() {
+        return tipo == PlaylistTipo.PRIVADA;
+    }
+
+    public Boolean isCompartilhada() {
+        return tipo == PlaylistTipo.COMPARTILHADA;
     }
 
     public Boolean getPermiteColaboracao() {

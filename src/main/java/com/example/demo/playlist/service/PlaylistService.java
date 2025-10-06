@@ -1,6 +1,7 @@
 package com.example.demo.playlist.service;
 
 import com.example.demo.playlist.model.Playlist;
+import com.example.demo.playlist.model.PlaylistTipo;
 import com.example.demo.playlist.repository.PlaylistRepository;
 import com.example.demo.playlist.dto.request.*;
 import com.example.demo.playlist.dto.response.*;
@@ -37,8 +38,7 @@ public class PlaylistService {
     public PlaylistOperacaoResponseDTO criarPlaylist(String emailUsuario, CriarPlaylistRequestDTO request) {
         Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
 
-        Playlist playlist = new Playlist(request.getNome(), request.getDescricao(), usuario);
-        playlist.setPublica(request.getPublica());
+        Playlist playlist = new Playlist(request.getNome(), request.getDescricao(), usuario, request.getTipo());
         playlist.setPermiteColaboracao(request.getPermiteColaboracao());
 
         playlist = playlistRepository.save(playlist);
@@ -75,11 +75,23 @@ public class PlaylistService {
     }
 
     /**
+     * Listar playlists compartilhadas com o usuário
+     */
+    public List<PlaylistResumoResponseDTO> listarPlaylistsCompartilhadas(String emailUsuario) {
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
+        List<Playlist> playlists = playlistRepository.findPlaylistsCompartilhadasPorUsuario(usuario);
+
+        return playlists.stream()
+                       .map(playlist -> converterParaResumoDTO(playlist, usuario))
+                       .collect(Collectors.toList());
+    }
+
+    /**
      * Listar playlists públicas
      */
     public List<PlaylistResumoResponseDTO> listarPlaylistsPublicas(String emailUsuario) {
         Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
-        List<Playlist> playlists = playlistRepository.findByPublicaTrueAndAtivaTrue();
+        List<Playlist> playlists = playlistRepository.findByTipoPublicaAndAtivaTrue();
 
         return playlists.stream()
                        .map(playlist -> converterParaResumoDTO(playlist, usuario))
@@ -91,7 +103,7 @@ public class PlaylistService {
      */
     public List<PlaylistResumoResponseDTO> buscarPlaylistsPorNome(String emailUsuario, String nome) {
         Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
-        List<Playlist> playlists = playlistRepository.findByNomeContainingIgnoreCaseAndPublicaTrueAndAtivaTrue(nome);
+        List<Playlist> playlists = playlistRepository.findByNomeContainingIgnoreCaseAndTipoPublicaAndAtivaTrue(nome);
 
         return playlists.stream()
                        .map(playlist -> converterParaResumoDTO(playlist, usuario))
@@ -125,8 +137,8 @@ public class PlaylistService {
         if (request.getDescricao() != null) {
             playlist.setDescricao(request.getDescricao());
         }
-        if (request.getPublica() != null) {
-            playlist.setPublica(request.getPublica());
+        if (request.getTipo() != null) {
+            playlist.setTipo(request.getTipo());
         }
         if (request.getPermiteColaboracao() != null) {
             playlist.setPermiteColaboracao(request.getPermiteColaboracao());
@@ -313,6 +325,60 @@ public class PlaylistService {
         );
     }
 
+    /**
+     * Tornar playlist compartilhada (muda tipo para COMPARTILHADA)
+     */
+    @Transactional
+    public PlaylistOperacaoResponseDTO tornarPlaylistCompartilhada(String emailUsuario, Long playlistId) {
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
+        Playlist playlist = buscarPlaylistPorId(playlistId);
+
+        verificarSeEhCriador(playlist, usuario);
+
+        playlist.setTipo(PlaylistTipo.COMPARTILHADA);
+        playlistRepository.save(playlist);
+
+        return new PlaylistOperacaoResponseDTO(
+            "Playlist '" + playlist.getNome() + "' agora é do tipo compartilhada",
+            playlist.getId(),
+            playlist.getNome()
+        );
+    }
+
+    /**
+     * Compartilhar playlist com usuário específico e definir como COMPARTILHADA
+     */
+    @Transactional
+    public PlaylistOperacaoResponseDTO compartilharComUsuario(String emailUsuario, Long playlistId, CompartilharPlaylistRequestDTO request) {
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
+        Playlist playlist = buscarPlaylistPorId(playlistId);
+        Usuario usuarioDestino = buscarUsuarioPorEmail(request.getEmailUsuario());
+
+        verificarSeEhCriador(playlist, usuario);
+
+        if (playlist.isSeguidor(usuarioDestino)) {
+            throw new IllegalArgumentException("Usuário já tem acesso a esta playlist");
+        }
+
+        if (playlist.isCriador(usuarioDestino)) {
+            throw new IllegalArgumentException("Não é possível compartilhar playlist com o próprio criador");
+        }
+
+        // Muda o tipo para COMPARTILHADA se ainda não for
+        if (playlist.getTipo() != PlaylistTipo.COMPARTILHADA) {
+            playlist.setTipo(PlaylistTipo.COMPARTILHADA);
+        }
+
+        playlist.adicionarSeguidor(usuarioDestino);
+        playlistRepository.save(playlist);
+
+        return new PlaylistOperacaoResponseDTO(
+            "Playlist '" + playlist.getNome() + "' compartilhada com " + usuarioDestino.getNomeUsuario(),
+            playlist.getId(),
+            playlist.getNome()
+        );
+    }
+
     // Métodos auxiliares privados
 
     private Usuario buscarUsuarioPorEmail(String email) {
@@ -350,7 +416,7 @@ public class PlaylistService {
         dto.setDescricao(playlist.getDescricao());
         dto.setCriadorNome(playlist.getCriador().getNomeUsuario());
         dto.setCriadorEmail(playlist.getCriador().getEmail());
-        dto.setPublica(playlist.getPublica());
+        dto.setTipo(playlist.getTipo());
         dto.setPermiteColaboracao(playlist.getPermiteColaboracao());
         dto.setTotalInvestimentos(playlist.getTotalInvestimentos());
         dto.setTotalSeguidores(playlist.getTotalSeguidores());
@@ -369,7 +435,7 @@ public class PlaylistService {
         dto.setDescricao(playlist.getDescricao());
         dto.setCriadorNome(playlist.getCriador().getNomeUsuario());
         dto.setCriadorEmail(playlist.getCriador().getEmail());
-        dto.setPublica(playlist.getPublica());
+        dto.setTipo(playlist.getTipo());
         dto.setPermiteColaboracao(playlist.getPermiteColaboracao());
         dto.setTotalInvestimentos(playlist.getTotalInvestimentos());
         dto.setTotalSeguidores(playlist.getTotalSeguidores());
