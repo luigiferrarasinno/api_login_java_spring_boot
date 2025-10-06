@@ -17,6 +17,7 @@ public class PosicaoCarteiraResponseDTO {
     private BigDecimal valorAtual;
     private BigDecimal ganhoPerda;
     private BigDecimal percentualGanhoPerda;
+    private BigDecimal totalDividendosRecebidos;  // Total de dividendos recebidos desta posição
     private LocalDateTime dataPrimeiraCompra;
     private LocalDateTime dataUltimaMovimentacao;
 
@@ -59,6 +60,9 @@ public class PosicaoCarteiraResponseDTO {
 
     public BigDecimal getPercentualGanhoPerda() { return percentualGanhoPerda; }
     public void setPercentualGanhoPerda(BigDecimal percentualGanhoPerda) { this.percentualGanhoPerda = percentualGanhoPerda; }
+
+    public BigDecimal getTotalDividendosRecebidos() { return totalDividendosRecebidos; }
+    public void setTotalDividendosRecebidos(BigDecimal totalDividendosRecebidos) { this.totalDividendosRecebidos = totalDividendosRecebidos; }
 
     public LocalDateTime getDataPrimeiraCompra() { return dataPrimeiraCompra; }
     public void setDataPrimeiraCompra(LocalDateTime dataPrimeiraCompra) { this.dataPrimeiraCompra = dataPrimeiraCompra; }

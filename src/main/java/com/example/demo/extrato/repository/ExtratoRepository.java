@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,4 +42,7 @@ public interface ExtratoRepository extends JpaRepository<Extrato, Long> {
     
     @Query("SELECT e FROM Extrato e WHERE e.usuario = :usuario AND e.investimento.id = :investimentoId AND e.tipoTransacao IN ('COMPRA_ACAO', 'VENDA_ACAO') ORDER BY e.dataTransacao DESC")
     List<Extrato> findTransacoesInvestimentoByUsuarioAndInvestimento(@Param("usuario") Usuario usuario, @Param("investimentoId") Long investimentoId);
+    
+    @Query("SELECT COALESCE(SUM(e.valorTotal), 0) FROM Extrato e WHERE e.usuario = :usuario AND e.investimento.id = :investimentoId AND e.tipoTransacao = 'DIVIDENDO_RECEBIDO'")
+    java.math.BigDecimal calcularTotalDividendosPorInvestimento(@Param("usuario") Usuario usuario, @Param("investimentoId") Long investimentoId);
 }

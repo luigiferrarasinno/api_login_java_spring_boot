@@ -10,6 +10,7 @@ public class ResumoCarteiraResponseDTO {
     private BigDecimal valorAtualCarteira;
     private BigDecimal ganhoTotalCarteira;
     private BigDecimal percentualGanhoCarteira;
+    private BigDecimal totalDividendosCarteira;  // Total de dividendos de todas as posições
     private Integer quantidadePosicoes;
     private List<PosicaoCarteiraResponseDTO> posicoes;
 
@@ -31,6 +32,9 @@ public class ResumoCarteiraResponseDTO {
 
     public BigDecimal getPercentualGanhoCarteira() { return percentualGanhoCarteira; }
     public void setPercentualGanhoCarteira(BigDecimal percentualGanhoCarteira) { this.percentualGanhoCarteira = percentualGanhoCarteira; }
+
+    public BigDecimal getTotalDividendosCarteira() { return totalDividendosCarteira; }
+    public void setTotalDividendosCarteira(BigDecimal totalDividendosCarteira) { this.totalDividendosCarteira = totalDividendosCarteira; }
 
     public Integer getQuantidadePosicoes() { return quantidadePosicoes; }
     public void setQuantidadePosicoes(Integer quantidadePosicoes) { this.quantidadePosicoes = quantidadePosicoes; }

@@ -30,7 +30,7 @@ public class CarteiraController {
      */
     @Operation(
         summary = "Obter resumo da carteira",
-        description = "Retorna um resumo consolidado da carteira do usuário, incluindo saldo disponível, valor total investido, valorização total e outras métricas financeiras importantes.",
+        description = "Retorna um resumo consolidado da carteira do usuário, incluindo saldo disponível, valor total investido, valorização total, total de dividendos recebidos e outras métricas financeiras importantes.",
         tags = { "Carteira" }
     )
     @ApiResponses(value = {
@@ -40,7 +40,7 @@ public class CarteiraController {
             content = @io.swagger.v3.oas.annotations.media.Content(
                 mediaType = "application/json",
                 examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
-                    value = "{\"saldoDisponivel\": 5000.00, \"valorTotalInvestido\": 15000.00, \"valorizacaoTotal\": 2500.00, \"percentualValorizacao\": 16.67, \"valorTotalCarteira\": 17500.00, \"quantidadeAtivos\": 5, \"ultimaAtualizacao\": \"2024-10-02T10:30:00\"}"
+                    value = "{\"saldoDisponivel\": 5000.00, \"valorTotalInvestido\": 15000.00, \"valorAtualCarteira\": 17500.00, \"ganhoTotalCarteira\": 2500.00, \"percentualGanhoCarteira\": 16.67, \"totalDividendosCarteira\": 850.50, \"quantidadePosicoes\": 5}"
                 )
             )
         ),
@@ -58,7 +58,7 @@ public class CarteiraController {
      */
     @Operation(
         summary = "Obter posições detalhadas da carteira",
-        description = "Retorna a lista detalhada de todas as posições de investimentos na carteira do usuário, incluindo quantidade de ações, preço médio, valor atual e performance de cada ativo.",
+        description = "Retorna a lista detalhada de todas as posições de investimentos na carteira do usuário, incluindo quantidade de ações, preço médio, valor atual, performance de cada ativo e total de dividendos recebidos.",
         tags = { "Carteira" }
     )
     @ApiResponses(value = {
@@ -68,7 +68,7 @@ public class CarteiraController {
             content = @io.swagger.v3.oas.annotations.media.Content(
                 mediaType = "application/json",
                 examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
-                    value = "[{\"investimentoId\": 1, \"investimentoNome\": \"PETR4\", \"quantidade\": 100, \"precoMedio\": 25.50, \"precoAtual\": 28.00, \"valorInvestido\": 2550.00, \"valorAtual\": 2800.00, \"valorizacao\": 250.00, \"percentualValorizacao\": 9.80}]"
+                    value = "[{\"investimentoId\": 1, \"investimentoNome\": \"PETR4\", \"quantidade\": 100, \"precoMedio\": 25.50, \"precoAtual\": 28.00, \"valorInvestido\": 2550.00, \"valorAtual\": 2800.00, \"valorizacao\": 250.00, \"percentualValorizacao\": 9.80, \"totalDividendosRecebidos\": 150.00}]"
                 )
             )
         ),

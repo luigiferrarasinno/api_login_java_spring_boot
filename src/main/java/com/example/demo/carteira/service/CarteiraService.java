@@ -8,6 +8,7 @@ import com.example.demo.user.model.Usuario;
 import com.example.demo.user.repository.UsuarioRepository;
 import com.example.demo.investimento.model.Investimento;
 import com.example.demo.investimento.service.CotacaoService;
+import com.example.demo.extrato.repository.ExtratoRepository;
 import com.example.demo.exception.RecursoNaoEncontradoException;
 
 import org.springframework.stereotype.Service;
@@ -23,13 +24,16 @@ public class CarteiraService {
     private final PosicaoCarteiraRepository posicaoCarteiraRepository;
     private final UsuarioRepository usuarioRepository;
     private final CotacaoService cotacaoService;
+    private final ExtratoRepository extratoRepository;
 
     public CarteiraService(PosicaoCarteiraRepository posicaoCarteiraRepository,
                           UsuarioRepository usuarioRepository,
-                          CotacaoService cotacaoService) {
+                          CotacaoService cotacaoService,
+                          ExtratoRepository extratoRepository) {
         this.posicaoCarteiraRepository = posicaoCarteiraRepository;
         this.usuarioRepository = usuarioRepository;
         this.cotacaoService = cotacaoService;
+        this.extratoRepository = extratoRepository;
     }
 
     public ResumoCarteiraResponseDTO obterResumoCarteira(String emailUsuario) {
@@ -74,6 +78,13 @@ public class CarteiraService {
         resumo.setValorAtualCarteira(valorAtualCarteira);
         resumo.setGanhoTotalCarteira(ganhoTotalCarteira);
         resumo.setPercentualGanhoCarteira(percentualGanhoCarteira);
+        
+        // Calcular total de dividendos da carteira
+        BigDecimal totalDividendosCarteira = posicoesDTO.stream()
+                                                       .map(PosicaoCarteiraResponseDTO::getTotalDividendosRecebidos)
+                                                       .reduce(BigDecimal.ZERO, BigDecimal::add);
+        resumo.setTotalDividendosCarteira(totalDividendosCarteira);
+        
         resumo.setPosicoes(posicoesDTO);
         
         return resumo;
@@ -120,6 +131,13 @@ public class CarteiraService {
                                  .multiply(BigDecimal.valueOf(100));
         }
         dto.setPercentualGanhoPerda(percentualGanhoPerda);
+        
+        // Buscar total de dividendos recebidos deste investimento
+        BigDecimal totalDividendos = extratoRepository.calcularTotalDividendosPorInvestimento(
+            posicao.getUsuario(), 
+            investimento.getId()
+        );
+        dto.setTotalDividendosRecebidos(totalDividendos != null ? totalDividendos : BigDecimal.ZERO);
         
         return dto;
     }
