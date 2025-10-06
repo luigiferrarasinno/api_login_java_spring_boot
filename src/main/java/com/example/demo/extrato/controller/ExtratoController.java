@@ -220,7 +220,8 @@ public class ExtratoController {
      */
     @Operation(
         summary = "Obter extrato completo",
-        description = "Retorna o extrato completo de todas as operações financeiras do usuário autenticado.",
+        description = "Retorna o extrato completo de todas as operações financeiras do usuário autenticado. " +
+                     "Admins podem consultar extratos de outros usuários informando o parâmetro userId.",
         tags = { "Extrato" }
     )
     @ApiResponses(value = {
@@ -234,12 +235,38 @@ public class ExtratoController {
                 )
             )
         ),
-        @ApiResponse(responseCode = "401", description = "Usuário não autenticado")
+        @ApiResponse(responseCode = "401", description = "Usuário não autenticado"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado - usuário comum tentando acessar dados de outro usuário")
     })
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<List<ExtratoResponseDTO>> obterExtrato(Authentication authentication) {
-        List<ExtratoResponseDTO> extrato = extratoService.obterExtrato(authentication.getName());
+    public ResponseEntity<List<ExtratoResponseDTO>> obterExtrato(
+            Authentication authentication,
+            @RequestParam(required = false, name = "userId")
+            @io.swagger.v3.oas.annotations.Parameter(
+                description = "ID do usuário para consultar o extrato (apenas para admins). Sem este parâmetro retorna o extrato do usuário autenticado.",
+                example = "2"
+            ) Long userId) {
+        
+        String emailUsuario = authentication.getName();
+        
+        // Se userId foi informado, validar se é admin ou se está consultando seus próprios dados
+        if (userId != null) {
+            com.example.demo.user.model.Usuario usuarioAuth = extratoService.buscarUsuarioPorEmail(emailUsuario);
+            
+            // Se não for admin, validar se está consultando seus próprios dados
+            if (!"ROLE_ADMIN".equals(usuarioAuth.getRole())) {
+                if (!usuarioAuth.getId().equals(userId)) {
+                    return ResponseEntity.status(403).build(); // Forbidden
+                }
+            }
+            
+            // Buscar usuário alvo por ID
+            com.example.demo.user.model.Usuario usuarioAlvo = extratoService.buscarUsuarioPorId(userId);
+            emailUsuario = usuarioAlvo.getEmail();
+        }
+        
+        List<ExtratoResponseDTO> extrato = extratoService.obterExtrato(emailUsuario);
         return ResponseEntity.ok(extrato);
     }
 
@@ -248,7 +275,8 @@ public class ExtratoController {
      */
     @Operation(
         summary = "Obter extrato por investimento",
-        description = "Retorna o extrato filtrado por um investimento específico, mostrando apenas operações relacionadas a esse ativo.",
+        description = "Retorna o extrato filtrado por um investimento específico, mostrando apenas operações relacionadas a esse ativo. " +
+                     "Admins podem consultar extratos de outros usuários informando o parâmetro userId.",
         tags = { "Extrato" }
     )
     @ApiResponses(value = {
@@ -262,14 +290,39 @@ public class ExtratoController {
                 )
             )
         ),
-        @ApiResponse(responseCode = "401", description = "Usuário não autenticado")
+        @ApiResponse(responseCode = "401", description = "Usuário não autenticado"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado - usuário comum tentando acessar dados de outro usuário")
     })
     @GetMapping("/investimento/{investimentoId}")
     @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<List<ExtratoResponseDTO>> obterExtratoPorInvestimento(
             @PathVariable Long investimentoId, 
-            Authentication authentication) {
-        List<ExtratoResponseDTO> extrato = extratoService.obterExtratoPorInvestimento(authentication.getName(), investimentoId);
+            Authentication authentication,
+            @RequestParam(required = false, name = "userId")
+            @io.swagger.v3.oas.annotations.Parameter(
+                description = "ID do usuário para consultar o extrato (apenas para admins). Sem este parâmetro retorna o extrato do usuário autenticado.",
+                example = "2"
+            ) Long userId) {
+        
+        String emailUsuario = authentication.getName();
+        
+        // Se userId foi informado, validar se é admin ou se está consultando seus próprios dados
+        if (userId != null) {
+            com.example.demo.user.model.Usuario usuarioAuth = extratoService.buscarUsuarioPorEmail(emailUsuario);
+            
+            // Se não for admin, validar se está consultando seus próprios dados
+            if (!"ROLE_ADMIN".equals(usuarioAuth.getRole())) {
+                if (!usuarioAuth.getId().equals(userId)) {
+                    return ResponseEntity.status(403).build(); // Forbidden
+                }
+            }
+            
+            // Buscar usuário alvo por ID
+            com.example.demo.user.model.Usuario usuarioAlvo = extratoService.buscarUsuarioPorId(userId);
+            emailUsuario = usuarioAlvo.getEmail();
+        }
+        
+        List<ExtratoResponseDTO> extrato = extratoService.obterExtratoPorInvestimento(emailUsuario, investimentoId);
         return ResponseEntity.ok(extrato);
     }
 
@@ -336,7 +389,8 @@ public class ExtratoController {
         summary = "Resumo unificado de investimentos com análise de lucro/prejuízo",
         description = "Gera um resumo completo dos investimentos do usuário com cálculos de lucro/prejuízo, " +
                      "dividendos recebidos e estatísticas detalhadas. Suporta filtros opcionais por mês, ano e investimento específico. " +
-                     "Todos os parâmetros são opcionais - sem filtros retorna resumo completo de todos os investimentos.",
+                     "Todos os parâmetros são opcionais - sem filtros retorna resumo completo de todos os investimentos. " +
+                     "Admins podem consultar resumos de outros usuários informando o parâmetro userId.",
         tags =  "Extrato" 
     )
     @ApiResponses(value = {
@@ -387,6 +441,12 @@ public class ExtratoController {
     @GetMapping("/resumo")
     public ResponseEntity<com.example.demo.extrato.dto.ResumoCompletoDTO> gerarResumoInvestimentos(
             Authentication authentication,
+            @RequestParam(required = false, name = "userId")
+            @io.swagger.v3.oas.annotations.Parameter(
+                description = "ID do usuário para consultar o resumo (apenas para admins). Sem este parâmetro retorna o resumo do usuário autenticado.",
+                example = "2"
+            ) Long userId,
+            
             @RequestParam(required = false, name = "ano") 
             @io.swagger.v3.oas.annotations.Parameter(
                 description = "Ano para filtrar (ex: 2024). Opcional - sem filtro retorna todo período.",
@@ -449,8 +509,25 @@ public class ExtratoController {
                 return ResponseEntity.badRequest().build();
             }
             
-            String email = authentication.getName();
-            com.example.demo.extrato.dto.ResumoCompletoDTO resumo = extratoService.gerarResumo(email, ano, mes, mesInicio, mesFim, investimentoId);
+            String emailUsuario = authentication.getName();
+            
+            // Se userId foi informado, validar se é admin ou se está consultando seus próprios dados
+            if (userId != null) {
+                com.example.demo.user.model.Usuario usuarioAuth = extratoService.buscarUsuarioPorEmail(emailUsuario);
+                
+                // Se não for admin, validar se está consultando seus próprios dados
+                if (!"ROLE_ADMIN".equals(usuarioAuth.getRole())) {
+                    if (!usuarioAuth.getId().equals(userId)) {
+                        return ResponseEntity.status(403).build(); // Forbidden
+                    }
+                }
+                
+                // Buscar usuário alvo por ID
+                com.example.demo.user.model.Usuario usuarioAlvo = extratoService.buscarUsuarioPorId(userId);
+                emailUsuario = usuarioAlvo.getEmail();
+            }
+            
+            com.example.demo.extrato.dto.ResumoCompletoDTO resumo = extratoService.gerarResumo(emailUsuario, ano, mes, mesInicio, mesFim, investimentoId);
             return ResponseEntity.ok(resumo);
             
         } catch (Exception e) {

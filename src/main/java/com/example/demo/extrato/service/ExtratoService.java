@@ -344,9 +344,14 @@ public class ExtratoService {
         return dto;
     }
 
-    private Usuario buscarUsuarioPorEmail(String email) {
+    public Usuario buscarUsuarioPorEmail(String email) {
         return usuarioRepository.findByEmail(email)
                                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado: " + email));
+    }
+    
+    public Usuario buscarUsuarioPorId(Long id) {
+        return usuarioRepository.findById(id)
+                               .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
     }
 
     private Investimento buscarInvestimentoPorId(Long id) {
