@@ -5,6 +5,8 @@ import com.example.demo.comentarios.repository.ComentarioRepository;
 import com.example.demo.extrato.model.Extrato;
 import com.example.demo.extrato.model.TipoTransacao;
 import com.example.demo.extrato.repository.ExtratoRepository;
+import com.example.demo.carteira.model.PosicaoCarteira;
+import com.example.demo.carteira.repository.PosicaoCarteiraRepository;
 import com.example.demo.investimento.model.Investimento;
 import com.example.demo.investimento.model.Categoria;
 import com.example.demo.investimento.model.Risco;
@@ -26,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Random;
 import java.util.Random;
 
 /**
@@ -60,6 +63,9 @@ public class SystemInitializer implements CommandLineRunner {
     
     @Autowired
     private ExtratoRepository extratoRepository;
+    
+    @Autowired
+    private PosicaoCarteiraRepository posicaoCarteiraRepository;
 
     @Override
     @Transactional
@@ -238,34 +244,101 @@ public class SystemInitializer implements CommandLineRunner {
     }
 
     /**
-     * 🔗 ETAPA 3: Vincular Investimentos aos Usuários
+     * 🔗 ETAPA 3: Criar Posições Iniciais na Carteira dos Usuários
      */
     private void vincularInvestimentosAosUsuarios() {
-        System.out.println("\n🔗 Vinculando investimentos aos usuários...");
+        System.out.println("\n� Criando posições iniciais na carteira dos usuários...");
+        
+        // Verificar se já existem posições criadas
+        if (posicaoCarteiraRepository.count() > 0) {
+            System.out.println("⏭️  Posições de carteira já existem, pulando criação...");
+            return;
+        }
         
         try {
+            Usuario admin = usuarioDAO.findByEmail("admin@admin.com").orElse(null);
             Usuario user = usuarioDAO.findByEmail("user@user.com").orElse(null);
             Usuario maria = usuarioDAO.findByEmail("maria@investidora.com").orElse(null);
             List<Investimento> investimentos = investimentoRepository.findAll();
             
-            if (user != null && !investimentos.isEmpty()) {
-                // João Silva tem alguns investimentos básicos
-                if (investimentos.size() >= 3) {
-                    System.out.println("💼 Vinculando investimentos para João Silva...");
-                }
+            if (admin == null || user == null || maria == null || investimentos.isEmpty()) {
+                System.out.println("⚠️  Dados insuficientes para criar posições");
+                return;
             }
+
+            Random random = new Random();
             
-            if (maria != null && !investimentos.isEmpty()) {
-                // Maria tem uma carteira mais diversificada
-                if (investimentos.size() >= 5) {
-                    System.out.println("💼 Vinculando investimentos para Maria Investidora...");
-                }
-            }
+            // 💼 Criar posições para João Silva (user@user.com) - Perfil Conservador
+            System.out.println("💼 Criando carteira para João Silva (Conservador)...");
+            criarPosicaoCarteira(user, "PETR4", new BigDecimal("100"), new BigDecimal("27.50"), investimentos, random);
+            criarPosicaoCarteira(user, "ITUB4", new BigDecimal("150"), new BigDecimal("31.80"), investimentos, random);
+            criarPosicaoCarteira(user, "TD-SELIC", new BigDecimal("50"), new BigDecimal("102.00"), investimentos, random);
+            criarPosicaoCarteira(user, "CDB-INTER", new BigDecimal("20"), new BigDecimal("1000.00"), investimentos, random);
             
-            System.out.println("✅ Investimentos vinculados com sucesso!");
+            // 💼 Criar posições para Maria Investidora - Perfil Moderado  
+            System.out.println("💼 Criando carteira para Maria Investidora (Moderado)...");
+            criarPosicaoCarteira(maria, "VALE3", new BigDecimal("80"), new BigDecimal("63.50"), investimentos, random);
+            criarPosicaoCarteira(maria, "BBAS3", new BigDecimal("120"), new BigDecimal("44.20"), investimentos, random);
+            criarPosicaoCarteira(maria, "HGLG11", new BigDecimal("200"), new BigDecimal("103.80"), investimentos, random);
+            criarPosicaoCarteira(maria, "MXRF11", new BigDecimal("500"), new BigDecimal("9.90"), investimentos, random);
+            criarPosicaoCarteira(maria, "LCI-NU", new BigDecimal("10"), new BigDecimal("5000.00"), investimentos, random);
+            
+            // 💼 Criar posições para Admin - Perfil Agressivo
+            System.out.println("💼 Criando carteira para Admin (Agressivo)...");
+            criarPosicaoCarteira(admin, "PETR4", new BigDecimal("200"), new BigDecimal("28.20"), investimentos, random);
+            criarPosicaoCarteira(admin, "VALE3", new BigDecimal("150"), new BigDecimal("64.80"), investimentos, random);
+            criarPosicaoCarteira(admin, "ABEV3", new BigDecimal("300"), new BigDecimal("14.60"), investimentos, random);
+            criarPosicaoCarteira(admin, "HGLG11", new BigDecimal("150"), new BigDecimal("104.50"), investimentos, random);
+            criarPosicaoCarteira(admin, "XPLG11", new BigDecimal("100"), new BigDecimal("97.80"), investimentos, random);
+            criarPosicaoCarteira(admin, "TD-SELIC", new BigDecimal("100"), new BigDecimal("102.30"), investimentos, random);
+            
+            System.out.println("✅ " + posicaoCarteiraRepository.count() + " posições de carteira criadas!");
             
         } catch (Exception e) {
-            System.err.println("⚠️  Erro ao vincular investimentos: " + e.getMessage());
+            System.err.println("❌ Erro ao criar posições de carteira: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Cria uma posição de carteira para um usuário em um investimento específico
+     */
+    private void criarPosicaoCarteira(Usuario usuario, String simboloInvestimento, BigDecimal quantidade, 
+                                     BigDecimal precoMedio, List<Investimento> investimentos, Random random) {
+        try {
+            // Encontrar o investimento pelo símbolo
+            Investimento investimento = investimentos.stream()
+                .filter(inv -> simboloInvestimento.equals(inv.getSimbolo()))
+                .findFirst()
+                .orElse(null);
+                
+            if (investimento == null) {
+                System.out.printf("⚠️  Investimento %s não encontrado para %s%n", simboloInvestimento, usuario.getNomeUsuario());
+                return;
+            }
+            
+            // Verificar se já existe posição para evitar duplicatas
+            boolean jaExiste = posicaoCarteiraRepository.findByUsuarioAndInvestimento(usuario, investimento).isPresent();
+            if (jaExiste) {
+                return; // Já existe, não criar duplicata
+            }
+            
+            // Criar nova posição
+            PosicaoCarteira posicao = new PosicaoCarteira(usuario, investimento);
+            posicao.setQuantidadeTotal(quantidade);
+            posicao.setPrecoMedio(precoMedio);
+            posicao.setValorInvestido(quantidade.multiply(precoMedio));
+            posicao.setDataPrimeiraCompra(LocalDateTime.now().minusDays(random.nextInt(90) + 30)); // 30-120 dias atrás
+            posicao.setDataUltimaMovimentacao(LocalDateTime.now().minusDays(random.nextInt(15) + 1)); // 1-15 dias atrás
+            
+            posicaoCarteiraRepository.save(posicao);
+            
+            System.out.printf("   ✅ %s: %s cotas de %s (R$ %.2f cada)%n", 
+                usuario.getNomeUsuario(), quantidade, simboloInvestimento, precoMedio);
+                
+        } catch (Exception e) {
+            System.err.printf("❌ Erro ao criar posição %s para %s: %s%n", 
+                simboloInvestimento, usuario.getNomeUsuario(), e.getMessage());
         }
     }
 
