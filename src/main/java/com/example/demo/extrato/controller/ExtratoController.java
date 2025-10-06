@@ -337,7 +337,7 @@ public class ExtratoController {
         description = "Gera um resumo completo dos investimentos do usuário com cálculos de lucro/prejuízo, " +
                      "dividendos recebidos e estatísticas detalhadas. Suporta filtros opcionais por mês, ano e investimento específico. " +
                      "Todos os parâmetros são opcionais - sem filtros retorna resumo completo de todos os investimentos.",
-        tags = { "Extrato", "Resumos" }
+        tags = { "Extrato", }
     )
     @ApiResponses(value = {
         @ApiResponse(
