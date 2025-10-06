@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,20 +29,20 @@ public class ExtratoService {
     private final InvestimentoRepository investimentoRepository;
     private final PosicaoCarteiraRepository posicaoCarteiraRepository;
     private final CotacaoService cotacaoService;
-    private final DividendoService dividendoService;
+    private final PagamentoDividendoService pagamentoDividendoService;
 
     public ExtratoService(ExtratoRepository extratoRepository, 
                          UsuarioRepository usuarioRepository,
                          InvestimentoRepository investimentoRepository,
                          PosicaoCarteiraRepository posicaoCarteiraRepository,
                          CotacaoService cotacaoService,
-                         DividendoService dividendoService) {
+                         PagamentoDividendoService pagamentoDividendoService) {
         this.extratoRepository = extratoRepository;
         this.usuarioRepository = usuarioRepository;
         this.investimentoRepository = investimentoRepository;
         this.posicaoCarteiraRepository = posicaoCarteiraRepository;
         this.cotacaoService = cotacaoService;
-        this.dividendoService = dividendoService;
+        this.pagamentoDividendoService = pagamentoDividendoService;
     }    @Transactional
     public String depositar(String emailUsuario, BigDecimal valor) {
         Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
@@ -114,7 +113,7 @@ public class ExtratoService {
         extratoRepository.save(extrato);
         
         // 🎯 NOVO: Pagar dividendo imediato se o investimento paga dividendos
-        String mensgemDividendo = dividendoService.pagarDividendoImediato(usuario, investimento, quantidade);
+        String mensgemDividendo = pagamentoDividendoService.pagarDividendoImediato(usuario, investimento, quantidade);
         
         String mensagemCompra = "Compra de " + quantidade + " ações de " + investimento.getNome() + " realizada com sucesso!";
         if (mensgemDividendo != null) {
@@ -174,7 +173,7 @@ public class ExtratoService {
         extratoRepository.save(extrato);
         
         // 🎯 NOVO: Pagar dividendo imediato se o investimento paga dividendos
-        String mensagemDividendo = dividendoService.pagarDividendoImediato(usuario, investimento, quantidadeBigDecimal);
+        String mensagemDividendo = pagamentoDividendoService.pagarDividendoImediato(usuario, investimento, quantidadeBigDecimal);
         
         String mensagemCompra = "Compra realizada: " + quantidade + " ações de " + investimento.getNome() + " por R$ " + valorTotal + " (R$ " + precoAtual + "/ação)";
         if (mensagemDividendo != null) {

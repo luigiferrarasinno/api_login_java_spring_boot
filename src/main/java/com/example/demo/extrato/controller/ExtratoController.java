@@ -1,7 +1,6 @@
 package com.example.demo.extrato.controller;
 
 import com.example.demo.extrato.service.ExtratoService;
-import com.example.demo.extrato.service.DividendoService;
 import com.example.demo.extrato.dto.*;
 import com.example.demo.extrato.dto.response.*;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +22,9 @@ import java.util.List;
 public class ExtratoController {
 
     private final ExtratoService extratoService;
-    private final DividendoService dividendoService;
 
-    public ExtratoController(ExtratoService extratoService, DividendoService dividendoService) {
+    public ExtratoController(ExtratoService extratoService) {
         this.extratoService = extratoService;
-        this.dividendoService = dividendoService;
     }
 
     /**
@@ -326,99 +323,9 @@ public class ExtratoController {
         }
     }
 
-    /**
-     * 💰 ADMIN: Distribuir dividendos de um investimento específico
-     */
-    @Operation(
-        summary = "Distribuir dividendos automáticos",
-        description = "Endpoint ADMIN para distribuir dividendos automaticamente para todos os acionários de um investimento específico.",
-        tags = { "Extrato" }
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Dividendos distribuídos com sucesso",
-            content = @io.swagger.v3.oas.annotations.media.Content(
-                mediaType = "application/json",
-                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
-                    value = "{\"mensagem\": \"Dividendos distribuídos para 15 acionários de PETR4\", \"timestamp\": \"2024-10-02T10:30:00\", \"status\": \"sucesso\", \"tipo\": \"DISTRIBUICAO_AUTOMATICA\"}"
-                )
-            )
-        ),
-        @ApiResponse(responseCode = "400", description = "Erro ao distribuir dividendos")
-    })
-    @PostMapping("/admin/distribuir-dividendos/{investimentoId}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<?> distribuirDividendosAutomatico(@PathVariable Long investimentoId,
-                                                           Authentication authentication) {
-        try {
-            // Integração com DividendoService - IMPLEMENTADO AGORA!
-            String mensagem = dividendoService.distribuirDividendosComDetalhes(investimentoId);
-            
-            DistribuicaoDividendosResponseDTO response = new DistribuicaoDividendosResponseDTO(
-                mensagem,
-                LocalDateTime.now(),
-                "sucesso",
-                "DISTRIBUICAO_AUTOMATICA"
-            );
-            
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            OperacaoErroResponseDTO errorResponse = new OperacaoErroResponseDTO(
-                e.getMessage(),
-                LocalDateTime.now(),
-                "erro"
-            );
-            
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-    }
 
-    /**
-     * 🤖 ADMIN: Criar pendências de dividendos para todos os investimentos
-     */
-    @Operation(
-        summary = "Distribuir dividendos para todos os investimentos",
-        description = "Endpoint ADMIN para criar pendências de dividendos para todos os investimentos. As pendências criadas devem ser aprovadas posteriormente.",
-        tags = { "Extrato" }
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Pendências de dividendos criadas com sucesso",
-            content = @io.swagger.v3.oas.annotations.media.Content(
-                mediaType = "application/json",
-                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
-                    value = "{\"mensagem\": \"Pendências criadas para todos os investimentos\", \"timestamp\": \"2024-10-02T10:30:00\", \"status\": \"sucesso\", \"tipo\": \"DISTRIBUICAO_GERAL\"}"
-                )
-            )
-        ),
-        @ApiResponse(responseCode = "400", description = "Erro ao criar pendências de dividendos")
-    })
-    @PostMapping("/admin/distribuir-todos-dividendos")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<?> distribuirTodosDividendos(Authentication authentication) {
-        try {
-            String mensagem = dividendoService.criarTodasPendenciasDividendos();
-            
-            DistribuicaoDividendosResponseDTO response = new DistribuicaoDividendosResponseDTO(
-                mensagem,
-                LocalDateTime.now(),
-                "sucesso",
-                "DISTRIBUICAO_GERAL"
-            );
-            
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            OperacaoErroResponseDTO errorResponse = new OperacaoErroResponseDTO(
-                e.getMessage(),
-                LocalDateTime.now(),
-                "erro"
-            );
-            
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-    }
+
+
     
     // ===== ENDPOINT UNIFICADO DE RESUMO DE INVESTIMENTOS =====
     
