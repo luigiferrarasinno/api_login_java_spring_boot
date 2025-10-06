@@ -19,9 +19,12 @@ public interface PosicaoCarteiraRepository extends JpaRepository<PosicaoCarteira
     
     Optional<PosicaoCarteira> findByUsuarioAndInvestimento(Usuario usuario, Investimento investimento);
     
+    // Retorna apenas posições ativas (com quantidade > 0)
+    // Nota: Posições zeradas são automaticamente deletadas pelo ExtratoService, mas mantemos o filtro por segurança
     @Query("SELECT pc FROM PosicaoCarteira pc WHERE pc.usuario = :usuario AND pc.quantidadeTotal > 0 ORDER BY pc.valorInvestido DESC")
     List<PosicaoCarteira> findPosicoesAtivasByUsuario(@Param("usuario") Usuario usuario);
     
+    // Calcula valor total investido apenas em posições ativas
     @Query("SELECT SUM(pc.valorInvestido) FROM PosicaoCarteira pc WHERE pc.usuario = :usuario AND pc.quantidadeTotal > 0")
     BigDecimal calcularValorTotalInvestido(@Param("usuario") Usuario usuario);
     

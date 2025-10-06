@@ -320,7 +320,13 @@ public class ExtratoService {
                                                           .orElseThrow(() -> new IllegalArgumentException("Posição não encontrada"));
         
         posicao.removerVenda(quantidade);
-        posicaoCarteiraRepository.save(posicao);
+        
+        // Se a posição zerou, deletar do banco (histórico está no extrato)
+        if (posicao.getQuantidadeTotal().compareTo(BigDecimal.ZERO) == 0) {
+            posicaoCarteiraRepository.delete(posicao);
+        } else {
+            posicaoCarteiraRepository.save(posicao);
+        }
     }
 
     private ExtratoResponseDTO converterParaDTO(Extrato extrato) {

@@ -102,7 +102,8 @@ public class PosicaoCarteira {
         this.quantidadeTotal = this.quantidadeTotal.subtract(quantidade);
         this.dataUltimaMovimentacao = LocalDateTime.now();
         
-        // Se zerou a posição, reseta os valores
+        // Nota: Se zerou a posição, o ExtratoService deleta o registro do banco
+        // (histórico preservado na tabela extrato)
         if (this.quantidadeTotal.equals(BigDecimal.ZERO)) {
             this.precoMedio = BigDecimal.ZERO;
             this.valorInvestido = BigDecimal.ZERO;
