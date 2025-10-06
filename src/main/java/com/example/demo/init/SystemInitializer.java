@@ -2,8 +2,9 @@ package com.example.demo.init;
 
 import com.example.demo.comentarios.model.Comentario;
 import com.example.demo.comentarios.repository.ComentarioRepository;
-import com.example.demo.historico.model.Historico;
-import com.example.demo.historico.repository.HistoricoRepository;
+import com.example.demo.extrato.model.Extrato;
+import com.example.demo.extrato.model.TipoTransacao;
+import com.example.demo.extrato.repository.ExtratoRepository;
 import com.example.demo.investimento.model.Investimento;
 import com.example.demo.investimento.model.Categoria;
 import com.example.demo.investimento.model.Risco;
@@ -58,7 +59,7 @@ public class SystemInitializer implements CommandLineRunner {
     private ComentarioRepository comentarioRepository;
     
     @Autowired
-    private HistoricoRepository historicoRepository;
+    private ExtratoRepository extratoRepository;
 
     @Override
     @Transactional
@@ -80,8 +81,8 @@ public class SystemInitializer implements CommandLineRunner {
         // 5. Criar comentários (precisa de usuários e investimentos)
         criarComentariosIniciais();
         
-        // 6. Criar históricos de investimentos (precisa de usuários e investimentos)
-        criarHistoricosIniciais();
+        // 6. Criar extratos de investimentos para os últimos 12 meses (precisa de usuários e investimentos)
+        criarExtratosIniciais();
         
         System.out.println("✅ ===== SISTEMA INICIALIZADO COM SUCESSO! ===== ✅\n");
         imprimirResumoInicializacao();
@@ -437,13 +438,15 @@ public class SystemInitializer implements CommandLineRunner {
     }
 
     /**
-     * � ETAPA 6: Criar Históricos de Investimentos
+     * 📊 ETAPA 6: Criar Extratos de Investimentos para os Últimos 12 Meses
      */
-    private void criarHistoricosIniciais() {
-        System.out.println("\n📈 Inicializando históricos de investimentos...");
+    private void criarExtratosIniciais() {
+        System.out.println("\n� Inicializando extratos de investimentos para 12 meses...");
         
-        if (historicoRepository.count() > 0) {
-            System.out.println("⏭️  Históricos já existem, pulando criação...");
+        // Verificar se já existem extratos de investimento
+        long extratosInvestimento = extratoRepository.count();
+        if (extratosInvestimento > 20) { // Se já tem mais de 20 registros, provavelmente já foi inicializado
+            System.out.println("⏭️  Extratos de investimento já existem, pulando criação...");
             return;
         }
 
@@ -454,107 +457,190 @@ public class SystemInitializer implements CommandLineRunner {
             List<Investimento> investimentos = investimentoRepository.findAll();
 
             if (user == null || maria == null || admin == null || investimentos.isEmpty()) {
-                System.out.println("⚠️  Dados insuficientes para criar históricos");
+                System.out.println("⚠️  Dados insuficientes para criar extratos de investimentos");
                 return;
             }
 
             Random random = new Random();
             YearMonth mesAtual = YearMonth.now();
             
-            // Criar históricos para os últimos 12 meses
-            for (int mesesAtras = 11; mesesAtras >= 0; mesesAtras--) {
+            // Criar extratos para os últimos 12 meses (até o mês passado)
+            for (int mesesAtras = 12; mesesAtras >= 1; mesesAtras--) {
                 YearMonth mesReferencia = mesAtual.minusMonths(mesesAtras);
                 
-                // 📊 Históricos para João Silva (user@user.com)
-                criarHistoricosParaUsuario(user, investimentos, mesReferencia, random, "conservador");
+                // 📊 Extratos para João Silva (user@user.com) - Perfil Conservador
+                criarExtratosParaUsuario(user, investimentos, mesReferencia, random, "conservador");
                 
-                // 📊 Históricos para Maria Investidora
-                criarHistoricosParaUsuario(maria, investimentos, mesReferencia, random, "moderado");
+                // 📊 Extratos para Maria Investidora - Perfil Moderado
+                criarExtratosParaUsuario(maria, investimentos, mesReferencia, random, "moderado");
                 
-                // 📊 Históricos para Admin (mais diversificado)
-                criarHistoricosParaUsuario(admin, investimentos, mesReferencia, random, "agressivo");
+                // 📊 Extratos para Admin - Perfil Agressivo
+                criarExtratosParaUsuario(admin, investimentos, mesReferencia, random, "agressivo");
             }
 
-            System.out.println("✅ " + historicoRepository.count() + " registros de histórico criados!");
+            System.out.println("✅ " + extratoRepository.count() + " registros de extrato criados para 12 meses!");
             
         } catch (Exception e) {
-            System.err.println("❌ Erro ao criar históricos: " + e.getMessage());
+            System.err.println("❌ Erro ao criar extratos de investimentos: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     /**
-     * Cria múltiplos históricos para um usuário em um mês específico
+     * Cria múltiplos extratos de investimento para um usuário em um mês específico
      */
-    private void criarHistoricosParaUsuario(Usuario usuario, List<Investimento> investimentos, 
-                                           YearMonth mesReferencia, Random random, String perfil) {
+    private void criarExtratosParaUsuario(Usuario usuario, List<Investimento> investimentos, 
+                                         YearMonth mesReferencia, Random random, String perfil) {
         
-        // Determinar quantos investimentos este usuário terá neste mês
-        int maxInvestimentos = switch (perfil) {
-            case "conservador" -> Math.min(3, investimentos.size()); // João - mais conservador
-            case "moderado" -> Math.min(5, investimentos.size());    // Maria - moderado
-            case "agressivo" -> Math.min(8, investimentos.size());   // Admin - mais diversificado
-            default -> 3;
+        // Determinar quantos investimentos este usuário fará neste mês baseado no perfil
+        int maxOperacoesMes = switch (perfil) {
+            case "conservador" -> random.nextInt(2) + 2; // 2-3 operações por mês
+            case "moderado" -> random.nextInt(3) + 3;    // 3-5 operações por mês
+            case "agressivo" -> random.nextInt(4) + 4;   // 4-7 operações por mês
+            default -> 2;
         };
         
-        // Selecionar investimentos aleatórios para este usuário neste mês
-        List<Investimento> investimentosEscolhidos = investimentos.stream()
-            .limit(maxInvestimentos)
-            .toList();
+        // Selecionar investimentos baseado no perfil
+        List<Investimento> investimentosEscolhidos = switch (perfil) {
+            case "conservador" -> investimentos.stream()
+                .filter(inv -> inv.getRisco() != Risco.ALTO)
+                .limit(4).toList(); // Evita alto risco
+            case "moderado" -> investimentos.stream()
+                .limit(6).toList(); // Mix equilibrado
+            case "agressivo" -> investimentos; // Todos os investimentos
+            default -> investimentos.subList(0, Math.min(3, investimentos.size()));
+        };
         
-        for (int i = 0; i < Math.min(random.nextInt(3) + 2, maxInvestimentos); i++) { // 2 a 4 registros por mês
+        BigDecimal saldoAtual = usuario.getSaldoCarteira();
+        
+        for (int i = 0; i < maxOperacoesMes && !investimentosEscolhidos.isEmpty(); i++) {
             Investimento investimento = investimentosEscolhidos.get(random.nextInt(investimentosEscolhidos.size()));
             
-            // Calcular valores baseados no perfil e mês
-            BigDecimal valorBase = switch (perfil) {
-                case "conservador" -> new BigDecimal(random.nextDouble(1000, 5000)); // R$ 1.000 - 5.000
-                case "moderado" -> new BigDecimal(random.nextDouble(2000, 8000));    // R$ 2.000 - 8.000  
-                case "agressivo" -> new BigDecimal(random.nextDouble(5000, 15000));  // R$ 5.000 - 15.000
-                default -> new BigDecimal(1000);
-            };
+            // Calcular valores baseados no perfil e investimento
+            BigDecimal valorOperacao = calcularValorOperacao(perfil, investimento, random);
+            BigDecimal quantidade = valorOperacao.divide(investimento.getPrecoAtual(), 6, java.math.RoundingMode.HALF_UP);
             
-            // Simular variação de mercado (alguns meses bons, outros ruins)
-            double variacaoMercado = switch (mesReferencia.getMonthValue()) {
-                case 1, 2, 11, 12 -> random.nextDouble(-0.15, 0.10); // Inverno: mais volátil
-                case 3, 4, 9, 10 -> random.nextDouble(-0.08, 0.15);   // Primavera/Outono: moderado
-                case 5, 6, 7, 8 -> random.nextDouble(-0.05, 0.12);    // Verão: mais estável
-                default -> random.nextDouble(-0.10, 0.10);
-            };
+            // Simular compra do investimento
+            BigDecimal saldoAnterior = saldoAtual;
+            saldoAtual = saldoAtual.subtract(valorOperacao);
             
-            // Ajustar variação baseada no tipo de investimento
-            if (investimento.getCategoria() == Categoria.RENDA_FIXA) {
-                variacaoMercado = Math.abs(variacaoMercado) * 0.3; // Renda fixa sempre positiva e menor
-            } else if (investimento.getRisco() == Risco.ALTO) {
-                variacaoMercado *= 1.5; // Alto risco = maior variação
-            }
+            // Criar extrato de compra
+            Extrato extratoCompra = new Extrato();
+            extratoCompra.setUsuario(usuario);
+            extratoCompra.setInvestimento(investimento);
+            extratoCompra.setTipoTransacao(TipoTransacao.COMPRA_ACAO);
+            extratoCompra.setQuantidade(quantidade);
+            extratoCompra.setPrecoUnitario(investimento.getPrecoAtual());
+            extratoCompra.setValorTotal(valorOperacao.negate()); // Negativo pois é saída
+            extratoCompra.setSaldoAnterior(saldoAnterior);
+            extratoCompra.setSaldoAtual(saldoAtual);
+            extratoCompra.setDescricao(String.format("Compra de %s cotas de %s", 
+                quantidade.setScale(2, java.math.RoundingMode.HALF_UP), investimento.getSimbolo()));
             
-            BigDecimal totalInvestido = valorBase.setScale(2, java.math.RoundingMode.HALF_UP);
-            BigDecimal totalRetornando = totalInvestido
-                .multiply(BigDecimal.valueOf(1 + variacaoMercado))
-                .setScale(2, java.math.RoundingMode.HALF_UP);
+            // Data aleatória dentro do mês
+            LocalDate dataOperacao = mesReferencia.atDay(random.nextInt(28) + 1);
+            extratoCompra.setDataTransacao(dataOperacao.atTime(9 + random.nextInt(8), random.nextInt(60)));
             
-            // Verificar se já existe histórico para este usuário, investimento e mês
-            if (historicoRepository.findByUsuarioIdAndInvestimentoIdAndMesAnoRegistro(
-                    usuario.getId(), investimento.getId(), mesReferencia).isEmpty()) {
+            extratoRepository.save(extratoCompra);
+            
+            // Simular dividendo se aplicável (apenas para ações e FIIs)
+            if (investimento.getDividendYield() != null && investimento.getDividendYield().compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal dividendo = valorOperacao
+                    .multiply(investimento.getDividendYield())
+                    .divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP)
+                    .divide(BigDecimal.valueOf(12), 2, java.math.RoundingMode.HALF_UP); // Mensal
                 
-                Historico historico = new Historico(investimento, usuario, totalInvestido, 
-                                                   totalRetornando, mesReferencia);
-                
-                // Definir data de registro variada dentro do mês (simular quando foi feito o registro)
-                LocalDate dataRegistro = mesReferencia.atDay(random.nextInt(28) + 1);
-                historico.setDataRegistro(dataRegistro);
-                
-                historicoRepository.save(historico);
-                
-                // Log detalhado para debug
-                if (random.nextInt(10) == 0) { // Log apenas 10% para não poluir
-                    System.out.printf("📊 %s - %s (%s): R$ %.2f → R$ %.2f (%.1f%%)%n", 
-                        usuario.getNomeUsuario(), investimento.getSimbolo(), 
-                        mesReferencia, totalInvestido, totalRetornando, 
-                        variacaoMercado * 100);
+                if (dividendo.compareTo(BigDecimal.valueOf(0.01)) > 0) { // Só se for maior que 1 centavo
+                    BigDecimal saldoAntesDividendo = saldoAtual;
+                    saldoAtual = saldoAtual.add(dividendo);
+                    
+                    Extrato extratoDividendo = new Extrato();
+                    extratoDividendo.setUsuario(usuario);
+                    extratoDividendo.setInvestimento(investimento);
+                    extratoDividendo.setTipoTransacao(TipoTransacao.DIVIDENDO_RECEBIDO);
+                    extratoDividendo.setQuantidade(quantidade);
+                    extratoDividendo.setPrecoUnitario(BigDecimal.ZERO);
+                    extratoDividendo.setValorTotal(dividendo); // Positivo pois é entrada
+                    extratoDividendo.setSaldoAnterior(saldoAntesDividendo);
+                    extratoDividendo.setSaldoAtual(saldoAtual);
+                    extratoDividendo.setDescricao(String.format("Dividendo de %s (%.2f%% yield)", 
+                        investimento.getSimbolo(), investimento.getDividendYield()));
+                    
+                    // Dividendo alguns dias após a compra
+                    extratoDividendo.setDataTransacao(dataOperacao.plusDays(random.nextInt(15) + 5)
+                        .atTime(10 + random.nextInt(6), random.nextInt(60)));
+                    
+                    extratoRepository.save(extratoDividendo);
                 }
             }
+            
+            // Algumas vezes simular venda (20% de chance)
+            if (random.nextInt(5) == 0) {
+                // Simular variação de preço para a venda
+                double variacaoPreco = switch (investimento.getRisco()) {
+                    case BAIXO -> random.nextDouble(-0.05, 0.08);   // -5% a +8%
+                    case MEDIO -> random.nextDouble(-0.12, 0.15);   // -12% a +15%
+                    case ALTO -> random.nextDouble(-0.25, 0.30);    // -25% a +30%
+                };
+                
+                BigDecimal precoVenda = investimento.getPrecoAtual()
+                    .multiply(BigDecimal.valueOf(1 + variacaoPreco))
+                    .setScale(2, java.math.RoundingMode.HALF_UP);
+                
+                BigDecimal valorVenda = quantidade.multiply(precoVenda);
+                BigDecimal saldoAntesVenda = saldoAtual;
+                saldoAtual = saldoAtual.add(valorVenda);
+                
+                Extrato extratoVenda = new Extrato();
+                extratoVenda.setUsuario(usuario);
+                extratoVenda.setInvestimento(investimento);
+                extratoVenda.setTipoTransacao(TipoTransacao.VENDA_ACAO);
+                extratoVenda.setQuantidade(quantidade);
+                extratoVenda.setPrecoUnitario(precoVenda);
+                extratoVenda.setValorTotal(valorVenda); // Positivo pois é entrada
+                extratoVenda.setSaldoAnterior(saldoAntesVenda);
+                extratoVenda.setSaldoAtual(saldoAtual);
+                extratoVenda.setDescricao(String.format("Venda de %s cotas de %s (%.1f%%)", 
+                    quantidade.setScale(2, java.math.RoundingMode.HALF_UP), 
+                    investimento.getSimbolo(), variacaoPreco * 100));
+                
+                // Venda alguns dias/semanas após a compra
+                extratoVenda.setDataTransacao(dataOperacao.plusDays(random.nextInt(20) + 5)
+                    .atTime(10 + random.nextInt(6), random.nextInt(60)));
+                
+                extratoRepository.save(extratoVenda);
+            }
         }
+        
+        // Log ocasional para acompanhar o progresso
+        if (random.nextInt(8) == 0) {
+            System.out.printf("📊 %s - %s: %d operações criadas%n", 
+                usuario.getNomeUsuario(), mesReferencia, maxOperacoesMes);
+        }
+    }
+
+    /**
+     * Calcula valor da operação baseado no perfil do usuário e tipo de investimento
+     */
+    private BigDecimal calcularValorOperacao(String perfil, Investimento investimento, Random random) {
+        // Valor base conforme perfil
+        double valorBase = switch (perfil) {
+            case "conservador" -> random.nextDouble(500, 2000);   // R$ 500 - 2.000
+            case "moderado" -> random.nextDouble(1000, 4000);     // R$ 1.000 - 4.000
+            case "agressivo" -> random.nextDouble(2000, 8000);    // R$ 2.000 - 8.000
+            default -> 1000;
+        };
+        
+        // Ajustar baseado no tipo de investimento
+        double multiplicador = switch (investimento.getCategoria()) {
+            case RENDA_FIXA -> random.nextDouble(1.2, 2.0);       // Renda fixa: valores maiores
+            case FUNDO_IMOBILIARIO -> random.nextDouble(0.8, 1.5); // FIIs: valores médios
+            case RENDA_VARIAVEL -> random.nextDouble(0.6, 1.3);    // Ações: mais variado
+            default -> 1.0; // Default multiplicador
+        };
+        
+        return BigDecimal.valueOf(valorBase * multiplicador)
+            .setScale(2, java.math.RoundingMode.HALF_UP);
     }
 
     /**
@@ -566,7 +652,7 @@ public class SystemInitializer implements CommandLineRunner {
         System.out.println("💰 Investimentos: " + investimentoRepository.count());
         System.out.println("🎵 Playlists: " + playlistRepository.count());
         System.out.println("💬 Comentários: " + comentarioRepository.count());
-        System.out.println("📈 Históricos: " + historicoRepository.count() + " (últimos 12 meses)");
+        System.out.println("� Extratos: " + extratoRepository.count() + " (últimos 12 meses com compras, vendas e dividendos)");
         System.out.println("");
         System.out.println("🔑 CREDENCIAIS DE ACESSO:");
         System.out.println("   👨‍💼 Admin: admin@admin.com / 123456 (R$ 50.000)");
@@ -581,12 +667,12 @@ public class SystemInitializer implements CommandLineRunner {
         System.out.println("🌐 Swagger UI: http://localhost:8080/swagger-ui.html");
         System.out.println("🎵 Teste as playlists após fazer login!");
         System.out.println("");
-        System.out.println("� HISTÓRICOS GERADOS:");
-        System.out.println("   📊 12 meses de dados para cada usuário");
-        System.out.println("   👤 João Silva: 2-4 investimentos por mês (conservador)");
-        System.out.println("   👩‍💼 Maria: 2-5 investimentos por mês (moderado)");  
-        System.out.println("   👨‍💼 Admin: 2-8 investimentos por mês (agressivo)");
-        System.out.println("   💡 Use /api/historico/usuario/{id} para ver o histórico completo!");
+        System.out.println("📊 EXTRATOS GERADOS (12 MESES):");
+        System.out.println("   � Compras, vendas e dividendos simulados realisticamente");
+        System.out.println("   👤 João Silva: 2-3 operações/mês (conservador - evita alto risco)");
+        System.out.println("   👩‍💼 Maria: 3-5 operações/mês (moderado - mix equilibrado)");  
+        System.out.println("   👨‍💼 Admin: 4-7 operações/mês (agressivo - todos investimentos)");
+        System.out.println("   💡 Use /api/extrato/resumo para ver análise de lucro/prejuízo!");
         System.out.println("");
         System.out.println("�🛢️ Console do Banco H2:");
         System.out.println("Acesse o banco de dados em memória para consultas SQL:");

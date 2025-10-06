@@ -29,4 +29,16 @@ public interface ExtratoRepository extends JpaRepository<Extrato, Long> {
                                          
     @Query("SELECT e FROM Extrato e WHERE e.usuario = :usuario AND e.investimento.id = :investimentoId ORDER BY e.dataTransacao DESC")
     List<Extrato> findByUsuarioAndInvestimento(@Param("usuario") Usuario usuario, @Param("investimentoId") Long investimentoId);
+    
+    @Query("SELECT e FROM Extrato e WHERE e.usuario = :usuario AND FUNCTION('YEAR', e.dataTransacao) = :ano AND FUNCTION('MONTH', e.dataTransacao) = :mes ORDER BY e.dataTransacao DESC")
+    List<Extrato> findByUsuarioAndMesAno(@Param("usuario") Usuario usuario, @Param("ano") int ano, @Param("mes") int mes);
+    
+    @Query("SELECT e FROM Extrato e WHERE e.usuario = :usuario AND e.investimento.id = :investimentoId AND FUNCTION('YEAR', e.dataTransacao) = :ano AND FUNCTION('MONTH', e.dataTransacao) = :mes ORDER BY e.dataTransacao DESC")
+    List<Extrato> findByUsuarioAndInvestimentoAndMesAno(@Param("usuario") Usuario usuario, @Param("investimentoId") Long investimentoId, @Param("ano") int ano, @Param("mes") int mes);
+    
+    @Query("SELECT e FROM Extrato e WHERE e.usuario = :usuario AND e.tipoTransacao IN ('COMPRA_ACAO', 'VENDA_ACAO') ORDER BY e.dataTransacao DESC")
+    List<Extrato> findTransacoesInvestimentoByUsuario(@Param("usuario") Usuario usuario);
+    
+    @Query("SELECT e FROM Extrato e WHERE e.usuario = :usuario AND e.investimento.id = :investimentoId AND e.tipoTransacao IN ('COMPRA_ACAO', 'VENDA_ACAO') ORDER BY e.dataTransacao DESC")
+    List<Extrato> findTransacoesInvestimentoByUsuarioAndInvestimento(@Param("usuario") Usuario usuario, @Param("investimentoId") Long investimentoId);
 }

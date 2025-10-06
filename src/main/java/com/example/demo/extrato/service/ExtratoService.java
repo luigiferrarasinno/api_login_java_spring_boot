@@ -354,4 +354,257 @@ public class ExtratoService {
         return investimentoRepository.findById(id)
                                    .orElseThrow(() -> new RecursoNaoEncontradoException("Investimento não encontrado: " + id));
     }
+    
+    // ===== NOVOS MÉTODOS PARA RESUMOS DE INVESTIMENTO =====
+    
+    /**
+     * 📊 Gera resumo completo de investimentos com filtros
+     */
+    public com.example.demo.extrato.dto.ResumoCompletoDTO gerarResumo(String emailUsuario, Integer ano, Integer mes, Integer mesInicio, Integer mesFim, Long investimentoId) {
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
+        
+        List<Extrato> extratos;
+        String periodo;
+        
+        if (ano != null && mes != null && investimentoId != null) {
+            // Filtro específico: mês, ano e investimento
+            extratos = extratoRepository.findByUsuarioAndInvestimentoAndMesAno(usuario, investimentoId, ano, mes);
+            periodo = String.format("%04d-%02d - Investimento ID %d", ano, mes, investimentoId);
+        } else if (ano != null && mesInicio != null && mesFim != null && investimentoId != null) {
+            // Filtro: período de meses + investimento específico
+            extratos = filtrarPorPeriodoEInvestimento(usuario, ano, mesInicio, mesFim, investimentoId);
+            periodo = String.format("%04d-%02d a %02d - Investimento ID %d", ano, mesInicio, mesFim, investimentoId);
+        } else if (ano != null && mesInicio != null && mesFim != null) {
+            // Filtro: período de meses
+            extratos = filtrarPorPeriodo(usuario, ano, mesInicio, mesFim);
+            periodo = String.format("%04d-%02d a %02d", ano, mesInicio, mesFim);
+        } else if (ano != null && mes != null) {
+            // Filtro por mês e ano
+            extratos = extratoRepository.findByUsuarioAndMesAno(usuario, ano, mes);
+            periodo = String.format("%04d-%02d", ano, mes);
+        } else if (investimentoId != null) {
+            // Filtro por investimento específico
+            extratos = extratoRepository.findByUsuarioAndInvestimento(usuario, investimentoId);
+            periodo = String.format("Todo período - Investimento ID %d", investimentoId);
+        } else {
+            // Todos os extratos de investimentos
+            extratos = extratoRepository.findTransacoesInvestimentoByUsuario(usuario);
+            periodo = "Todo período";
+        }
+        
+        return construirResumoCompleto(usuario, extratos, periodo);
+    }
+    
+    /**
+     * 📅 Filtra extratos por período de meses
+     */
+    private List<Extrato> filtrarPorPeriodo(Usuario usuario, Integer ano, Integer mesInicio, Integer mesFim) {
+        List<Extrato> extratosCompletos = extratoRepository.findTransacoesInvestimentoByUsuario(usuario);
+        
+        return extratosCompletos.stream()
+            .filter(extrato -> {
+                int anoTransacao = extrato.getDataTransacao().getYear();
+                int mesTransacao = extrato.getDataTransacao().getMonthValue();
+                
+                return anoTransacao == ano && mesTransacao >= mesInicio && mesTransacao <= mesFim;
+            })
+            .collect(Collectors.toList());
+    }
+    
+    /**
+     * 📈 Filtra extratos por período de meses e investimento específico
+     */
+    private List<Extrato> filtrarPorPeriodoEInvestimento(Usuario usuario, Integer ano, Integer mesInicio, Integer mesFim, Long investimentoId) {
+        List<Extrato> extratosCompletos = extratoRepository.findTransacoesInvestimentoByUsuarioAndInvestimento(usuario, investimentoId);
+        
+        return extratosCompletos.stream()
+            .filter(extrato -> {
+                int anoTransacao = extrato.getDataTransacao().getYear();
+                int mesTransacao = extrato.getDataTransacao().getMonthValue();
+                
+                return anoTransacao == ano && mesTransacao >= mesInicio && mesTransacao <= mesFim;
+            })
+            .collect(Collectors.toList());
+    }
+    
+    /**
+     * 🔧 Constrói o DTO de resumo completo baseado nos extratos
+     */
+    private com.example.demo.extrato.dto.ResumoCompletoDTO construirResumoCompleto(Usuario usuario, List<Extrato> extratos, String periodo) {
+        com.example.demo.extrato.dto.ResumoCompletoDTO resumo = new com.example.demo.extrato.dto.ResumoCompletoDTO();
+        resumo.setPeriodo(periodo);
+        resumo.setNomeUsuario(usuario.getNomeUsuario());
+        resumo.setEmailUsuario(usuario.getEmail());
+        
+        // Agrupar extratos por investimento
+        var extratosPorInvestimento = extratos.stream()
+            .collect(Collectors.groupingBy(e -> e.getInvestimento().getId()));
+        
+        List<com.example.demo.extrato.dto.ResumoInvestimentoDTO> resumosInvestimentos = extratosPorInvestimento.entrySet().stream()
+            .map(entry -> {
+                List<Extrato> extratosInvestimento = entry.getValue();
+                Investimento investimento = extratosInvestimento.get(0).getInvestimento();
+                
+                return calcularResumoInvestimento(investimento, extratosInvestimento, periodo);
+            })
+            .collect(Collectors.toList());
+        
+        resumo.setInvestimentos(resumosInvestimentos);
+        
+        // Calcular totais gerais
+        calcularTotaisGerais(resumo, resumosInvestimentos);
+        
+        // Calcular estatísticas
+        calcularEstatisticas(resumo, resumosInvestimentos);
+        
+        return resumo;
+    }
+    
+    /**
+     * 📈 Calcula resumo para um investimento específico
+     */
+    private com.example.demo.extrato.dto.ResumoInvestimentoDTO calcularResumoInvestimento(Investimento investimento, List<Extrato> extratos, String periodo) {
+        com.example.demo.extrato.dto.ResumoInvestimentoDTO resumo = new com.example.demo.extrato.dto.ResumoInvestimentoDTO(
+            periodo, investimento.getId(), investimento.getSimbolo(), investimento.getNome()
+        );
+        
+        BigDecimal totalInvestido = BigDecimal.ZERO;
+        BigDecimal totalRecebido = BigDecimal.ZERO;
+        BigDecimal totalDividendos = BigDecimal.ZERO;
+        int numeroOperacoes = 0;
+        
+        List<com.example.demo.extrato.dto.ExtratoResumoDTO> transacoes = extratos.stream()
+            .map(extrato -> new com.example.demo.extrato.dto.ExtratoResumoDTO(
+                extrato.getId(),
+                extrato.getTipoTransacao(),
+                extrato.getQuantidade(),
+                extrato.getPrecoUnitario(),
+                extrato.getValorTotal(),
+                extrato.getDescricao(),
+                extrato.getDataTransacao()
+            ))
+            .collect(Collectors.toList());
+        
+        for (Extrato extrato : extratos) {
+            switch (extrato.getTipoTransacao()) {
+                case COMPRA_ACAO:
+                    totalInvestido = totalInvestido.add(extrato.getValorTotal().abs());
+                    numeroOperacoes++;
+                    break;
+                case VENDA_ACAO:
+                    totalRecebido = totalRecebido.add(extrato.getValorTotal());
+                    numeroOperacoes++;
+                    break;
+                case DIVIDENDO_RECEBIDO:
+                    totalDividendos = totalDividendos.add(extrato.getValorTotal());
+                    break;
+                case DEPOSITO:
+                case SAQUE:
+                    // Ignorar depósitos e saques para cálculo de investimentos
+                    break;
+            }
+        }
+        
+        resumo.setTotalInvestido(totalInvestido);
+        resumo.setTotalRecebido(totalRecebido);
+        resumo.setTotalDividendos(totalDividendos);
+        resumo.setNumeroOperacoes(numeroOperacoes);
+        resumo.setTransacoes(transacoes);
+        
+        // Calcular resultado líquido e percentual de retorno
+        BigDecimal resultadoLiquido = totalRecebido.add(totalDividendos).subtract(totalInvestido);
+        resumo.setResultadoLiquido(resultadoLiquido);
+        
+        if (totalInvestido.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal percentualRetorno = resultadoLiquido
+                .divide(totalInvestido, 4, java.math.RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100));
+            resumo.setPercentualRetorno(percentualRetorno);
+        }
+        
+        return resumo;
+    }
+    
+    /**
+     * 🧮 Calcula totais gerais do resumo
+     */
+    private void calcularTotaisGerais(com.example.demo.extrato.dto.ResumoCompletoDTO resumo, 
+                                     List<com.example.demo.extrato.dto.ResumoInvestimentoDTO> investimentos) {
+        BigDecimal totalInvestido = BigDecimal.ZERO;
+        BigDecimal totalRecebido = BigDecimal.ZERO;
+        BigDecimal totalDividendos = BigDecimal.ZERO;
+        int totalOperacoes = 0;
+        
+        for (com.example.demo.extrato.dto.ResumoInvestimentoDTO inv : investimentos) {
+            totalInvestido = totalInvestido.add(inv.getTotalInvestido());
+            totalRecebido = totalRecebido.add(inv.getTotalRecebido());
+            totalDividendos = totalDividendos.add(inv.getTotalDividendos());
+            totalOperacoes += inv.getNumeroOperacoes();
+        }
+        
+        resumo.setTotalGeralInvestido(totalInvestido);
+        resumo.setTotalGeralRecebido(totalRecebido);
+        resumo.setTotalGeralDividendos(totalDividendos);
+        resumo.setNumeroTotalOperacoes(totalOperacoes);
+        
+        BigDecimal resultadoGeral = totalRecebido.add(totalDividendos).subtract(totalInvestido);
+        resumo.setResultadoGeralLiquido(resultadoGeral);
+        
+        if (totalInvestido.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal percentualGeral = resultadoGeral
+                .divide(totalInvestido, 4, java.math.RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100));
+            resumo.setPercentualRetornoGeral(percentualGeral);
+        }
+    }
+    
+    /**
+     * 📊 Calcula estatísticas avançadas
+     */
+    private void calcularEstatisticas(com.example.demo.extrato.dto.ResumoCompletoDTO resumo, 
+                                     List<com.example.demo.extrato.dto.ResumoInvestimentoDTO> investimentos) {
+        int lucros = 0;
+        int prejuizos = 0;
+        int neutros = 0;
+        BigDecimal maiorLucro = BigDecimal.ZERO;
+        BigDecimal maiorPrejuizo = BigDecimal.ZERO;
+        String maisRentavel = "";
+        String menosRentavel = "";
+        BigDecimal melhorPercentual = new BigDecimal("-999999");
+        BigDecimal piorPercentual = new BigDecimal("999999");
+        
+        for (com.example.demo.extrato.dto.ResumoInvestimentoDTO inv : investimentos) {
+            switch (inv.getSituacao()) {
+                case "LUCRO" -> lucros++;
+                case "PREJUIZO" -> prejuizos++;
+                case "NEUTRO" -> neutros++;
+            }
+            
+            if (inv.getResultadoLiquido().compareTo(maiorLucro) > 0) {
+                maiorLucro = inv.getResultadoLiquido();
+            }
+            
+            if (inv.getResultadoLiquido().compareTo(maiorPrejuizo) < 0) {
+                maiorPrejuizo = inv.getResultadoLiquido();
+            }
+            
+            if (inv.getPercentualRetorno().compareTo(melhorPercentual) > 0) {
+                melhorPercentual = inv.getPercentualRetorno();
+                maisRentavel = inv.getSimboloInvestimento();
+            }
+            
+            if (inv.getPercentualRetorno().compareTo(piorPercentual) < 0) {
+                piorPercentual = inv.getPercentualRetorno();
+                menosRentavel = inv.getSimboloInvestimento();
+            }
+        }
+        
+        resumo.setQuantidadeInvestimentosComLucro(lucros);
+        resumo.setQuantidadeInvestimentosComPrejuizo(prejuizos);
+        resumo.setQuantidadeInvestimentosNeutros(neutros);
+        resumo.setMaiorLucroIndividual(maiorLucro);
+        resumo.setMaiorPrejuizoIndividual(maiorPrejuizo);
+        resumo.setInvestimentoMaisRentavel(maisRentavel);
+        resumo.setInvestimentoMenosRentavel(menosRentavel);
+    }
 }
