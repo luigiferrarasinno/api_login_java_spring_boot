@@ -523,10 +523,17 @@ public class PlaylistService {
         dto.setVariacaoPercentual(investimento.getVariacaoPercentual());
         dto.setDescricao(investimento.getDescricao());
         
-        // Verificar se este investimento foi recomendado para o usuário
-        boolean recomendado = investimentoRecomendadoRepository
-            .existsByUsuarioIdAndInvestimentoId(usuario.getId(), investimento.getId());
-        dto.setRecomendadoParaVoce(recomendado);
+        // Verificar se o usuário tem ALGUMA recomendação
+        boolean usuarioTemRecomendacoes = investimentoRecomendadoRepository.existsByUsuarioId(usuario.getId());
+        
+        if (!usuarioTemRecomendacoes) {
+            dto.setRecomendadoParaVoce(null); // null indica que usuário não tem recomendações
+        } else {
+            // Verificar se este investimento foi recomendado para o usuário
+            boolean recomendado = investimentoRecomendadoRepository
+                .existsByUsuarioIdAndInvestimentoId(usuario.getId(), investimento.getId());
+            dto.setRecomendadoParaVoce(recomendado);
+        }
 
         return dto;
     }

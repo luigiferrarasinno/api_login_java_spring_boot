@@ -190,15 +190,27 @@ public class InvestimentoService {
 
     /**
      * Converte uma lista de investimentos para DTOs, populando o campo recomendadoParaVoce
-     * @param investimentos Lista de investimentos
-     * @param usuarioId ID do usuário logado
-     * @param incluirUsuarioIds Se deve incluir IDs de usuários (apenas para admin)
-     * @return Lista de DTOs com flag de recomendação preenchida
+     * Se o usuário NÃO tem nenhuma recomendação, o campo será null
+     * Se o usuário TEM recomendações, será true/false para cada investimento
      */
     public List<InvestimentoDTO> converterParaDTOComRecomendacao(List<Investimento> investimentos, 
                                                                   Long usuarioId, 
                                                                   boolean incluirUsuarioIds) {
-        // Buscar IDs dos investimentos recomendados para este usuário
+        // Verificar se o usuário tem ALGUMA recomendação
+        boolean usuarioTemRecomendacoes = investimentoRecomendadoRepository.existsByUsuarioId(usuarioId);
+        
+        // Se não tem nenhuma recomendação, retorna com campo null
+        if (!usuarioTemRecomendacoes) {
+            return investimentos.stream()
+                .map(inv -> {
+                    InvestimentoDTO dto = new InvestimentoDTO(inv, incluirUsuarioIds);
+                    dto.setRecomendadoParaVoce(null); // null indica que usuário não tem recomendações
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        }
+        
+        // Se tem recomendações, buscar os IDs recomendados e marcar true/false
         Set<Long> investimentosRecomendadosIds = investimentoRecomendadoRepository
             .findByUsuarioId(usuarioId)
             .stream()
@@ -216,18 +228,25 @@ public class InvestimentoService {
 
     /**
      * Converte um investimento para DTO, populando o campo recomendadoParaVoce
-     * @param investimento Investimento
-     * @param usuarioId ID do usuário logado
-     * @param incluirUsuarioIds Se deve incluir IDs de usuários (apenas para admin)
-     * @return DTO com flag de recomendação preenchida
+     * Se o usuário NÃO tem nenhuma recomendação, o campo será null
+     * Se o usuário TEM recomendações, será true/false
      */
     public InvestimentoDTO converterParaDTOComRecomendacao(Investimento investimento, 
                                                            Long usuarioId, 
                                                            boolean incluirUsuarioIds) {
         InvestimentoDTO dto = new InvestimentoDTO(investimento, incluirUsuarioIds);
-        boolean recomendado = investimentoRecomendadoRepository
-            .existsByUsuarioIdAndInvestimentoId(usuarioId, investimento.getId());
-        dto.setRecomendadoParaVoce(recomendado);
+        
+        // Verificar se o usuário tem ALGUMA recomendação
+        boolean usuarioTemRecomendacoes = investimentoRecomendadoRepository.existsByUsuarioId(usuarioId);
+        
+        if (!usuarioTemRecomendacoes) {
+            dto.setRecomendadoParaVoce(null); // null indica que usuário não tem recomendações
+        } else {
+            boolean recomendado = investimentoRecomendadoRepository
+                .existsByUsuarioIdAndInvestimentoId(usuarioId, investimento.getId());
+            dto.setRecomendadoParaVoce(recomendado);
+        }
+        
         return dto;
     }
 }

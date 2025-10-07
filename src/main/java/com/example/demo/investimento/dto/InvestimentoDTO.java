@@ -28,7 +28,7 @@ public class InvestimentoDTO {
     private String risco;         // do Enum Risco
     private String createdAt;     // ISO_LOCAL_DATE_TIME
     private String updatedAt;     // ISO_LOCAL_DATE_TIME
-    private boolean recomendadoParaVoce; // indica se este investimento foi recomendado para o usuário
+    private Boolean recomendadoParaVoce; // Null se usuário não tem recomendações, true/false caso contrário
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
     private static final DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
@@ -67,7 +67,7 @@ public class InvestimentoDTO {
         this.quantidadeDisponivel = investimento.getQuantidadeDisponivel();
         this.createdAt = investimento.getCreatedAt() != null ? investimento.getCreatedAt().format(DATETIME_FORMAT) : null;
         this.updatedAt = investimento.getUpdatedAt() != null ? investimento.getUpdatedAt().format(DATETIME_FORMAT) : null;
-        this.recomendadoParaVoce = false; // valor padrão, será setado externamente quando necessário
+        this.recomendadoParaVoce = null; // Será null se usuário não tem recomendações, ou true/false se tiver
     }
 
     // Getters e setters
@@ -132,6 +132,6 @@ public class InvestimentoDTO {
     public String getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
 
-    public boolean isRecomendadoParaVoce() { return recomendadoParaVoce; }
-    public void setRecomendadoParaVoce(boolean recomendadoParaVoce) { this.recomendadoParaVoce = recomendadoParaVoce; }
+    public Boolean getRecomendadoParaVoce() { return recomendadoParaVoce; }
+    public void setRecomendadoParaVoce(Boolean recomendadoParaVoce) { this.recomendadoParaVoce = recomendadoParaVoce; }
 }

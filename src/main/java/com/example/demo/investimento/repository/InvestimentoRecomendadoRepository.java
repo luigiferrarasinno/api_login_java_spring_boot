@@ -26,6 +26,11 @@ public interface InvestimentoRecomendadoRepository extends JpaRepository<Investi
     boolean existsByUsuarioIdAndInvestimentoId(Long usuarioId, Long investimentoId);
     
     /**
+     * Verifica se o usuário tem ALGUMA recomendação
+     */
+    boolean existsByUsuarioId(Long usuarioId);
+    
+    /**
      * Remove todas as recomendações de um investimento específico para um usuário
      */
     void deleteByUsuarioIdAndInvestimentoId(Long usuarioId, Long investimentoId);

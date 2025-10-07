@@ -12,7 +12,7 @@ public class InvestimentoPlaylistResponseDTO {
     private BigDecimal precoAtual;
     private BigDecimal variacaoPercentual;
     private String descricao;
-    private boolean recomendadoParaVoce;
+    private Boolean recomendadoParaVoce; // Null se usuário não tem recomendações, true/false caso contrário
 
     public InvestimentoPlaylistResponseDTO() {}
 
@@ -81,11 +81,11 @@ public class InvestimentoPlaylistResponseDTO {
         this.descricao = descricao;
     }
 
-    public boolean isRecomendadoParaVoce() {
+    public Boolean getRecomendadoParaVoce() {
         return recomendadoParaVoce;
     }
 
-    public void setRecomendadoParaVoce(boolean recomendadoParaVoce) {
+    public void setRecomendadoParaVoce(Boolean recomendadoParaVoce) {
         this.recomendadoParaVoce = recomendadoParaVoce;
     }
 }
