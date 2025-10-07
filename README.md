@@ -10,13 +10,15 @@ Uma API RESTful completa para gestão de investimentos com autenticação JWT, c
 
 - 🔐 **Autenticação JWT** com roles diferenciadas (USER/ADMIN)
 - 📈 **Sistema Brasileiro de Ações** (apenas números inteiros, estoque limitado)
-- 💰 **Dividendos Administrativos** (controle manual pelo admin)
-- 💼 **Carteira Completa** com compra/venda e extrato
+- 🎯 **Investimentos Recomendados** - Sistema personalizado de recomendações por perfil
+- 💼 **Carteira Unificada** com GET consolidado e filtros avançados
 - 💬 **Sistema de Comentários** nas ações com moderação
 - 🔍 **Filtros Avançados** em todos os endpoints GET
 - ⚙️ **Controle de Visibilidade** de investimentos para usuários
 - 📊 **Preços Dinâmicos** com simulação de volatilidade por risco
 - 🎵 **Sistema de Playlists Sociais** - "Spotify para investimentos"
+- ✨ **Campo `recomendadoParaVoce`** - Indicador em todos os endpoints de investimentos
+- 📋 **Extrato Completo** - Histórico detalhado de todas as transações
 
 ---
 
@@ -166,10 +168,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 |-----------|-------------------|---------|
 | 👤 **Usuários** | Login, cadastro, alteração de dados, filtros avançados | [usuarios.md](guias-de-uso/usuarios.md) |
 | 📈 **Investimentos** | CRUD, favoritos, filtros, controle de visibilidade | [investimentos.md](guias-de-uso/investimentos.md) |
+| 🎯 **Investimentos Recomendados** | Sistema de recomendações personalizadas, GET/POST/DELETE | [investimentos-recomendados.md](guias-de-uso/investimentos-recomendados.md) |
 | 💬 **Comentários** | Sistema completo com moderação admin | [comentarios.md](guias-de-uso/comentarios.md) |
-| 💰 **Dividendos** | Liberação manual, cálculos automáticos, histórico | [dividendos.md](guias-de-uso/dividendos.md) |
-| 💼 **Carteira & Extrato** | Compra/venda brasileira, posições, extrato | [carteira-extrato.md](guias-de-uso/carteira-extrato.md) |
-| 🎵 **Playlists Sociais** | Sistema completo tipo Spotify | **[GUIA-PLAYLIST.md](GUIA-PLAYLIST.md)** |
+| � **Carteira Unificada** | GET consolidado com filtros, resumo e posições | [carteira-unificada.md](guias-de-uso/carteira-unificada.md) |
+| � **Resumo de Investimentos** | Endpoint GET /resumo com métricas consolidadas | [resumo-investimentos.md](guias-de-uso/resumo-investimentos.md) |
+| 🎵 **Playlists Sociais** | Sistema completo tipo Spotify | [playlist.md](guias-de-uso/playlist.md) |
+| ✨ **Campo recomendadoParaVoce** | Lógica nullable em todos os endpoints | [campo-recomendado-null.md](guias-de-uso/campo-recomendado-null.md) |
 
 > 💡 **Cada guia contém:**
 > - Exemplos completos para Postman
@@ -186,7 +190,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 src/main/java/com/example/demo
 ├── 🚀 DemoApplication.java               # Aplicação principal
 ├── 🔧 init/                              # Sistema de inicialização centralizado
-│   └── SystemInitializer.java           # Cria usuários, investimentos e playlists
+│   └── SystemInitializer.java           # Cria usuários, investimentos, playlists e recomendações
 ├── 🛡️ security/                          # Segurança e autenticação
 │   ├── JwtAuthenticationFilter.java     # Filtro JWT para requisições
 │   ├── JwtUtil.java                     # Utilitários para geração/validação JWT
@@ -198,6 +202,8 @@ src/main/java/com/example/demo
 │   └── RecursoNaoEncontradoException.java # Exceção para recursos não encontrados
 ├── 📝 logging/                           # Sistema de logs
 │   └── PreSecurityLoggingFilter.java    # Log de requisições antes da autenticação
+├── ⚙️ config/                            # Configurações gerais
+│   └── SwaggerConfig.java               # Configuração do Swagger/OpenAPI
 ├── 👤 user/                              # Módulo de usuários
 │   ├── controller/UsuarioController.java # Endpoints da API de usuários
 │   ├── service/UsuarioService.java      # Lógica de negócio de usuários
@@ -206,50 +212,75 @@ src/main/java/com/example/demo
 │   ├── model/Usuario.java               # Entidade JPA usuário
 │   └── dto/                             # DTOs de entrada e saída
 │       ├── UsuarioDTO.java              # DTO principal de usuário
+│       ├── LoginRequestDTO.java         # DTO de requisição de login
 │       ├── LoginResponseDTO.java        # Resposta do login
+│       ├── RegisterRequestDTO.java      # DTO de registro de usuário
 │       └── AlterarSenhaComSenhaAntiga.java # DTO para alteração de senha
 ├── 📈 investimento/                      # Módulo de investimentos
 │   ├── controller/InvestimentoController.java # Endpoints CRUD investimentos
-│   ├── service/InvestimentoService.java # Regras de negócio e validações
-│   ├── repository/InvestimentoRepository.java # Queries personalizadas
+│   ├── service/                         # Serviços de negócio
+│   │   ├── InvestimentoService.java     # Regras de negócio e validações
+│   │   └── CotacaoService.java          # Serviço de cotações e preços
+│   ├── repository/                      # Repositórios de dados
+│   │   ├── InvestimentoRepository.java  # Queries personalizadas de investimentos
+│   │   └── InvestimentoRecomendadoRepository.java # Queries de recomendações
 │   ├── model/                           # Entidades do domínio
 │   │   ├── Investimento.java            # Entidade principal
+│   │   ├── InvestimentoRecomendado.java # Entidade de recomendações
 │   │   ├── Categoria.java               # Enum de categorias
 │   │   └── Risco.java                   # Enum de níveis de risco
-│   └── dto/                             # DTOs específicos
-│       └── InvestimentoDTO.java         # DTO de investimento
-├── 🎵 playlist/                          # Módulo de playlists sociais
+│   ├── dto/                             # DTOs específicos
+│   │   └── InvestimentoDTO.java         # DTO de investimento (com recomendadoParaVoce)
+│   └── init/                            # Inicialização de dados
+│       └── InvestimentoDataInitializer.java # Cria investimentos base
+├── � investimento_recomendado/          # Sistema de recomendações personalizadas
+│   ├── controller/InvestimentoRecomendadoController.java # Endpoints de recomendações
+│   └── service/InvestimentoRecomendadoService.java # Lógica de recomendações
+├── �🎵 playlist/                          # Módulo de playlists sociais
 │   ├── controller/PlaylistController.java # 13 endpoints REST completos
 │   ├── service/PlaylistService.java     # Lógica social e colaborativa
 │   ├── repository/PlaylistRepository.java # Queries específicas de playlist
-│   ├── model/Playlist.java              # Entidade com relacionamentos M:N
+│   ├── model/                           # Entidades do domínio
+│   │   ├── Playlist.java                # Entidade principal com M:N
+│   │   └── PlaylistTipo.java            # Enum de tipos (PUBLICA/PRIVADA/COMPARTILHADA)
 │   └── dto/                             # DTOs de request e response
 │       ├── request/                     # DTOs de entrada
 │       │   ├── CriarPlaylistRequestDTO.java
+│       │   ├── AtualizarPlaylistRequestDTO.java
 │       │   ├── AdicionarInvestimentoRequestDTO.java
 │       │   └── CompartilharPlaylistRequestDTO.java
 │       └── response/                    # DTOs de saída
 │           ├── PlaylistResumoResponseDTO.java
 │           ├── PlaylistDetalhadaResponseDTO.java
+│           ├── InvestimentoPlaylistResponseDTO.java # DTO com recomendadoParaVoce
+│           ├── UsuarioSeguidorResponseDTO.java
 │           └── PlaylistOperacaoResponseDTO.java
 ├── 💬 comentarios/                       # Sistema de comentários
 │   ├── controller/ComentarioController.java # CRUD e moderação
 │   ├── service/ComentarioService.java   # Regras de permissão
 │   ├── repository/ComentarioRepository.java # Soft delete
-│   └── model/Comentario.java            # Entidade com auditoria
-├── 💼 carteira/                          # Sistema de carteira
-│   ├── controller/CarteiraController.java # Compra, venda, posições
-│   ├── service/CarteiraService.java     # Cálculos brasileiros
-│   ├── repository/PosicaoCarteiraRepository.java # Posições
-│   └── model/PosicaoCarteira.java       # Entidade de posições
+│   ├── model/Comentario.java            # Entidade com auditoria
+│   └── dto/                             # DTOs específicos
+│       ├── ComentarioDTO.java           # DTO principal
+│       └── CriarComentarioRequestDTO.java # DTO de criação
+├── 💼 carteira/                          # Sistema de carteira unificado
+│   ├── controller/CarteiraController.java # Endpoint GET unificado com filtros
+│   ├── service/CarteiraService.java     # Cálculos brasileiros e consolidação
+│   ├── repository/PosicaoCarteiraRepository.java # Posições do usuário
+│   ├── model/PosicaoCarteira.java       # Entidade de posições
+│   └── dto/                             # DTOs específicos
+│       ├── ResumoCarteiraResponseDTO.java # DTO principal de resposta
+│       └── PosicaoCarteiraResponseDTO.java # DTO de posição (com recomendadoParaVoce)
 ├── 📊 extrato/                           # Sistema de extrato
 │   ├── controller/ExtratoController.java # Consulta de transações
-│   ├── service/ExtratoService.java      # Consolidação
-│   └── model/Extrato.java               # Histórico de transações
-└── 💰 dividendo/                         # Sistema de dividendos
-    ├── controller/DividendoController.java # Liberação administrativa
-    ├── service/DividendoService.java    # Cálculos automáticos
-    └── model/DividendoPendente.java     # Entidade de dividendos
+│   ├── service/ExtratoService.java      # Consolidação de movimentações
+│   ├── repository/ExtratoRepository.java # Queries de histórico
+│   ├── model/                           # Entidades do domínio
+│   │   ├── Extrato.java                 # Histórico de transações
+│   │   └── TipoTransacao.java           # Enum de tipos (COMPRA/VENDA/DIVIDENDO)
+│   └── dto/                             # DTOs específicos
+│       └── ExtratoDTO.java              # DTO de extrato
+└── 💰 dividendo/                         # Sistema de dividendos (REMOVIDO - Funcionalidade descontinuada)
 ```
 
 ### 🏗️ Padrão Arquitetural MVC:
