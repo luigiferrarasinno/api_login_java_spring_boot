@@ -14,7 +14,6 @@ import com.example.demo.investimento.model.Risco;
 import com.example.demo.investimento.repository.InvestimentoRepository;
 import com.example.demo.investimento.repository.InvestimentoRecomendadoRepository;
 import com.example.demo.playlist.model.Playlist;
-import com.example.demo.playlist.model.PlaylistTipo;
 import com.example.demo.playlist.repository.PlaylistRepository;
 import com.example.demo.user.dao.UsuarioDAO;
 import com.example.demo.user.model.Usuario;
@@ -25,7 +24,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.example.demo.playlist.model.PlaylistTipo;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -98,6 +97,9 @@ public class SystemInitializer implements CommandLineRunner {
         
         // 7. Criar investimentos recomendados baseados no perfil do usuário
         criarInvestimentosRecomendados();
+        
+        // 8. Criar investimentos favoritados para os usuários
+        criarInvestimentosFavoritados();
         
         System.out.println("✅ ===== SISTEMA INICIALIZADO COM SUCESSO! ===== ✅\n");
         imprimirResumoInicializacao();
@@ -840,6 +842,77 @@ public class SystemInitializer implements CommandLineRunner {
     }
 
     /**
+     * ⭐ ETAPA 8: Criar Investimentos Favoritados baseados no perfil
+     */
+    private void criarInvestimentosFavoritados() {
+        System.out.println("\n⭐ Inicializando investimentos favoritados...");
+        
+        // Buscar usuários
+        Usuario admin = usuarioDAO.findByEmail("admin@admin.com").orElse(null);
+        Usuario joao = usuarioDAO.findByEmail("user@user.com").orElse(null);
+        Usuario maria = usuarioDAO.findByEmail("maria@investidora.com").orElse(null);
+        
+        if (admin == null || joao == null || maria == null) {
+            System.out.println("⚠️ Usuários não encontrados. Pulando criação de favoritos.");
+            return;
+        }
+        
+        // Buscar todos os investimentos visíveis
+        List<Investimento> todosInvestimentos = investimentoRepository.findAll()
+            .stream()
+            .filter(Investimento::isVisivelParaUsuarios)
+            .toList();
+        
+        int totalFavoritos = 0;
+        
+        // Admin (PERFIL_ARROJADO): Favorita uma variedade de investimentos
+        List<Investimento> favoritosAdmin = todosInvestimentos.stream()
+            .limit(6) // 6 favoritos
+            .toList();
+        totalFavoritos += criarFavoritosParaUsuario(admin, favoritosAdmin, "ARROJADO");
+        
+        // João Silva (PERFIL_MODERADO): Favorita apenas baixo e médio risco
+        List<Investimento> favoritosJoao = todosInvestimentos.stream()
+            .filter(inv -> inv.getRisco() == Risco.BAIXO || inv.getRisco() == Risco.MEDIO)
+            .limit(4) // 4 favoritos
+            .toList();
+        totalFavoritos += criarFavoritosParaUsuario(joao, favoritosJoao, "MODERADO");
+        
+        // Maria (PERFIL_CONSERVADOR): Favorita apenas baixo risco
+        List<Investimento> favoritosMaria = todosInvestimentos.stream()
+            .filter(inv -> inv.getRisco() == Risco.BAIXO)
+            .limit(3) // 3 favoritos
+            .toList();
+        totalFavoritos += criarFavoritosParaUsuario(maria, favoritosMaria, "CONSERVADOR");
+        
+        System.out.println("✅ " + totalFavoritos + " investimentos favoritados criados!");
+    }
+    
+    /**
+     * Cria favoritos para um usuário específico
+     */
+    private int criarFavoritosParaUsuario(Usuario usuario, List<Investimento> investimentos, String perfil) {
+        int contador = 0;
+        
+        for (Investimento investimento : investimentos) {
+            // Verificar se já não está favoritado (evitar duplicatas)
+            if (!investimento.getUsuarios().contains(usuario)) {
+                // Adicionar aos favoritos (associação bidirecional)
+                investimento.getUsuarios().add(usuario);
+                usuario.getInvestimentos().add(investimento);
+                investimentoRepository.save(investimento);
+                contador++;
+            }
+        }
+        
+        // Salvar o usuário para garantir sincronização
+        usuarioDAO.save(usuario);
+        
+        System.out.println("   ⭐ " + contador + " favoritos criados para " + usuario.getNomeUsuario() + " (Perfil: " + perfil + ")");
+        return contador;
+    }
+
+    /**
      * 📊 Imprimir Resumo da Inicialização
      */
     private void imprimirResumoInicializacao() {
@@ -850,6 +923,7 @@ public class SystemInitializer implements CommandLineRunner {
         System.out.println("�🎵 Playlists: " + playlistRepository.count());
         System.out.println("💬 Comentários: " + comentarioRepository.count());
         System.out.println("� Extratos: " + extratoRepository.count() + " (últimos 12 meses com compras, vendas e dividendos)");
+        System.out.println("⭐ Investimentos Favoritados:");
         System.out.println("");
         System.out.println("🔑 CREDENCIAIS DE ACESSO:");
         System.out.println("   👨‍💼 Admin: admin@admin.com / 123456 (R$ 50.000)");
