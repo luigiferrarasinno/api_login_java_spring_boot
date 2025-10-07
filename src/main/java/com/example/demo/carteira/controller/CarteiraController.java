@@ -63,7 +63,8 @@ public class CarteiraController {
                                   "percentualGanhoPerda": 9.80,
                                   "totalDividendosRecebidos": 150.00,
                                   "dataPrimeiraCompra": "2024-01-15T10:30:00",
-                                  "dataUltimaMovimentacao": "2024-09-20T14:20:00"
+                                  "dataUltimaMovimentacao": "2024-09-20T14:20:00",
+                                  "recomendadoParaVoce": true
                                 }
                               ]
                             }
@@ -93,7 +94,8 @@ public class CarteiraController {
                                   "valorAtual": 2800.00,
                                   "ganhoPerda": 250.00,
                                   "percentualGanhoPerda": 9.80,
-                                  "totalDividendosRecebidos": 150.00
+                                  "totalDividendosRecebidos": 150.00,
+                                  "recomendadoParaVoce": true
                                 }
                               ]
                             }

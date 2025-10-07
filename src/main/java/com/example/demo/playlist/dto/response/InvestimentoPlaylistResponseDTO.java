@@ -12,6 +12,7 @@ public class InvestimentoPlaylistResponseDTO {
     private BigDecimal precoAtual;
     private BigDecimal variacaoPercentual;
     private String descricao;
+    private boolean recomendadoParaVoce;
 
     public InvestimentoPlaylistResponseDTO() {}
 
@@ -78,5 +79,13 @@ public class InvestimentoPlaylistResponseDTO {
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
+    }
+
+    public boolean isRecomendadoParaVoce() {
+        return recomendadoParaVoce;
+    }
+
+    public void setRecomendadoParaVoce(boolean recomendadoParaVoce) {
+        this.recomendadoParaVoce = recomendadoParaVoce;
     }
 }

@@ -9,6 +9,7 @@ import com.example.demo.user.model.Usuario;
 import com.example.demo.user.repository.UsuarioRepository;
 import com.example.demo.investimento.model.Investimento;
 import com.example.demo.investimento.repository.InvestimentoRepository;
+import com.example.demo.investimento.repository.InvestimentoRecomendadoRepository;
 import com.example.demo.exception.RecursoNaoEncontradoException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,13 +23,16 @@ public class PlaylistService {
     private final PlaylistRepository playlistRepository;
     private final UsuarioRepository usuarioRepository;
     private final InvestimentoRepository investimentoRepository;
+    private final InvestimentoRecomendadoRepository investimentoRecomendadoRepository;
 
     public PlaylistService(PlaylistRepository playlistRepository,
                           UsuarioRepository usuarioRepository,
-                          InvestimentoRepository investimentoRepository) {
+                          InvestimentoRepository investimentoRepository,
+                          InvestimentoRecomendadoRepository investimentoRecomendadoRepository) {
         this.playlistRepository = playlistRepository;
         this.usuarioRepository = usuarioRepository;
         this.investimentoRepository = investimentoRepository;
+        this.investimentoRecomendadoRepository = investimentoRecomendadoRepository;
     }
 
     /**
@@ -493,7 +497,7 @@ public class PlaylistService {
         // Converter investimentos - filtrar invisíveis para usuários comuns
         dto.setInvestimentos(playlist.getInvestimentos().stream()
             .filter(inv -> isAdmin || inv.isVisivelParaUsuarios())
-            .map(this::converterInvestimentoParaDTO)
+            .map(inv -> converterInvestimentoParaDTO(inv, usuarioAtual))
             .collect(Collectors.toList()));
         
         // Atualizar total de investimentos com base nos visíveis
@@ -508,7 +512,7 @@ public class PlaylistService {
         return dto;
     }
 
-    private InvestimentoPlaylistResponseDTO converterInvestimentoParaDTO(Investimento investimento) {
+    private InvestimentoPlaylistResponseDTO converterInvestimentoParaDTO(Investimento investimento, Usuario usuario) {
         InvestimentoPlaylistResponseDTO dto = new InvestimentoPlaylistResponseDTO();
         dto.setId(investimento.getId());
         dto.setNome(investimento.getNome());
@@ -518,6 +522,11 @@ public class PlaylistService {
         dto.setPrecoAtual(investimento.getPrecoAtual());
         dto.setVariacaoPercentual(investimento.getVariacaoPercentual());
         dto.setDescricao(investimento.getDescricao());
+        
+        // Verificar se este investimento foi recomendado para o usuário
+        boolean recomendado = investimentoRecomendadoRepository
+            .existsByUsuarioIdAndInvestimentoId(usuario.getId(), investimento.getId());
+        dto.setRecomendadoParaVoce(recomendado);
 
         return dto;
     }

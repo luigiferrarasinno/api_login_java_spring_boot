@@ -1,16 +1,16 @@
 package com.example.demo.investimento.service;
 
+import com.example.demo.investimento.dto.InvestimentoDTO;
 import com.example.demo.investimento.model.Investimento;
 import com.example.demo.investimento.repository.InvestimentoRepository;
+import com.example.demo.investimento.repository.InvestimentoRecomendadoRepository;
 import com.example.demo.user.model.Usuario;
 import com.example.demo.user.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
-// import org.springframework.exception.RecursoNaoEncontradoException;
 import com.example.demo.exception.RecursoNaoEncontradoException;
-
 
 import java.util.List;
 import java.util.Optional;
@@ -22,10 +22,14 @@ public class InvestimentoService {
 
     private final InvestimentoRepository investimentoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final InvestimentoRecomendadoRepository investimentoRecomendadoRepository;
 
-    public InvestimentoService(InvestimentoRepository investimentoRepository, UsuarioRepository usuarioRepository) {
+    public InvestimentoService(InvestimentoRepository investimentoRepository, 
+                              UsuarioRepository usuarioRepository,
+                              InvestimentoRecomendadoRepository investimentoRecomendadoRepository) {
         this.investimentoRepository = investimentoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.investimentoRecomendadoRepository = investimentoRecomendadoRepository;
     }
 
     public List<Investimento> listarTodos() {
@@ -182,5 +186,48 @@ public class InvestimentoService {
         Investimento investimento = buscarPorId(investimentoId);
         investimento.setVisivelParaUsuarios(!investimento.isVisivelParaUsuarios());
         return investimentoRepository.save(investimento);
+    }
+
+    /**
+     * Converte uma lista de investimentos para DTOs, populando o campo recomendadoParaVoce
+     * @param investimentos Lista de investimentos
+     * @param usuarioId ID do usuário logado
+     * @param incluirUsuarioIds Se deve incluir IDs de usuários (apenas para admin)
+     * @return Lista de DTOs com flag de recomendação preenchida
+     */
+    public List<InvestimentoDTO> converterParaDTOComRecomendacao(List<Investimento> investimentos, 
+                                                                  Long usuarioId, 
+                                                                  boolean incluirUsuarioIds) {
+        // Buscar IDs dos investimentos recomendados para este usuário
+        Set<Long> investimentosRecomendadosIds = investimentoRecomendadoRepository
+            .findByUsuarioId(usuarioId)
+            .stream()
+            .map(rec -> rec.getInvestimento().getId())
+            .collect(Collectors.toSet());
+        
+        return investimentos.stream()
+            .map(inv -> {
+                InvestimentoDTO dto = new InvestimentoDTO(inv, incluirUsuarioIds);
+                dto.setRecomendadoParaVoce(investimentosRecomendadosIds.contains(inv.getId()));
+                return dto;
+            })
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Converte um investimento para DTO, populando o campo recomendadoParaVoce
+     * @param investimento Investimento
+     * @param usuarioId ID do usuário logado
+     * @param incluirUsuarioIds Se deve incluir IDs de usuários (apenas para admin)
+     * @return DTO com flag de recomendação preenchida
+     */
+    public InvestimentoDTO converterParaDTOComRecomendacao(Investimento investimento, 
+                                                           Long usuarioId, 
+                                                           boolean incluirUsuarioIds) {
+        InvestimentoDTO dto = new InvestimentoDTO(investimento, incluirUsuarioIds);
+        boolean recomendado = investimentoRecomendadoRepository
+            .existsByUsuarioIdAndInvestimentoId(usuarioId, investimento.getId());
+        dto.setRecomendadoParaVoce(recomendado);
+        return dto;
     }
 }

@@ -8,6 +8,7 @@ import com.example.demo.user.model.Usuario;
 import com.example.demo.user.repository.UsuarioRepository;
 import com.example.demo.investimento.model.Investimento;
 import com.example.demo.investimento.service.CotacaoService;
+import com.example.demo.investimento.repository.InvestimentoRecomendadoRepository;
 import com.example.demo.extrato.repository.ExtratoRepository;
 import com.example.demo.exception.RecursoNaoEncontradoException;
 
@@ -25,15 +26,18 @@ public class CarteiraService {
     private final UsuarioRepository usuarioRepository;
     private final CotacaoService cotacaoService;
     private final ExtratoRepository extratoRepository;
+    private final InvestimentoRecomendadoRepository investimentoRecomendadoRepository;
 
     public CarteiraService(PosicaoCarteiraRepository posicaoCarteiraRepository,
                           UsuarioRepository usuarioRepository,
                           CotacaoService cotacaoService,
-                          ExtratoRepository extratoRepository) {
+                          ExtratoRepository extratoRepository,
+                          InvestimentoRecomendadoRepository investimentoRecomendadoRepository) {
         this.posicaoCarteiraRepository = posicaoCarteiraRepository;
         this.usuarioRepository = usuarioRepository;
         this.cotacaoService = cotacaoService;
         this.extratoRepository = extratoRepository;
+        this.investimentoRecomendadoRepository = investimentoRecomendadoRepository;
     }
 
     public ResumoCarteiraResponseDTO obterResumoCarteira(String emailUsuario) {
@@ -100,6 +104,10 @@ public class CarteiraService {
     }
 
     private PosicaoCarteiraResponseDTO converterParaDTO(PosicaoCarteira posicao) {
+        return converterParaDTO(posicao, posicao.getUsuario());
+    }
+
+    private PosicaoCarteiraResponseDTO converterParaDTO(PosicaoCarteira posicao, Usuario usuario) {
         Investimento investimento = posicao.getInvestimento();
         
         PosicaoCarteiraResponseDTO dto = new PosicaoCarteiraResponseDTO();
@@ -138,6 +146,11 @@ public class CarteiraService {
             investimento.getId()
         );
         dto.setTotalDividendosRecebidos(totalDividendos != null ? totalDividendos : BigDecimal.ZERO);
+        
+        // Verificar se este investimento foi recomendado para o usuário
+        boolean recomendado = investimentoRecomendadoRepository
+            .existsByUsuarioIdAndInvestimentoId(usuario.getId(), investimento.getId());
+        dto.setRecomendadoParaVoce(recomendado);
         
         return dto;
     }

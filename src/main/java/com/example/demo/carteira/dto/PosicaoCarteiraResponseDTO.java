@@ -20,6 +20,7 @@ public class PosicaoCarteiraResponseDTO {
     private BigDecimal totalDividendosRecebidos;  // Total de dividendos recebidos desta posição
     private LocalDateTime dataPrimeiraCompra;
     private LocalDateTime dataUltimaMovimentacao;
+    private boolean recomendadoParaVoce;  // Indica se este investimento foi recomendado para o usuário
 
     // Constructors
     public PosicaoCarteiraResponseDTO() {}
@@ -69,4 +70,7 @@ public class PosicaoCarteiraResponseDTO {
 
     public LocalDateTime getDataUltimaMovimentacao() { return dataUltimaMovimentacao; }
     public void setDataUltimaMovimentacao(LocalDateTime dataUltimaMovimentacao) { this.dataUltimaMovimentacao = dataUltimaMovimentacao; }
+
+    public boolean isRecomendadoParaVoce() { return recomendadoParaVoce; }
+    public void setRecomendadoParaVoce(boolean recomendadoParaVoce) { this.recomendadoParaVoce = recomendadoParaVoce; }
 }

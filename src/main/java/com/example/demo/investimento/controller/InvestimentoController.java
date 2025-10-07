@@ -4,6 +4,8 @@ import com.example.demo.investimento.dto.InvestimentoDTO;
 import com.example.demo.investimento.dto.response.VincularResponseDTO;
 import com.example.demo.investimento.model.Investimento;
 import com.example.demo.investimento.service.InvestimentoService;
+import com.example.demo.user.repository.UsuarioRepository;
+import com.example.demo.user.model.Usuario;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -25,9 +27,11 @@ import java.util.stream.Collectors;
 public class InvestimentoController {
 
     private final InvestimentoService investimentoService;
+    private final UsuarioRepository usuarioRepository;
 
-    public InvestimentoController(InvestimentoService investimentoService) {
+    public InvestimentoController(InvestimentoService investimentoService, UsuarioRepository usuarioRepository) {
         this.investimentoService = investimentoService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     private boolean isAdmin(Authentication auth) {
@@ -35,12 +39,19 @@ public class InvestimentoController {
                 .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
     }
 
+    private Long getUserId(Authentication auth) {
+        if (auth == null) return null;
+        return usuarioRepository.findByEmail(auth.getName())
+            .map(Usuario::getId)
+            .orElse(null);
+    }
+
     @Operation(summary = "Listar investimentos", 
                description = "Lista investimentos com filtros avançados. Admin vê todos, usuário vê apenas visíveis")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista de investimentos",
             content = @Content(mediaType = "application/json",
-            examples = @ExampleObject(value = "[{\"id\": 1, \"nome\": \"Tesouro Direto\", \"simbolo\": \"TD\", \"categoria\": \"TESOURO_DIRETO\", \"precoAtual\": 102.50, \"risco\": \"BAIXO\", \"ativo\": true}]")))
+            examples = @ExampleObject(value = "[{\"id\": 1, \"nome\": \"Tesouro Direto\", \"simbolo\": \"TD\", \"categoria\": \"RENDA_FIXA\", \"precoAtual\": 102.50, \"risco\": \"BAIXO\", \"ativo\": true, \"recomendadoParaVoce\": true}]")))
     })
     @GetMapping
     @PreAuthorize("isAuthenticated()")
@@ -57,13 +68,20 @@ public class InvestimentoController {
         
         boolean incluirUsuarios = isAdmin(auth);
         boolean ehAdmin = isAdmin(auth);
+        Long usuarioId = getUserId(auth);
         
-        return investimentoService.listarComFiltros(
+        List<Investimento> investimentos = investimentoService.listarComFiltros(
                 nome, simbolo, categoria, risco, ativo, visivel, 
                 precoMin, precoMax, ehAdmin
-        ).stream()
+        );
+        
+        if (usuarioId != null) {
+            return investimentoService.converterParaDTOComRecomendacao(investimentos, usuarioId, incluirUsuarios);
+        } else {
+            return investimentos.stream()
                 .map(inv -> new InvestimentoDTO(inv, incluirUsuarios))
                 .collect(Collectors.toList());
+        }
     }
 
     @Operation(summary = "[ADMIN] Criar investimento", 
@@ -71,13 +89,18 @@ public class InvestimentoController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Investimento criado com sucesso",
             content = @Content(mediaType = "application/json",
-            examples = @ExampleObject(value = "{\"id\": 1, \"nome\": \"Tesouro Direto\", \"simbolo\": \"TD\", \"categoria\": \"TESOURO_DIRETO\", \"precoAtual\": 102.50, \"ativo\": true, \"visivelParaUsuarios\": true}")))
+            examples = @ExampleObject(value = "{\"id\": 1, \"nome\": \"Tesouro Direto\", \"simbolo\": \"TD\", \"categoria\": \"RENDA_FIXA\", \"precoAtual\": 102.50, \"ativo\": true, \"visivelParaUsuarios\": true, \"recomendadoParaVoce\": false}")))
     })
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<InvestimentoDTO> criar(@RequestBody Investimento investimento) {
+    public ResponseEntity<InvestimentoDTO> criar(@RequestBody Investimento investimento, Authentication auth) {
         Investimento salvo = investimentoService.salvar(investimento);
-        return ResponseEntity.ok(new InvestimentoDTO(salvo));
+        Long usuarioId = getUserId(auth);
+        if (usuarioId != null) {
+            return ResponseEntity.ok(investimentoService.converterParaDTOComRecomendacao(salvo, usuarioId, true));
+        } else {
+            return ResponseEntity.ok(new InvestimentoDTO(salvo));
+        }
     }
 
     @Operation(summary = "[ADMIN] Alternar status ativo", 
@@ -85,13 +108,18 @@ public class InvestimentoController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Status alterado com sucesso",
             content = @Content(mediaType = "application/json",
-            examples = @ExampleObject(value = "{\"id\": 1, \"nome\": \"Tesouro Direto\", \"ativo\": false, \"visivelParaUsuarios\": true}")))
+            examples = @ExampleObject(value = "{\"id\": 1, \"nome\": \"Tesouro Direto\", \"ativo\": false, \"visivelParaUsuarios\": true, \"recomendadoParaVoce\": false}")))
     })
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PatchMapping("/{id}/toggle-ativo")
-    public ResponseEntity<InvestimentoDTO> toggleAtivo(@PathVariable Long id) {
+    public ResponseEntity<InvestimentoDTO> toggleAtivo(@PathVariable Long id, Authentication auth) {
         Investimento investimentoAtualizado = investimentoService.toggleAtivo(id);
-        return ResponseEntity.ok(new InvestimentoDTO(investimentoAtualizado));
+        Long usuarioId = getUserId(auth);
+        if (usuarioId != null) {
+            return ResponseEntity.ok(investimentoService.converterParaDTOComRecomendacao(investimentoAtualizado, usuarioId, true));
+        } else {
+            return ResponseEntity.ok(new InvestimentoDTO(investimentoAtualizado));
+        }
     }
 
 
@@ -134,8 +162,14 @@ public class InvestimentoController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<InvestimentoDTO> buscar(@PathVariable Long id, Authentication auth) {
         boolean incluirUsuarios = isAdmin(auth);
+        Long usuarioId = getUserId(auth);
         Investimento investimento = investimentoService.buscarPorId(id);
-        return ResponseEntity.ok(new InvestimentoDTO(investimento, incluirUsuarios));
+        
+        if (usuarioId != null) {
+            return ResponseEntity.ok(investimentoService.converterParaDTOComRecomendacao(investimento, usuarioId, incluirUsuarios));
+        } else {
+            return ResponseEntity.ok(new InvestimentoDTO(investimento, incluirUsuarios));
+        }
     }
 
   
@@ -144,13 +178,18 @@ public class InvestimentoController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Visibilidade alterada com sucesso",
             content = @Content(mediaType = "application/json",
-            examples = @ExampleObject(value = "{\"id\": 1, \"nome\": \"Tesouro Direto\", \"visivelParaUsuarios\": false, \"ativo\": true}")))
+            examples = @ExampleObject(value = "{\"id\": 1, \"nome\": \"Tesouro Direto\", \"visivelParaUsuarios\": false, \"ativo\": true, \"recomendadoParaVoce\": true}")))
     })
     @PatchMapping("/{id}/toggle-visibilidade")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<InvestimentoDTO> toggleVisibilidade(@PathVariable Long id) {
+    public ResponseEntity<InvestimentoDTO> toggleVisibilidade(@PathVariable Long id, Authentication auth) {
         Investimento investimentoAtualizado = investimentoService.toggleVisibilidade(id);
-        return ResponseEntity.ok(new InvestimentoDTO(investimentoAtualizado, true));
+        Long usuarioId = getUserId(auth);
+        if (usuarioId != null) {
+            return ResponseEntity.ok(investimentoService.converterParaDTOComRecomendacao(investimentoAtualizado, usuarioId, true));
+        } else {
+            return ResponseEntity.ok(new InvestimentoDTO(investimentoAtualizado, true));
+        }
     }
 
     @Operation(summary = "[ADMIN] Excluir investimento", 
@@ -177,7 +216,7 @@ public class InvestimentoController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Operação realizada com sucesso",
             content = @Content(mediaType = "application/json",
-            examples = @ExampleObject(value = "{\"investimento\": {\"id\": 1, \"nome\": \"Tesouro Direto\", \"favoritado\": true}, \"mensagem\": \"Investimento favoritado com sucesso.\"}")))
+            examples = @ExampleObject(value = "{\"investimento\": {\"id\": 1, \"nome\": \"Tesouro Direto\", \"favoritado\": true, \"recomendadoParaVoce\": true}, \"mensagem\": \"Investimento favoritado com sucesso.\"}")))
     })
     @PostMapping("/favoritar/{investimentoId}/{usuarioId}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#usuarioId, authentication.name)")
@@ -193,7 +232,8 @@ public class InvestimentoController {
             mensagem = "Investimento desfavoritado com sucesso.";
         }
 
-        VincularResponseDTO responseDTO = new VincularResponseDTO(new InvestimentoDTO(investimento, incluirUsuarios), mensagem);
+        InvestimentoDTO dto = investimentoService.converterParaDTOComRecomendacao(investimento, usuarioId, incluirUsuarios);
+        VincularResponseDTO responseDTO = new VincularResponseDTO(dto, mensagem);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -203,14 +243,13 @@ public class InvestimentoController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista de investimentos favoritos",
             content = @Content(mediaType = "application/json",
-            examples = @ExampleObject(value = "[{\"id\": 1, \"nome\": \"Tesouro Direto\", \"simbolo\": \"TD\", \"categoria\": \"TESOURO_DIRETO\", \"precoAtual\": 102.50, \"risco\": \"BAIXO\"}]\n")))
+            examples = @ExampleObject(value = "[{\"id\": 1, \"nome\": \"Tesouro Direto\", \"simbolo\": \"TD\", \"categoria\": \"RENDA_FIXA\", \"precoAtual\": 102.50, \"risco\": \"BAIXO\", \"recomendadoParaVoce\": true}]\n")))
     })
     @GetMapping("/favoritos/{usuarioId}")
     @PreAuthorize("@usuarioService.isOwnerOrAdmin(#usuarioId, authentication.name)")
     public List<InvestimentoDTO> listarFavoritos(@PathVariable Long usuarioId, Authentication auth) {
         boolean incluirUsuarios = isAdmin(auth);
-        return investimentoService.listarPorUsuario(usuarioId).stream()
-                .map(inv -> new InvestimentoDTO(inv, incluirUsuarios))
-                .collect(Collectors.toList());
+        List<Investimento> favoritos = investimentoService.listarPorUsuario(usuarioId);
+        return investimentoService.converterParaDTOComRecomendacao(favoritos, usuarioId, incluirUsuarios);
     }
 }
