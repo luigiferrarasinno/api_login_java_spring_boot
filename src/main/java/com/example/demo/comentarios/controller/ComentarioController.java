@@ -43,7 +43,7 @@ public class ComentarioController {
     }
 
     @Operation(summary = "Criar novo comentário", 
-               description = "Cria um novo comentário em um investimento (usuário autenticado)")
+               description = "Cria um novo comentário em um investimento ou resposta a outro comentário (usuário autenticado)")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Comentário criado com sucesso",
             content = @Content(mediaType = "application/json",
@@ -58,12 +58,15 @@ public class ComentarioController {
             Comentario comentario = comentarioService.criarComentario(
                 criarDTO.getConteudo(), 
                 criarDTO.getInvestimentoId(), 
-                auth.getName()
+                auth.getName(),
+                criarDTO.getComentarioPaiId()
             );
             
             ComentarioDTO response = new ComentarioDTO(comentario);
             ComentarioCriadoResponseDTO resultado = new ComentarioCriadoResponseDTO(
-                "Comentário criado com sucesso!", response, LocalDateTime.now());
+                comentario.isResposta() ? "Resposta criada com sucesso!" : "Comentário criado com sucesso!", 
+                response, 
+                LocalDateTime.now());
             
             return ResponseEntity.ok(resultado);
         } catch (Exception e) {
@@ -82,16 +85,41 @@ public class ComentarioController {
     @GetMapping("/investimento/{investimentoId}")
     public ResponseEntity<?> buscarComentariosPorInvestimento(@PathVariable Long investimentoId) {
         try {
-            List<Comentario> comentarios = comentarioService.buscarComentariosPorInvestimento(investimentoId);
+            List<Comentario> comentarios = comentarioService.buscarComentariosRaizPorInvestimento(investimentoId);
             
             List<ComentarioDTO> comentariosDTO = comentarios.stream()
-                .map(ComentarioDTO::new)
+                .map(c -> new ComentarioDTO(c, true))
                 .collect(Collectors.toList());
             
             ComentariosPorInvestimentoResponseDTO response = new ComentariosPorInvestimentoResponseDTO(
                 investimentoId, comentariosDTO.size(), comentariosDTO);
             
             return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro: " + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "Buscar respostas de um comentário", 
+               description = "Lista todas as respostas de um comentário específico (acesso público)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de respostas do comentário"),
+        @ApiResponse(responseCode = "400", description = "Erro ao buscar respostas")
+    })
+    @GetMapping("/{comentarioId}/respostas")
+    public ResponseEntity<?> buscarRespostasDoComentario(@PathVariable Long comentarioId) {
+        try {
+            List<Comentario> respostas = comentarioService.buscarRespostasDoComentario(comentarioId);
+            
+            List<ComentarioDTO> respostasDTO = respostas.stream()
+                .map(c -> new ComentarioDTO(c, true))
+                .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(Map.of(
+                "comentarioPaiId", comentarioId,
+                "totalRespostas", respostasDTO.size(),
+                "respostas", respostasDTO
+            ));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro: " + e.getMessage());
         }

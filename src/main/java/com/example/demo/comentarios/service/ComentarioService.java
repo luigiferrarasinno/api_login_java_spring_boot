@@ -33,13 +33,42 @@ public class ComentarioService {
      */
     @Transactional
     public Comentario criarComentario(String conteudo, Long investimentoId, String emailUsuario) {
+        return criarComentario(conteudo, investimentoId, emailUsuario, null);
+    }
+
+    /**
+     * Criar novo comentário ou resposta a um comentário
+     */
+    @Transactional
+    public Comentario criarComentario(String conteudo, Long investimentoId, String emailUsuario, Long comentarioPaiId) {
         Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
             .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
         
         Investimento investimento = investimentoRepository.findById(investimentoId)
             .orElseThrow(() -> new EntityNotFoundException("Investimento não encontrado"));
         
-        Comentario comentario = new Comentario(conteudo, usuario, investimento);
+        Comentario comentario;
+        
+        if (comentarioPaiId != null) {
+            // É uma resposta a outro comentário
+            Comentario comentarioPai = buscarPorId(comentarioPaiId);
+            
+            // Validar que o comentário pai está ativo
+            if (!comentarioPai.isAtivo()) {
+                throw new IllegalArgumentException("Não é possível responder a um comentário inativo");
+            }
+            
+            // Validar que o comentário pai é do mesmo investimento
+            if (!comentarioPai.getInvestimento().getId().equals(investimentoId)) {
+                throw new IllegalArgumentException("O comentário pai não pertence ao mesmo investimento");
+            }
+            
+            comentario = new Comentario(conteudo, usuario, investimento, comentarioPai);
+        } else {
+            // É um comentário raiz
+            comentario = new Comentario(conteudo, usuario, investimento);
+        }
+        
         return comentarioRepository.save(comentario);
     }
 
@@ -48,6 +77,27 @@ public class ComentarioService {
      */
     public List<Comentario> buscarComentariosPorInvestimento(Long investimentoId) {
         return comentarioRepository.findByInvestimentoIdAndAtivoTrue(investimentoId);
+    }
+
+    /**
+     * Buscar apenas comentários raiz (sem pai) de um investimento
+     * Útil para exibir a árvore de comentários de forma hierárquica
+     */
+    public List<Comentario> buscarComentariosRaizPorInvestimento(Long investimentoId) {
+        List<Comentario> todosComentarios = comentarioRepository.findByInvestimentoIdAndAtivoTrue(investimentoId);
+        return todosComentarios.stream()
+            .filter(c -> c.getComentarioPai() == null)
+            .toList();
+    }
+
+    /**
+     * Buscar respostas de um comentário específico
+     */
+    public List<Comentario> buscarRespostasDoComentario(Long comentarioPaiId) {
+        Comentario comentarioPai = buscarPorId(comentarioPaiId);
+        return comentarioPai.getRespostas().stream()
+            .filter(Comentario::isAtivo)
+            .toList();
     }
 
     /**

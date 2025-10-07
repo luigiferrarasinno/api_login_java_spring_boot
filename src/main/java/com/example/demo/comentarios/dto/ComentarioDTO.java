@@ -2,9 +2,12 @@ package com.example.demo.comentarios.dto;
 
 import com.example.demo.comentarios.model.Comentario;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * DTO para exibir comentários
+ * DTO para exibir comentários com suporte para árvore de respostas
  */
 public class ComentarioDTO {
     
@@ -20,12 +23,19 @@ public class ComentarioDTO {
     private String dataAtualizacao;
     private boolean editado;
     private boolean ativo;
+    private Long comentarioPaiId;
+    private int numeroRespostas;
+    private List<ComentarioDTO> respostas;
 
     private static final DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     public ComentarioDTO() {}
 
     public ComentarioDTO(Comentario comentario) {
+        this(comentario, true); // Por padrão, incluir respostas
+    }
+
+    public ComentarioDTO(Comentario comentario, boolean incluirRespostas) {
         this.id = comentario.getId();
         this.conteudo = comentario.getConteudo();
         this.usuarioId = comentario.getUsuario().getId();
@@ -39,6 +49,18 @@ public class ComentarioDTO {
             comentario.getDataAtualizacao().format(DATETIME_FORMAT) : null;
         this.editado = comentario.isEditado();
         this.ativo = comentario.isAtivo();
+        this.comentarioPaiId = comentario.getComentarioPai() != null ? 
+            comentario.getComentarioPai().getId() : null;
+        this.numeroRespostas = comentario.getNumeroRespostas();
+        
+        if (incluirRespostas && comentario.getRespostas() != null && !comentario.getRespostas().isEmpty()) {
+            this.respostas = comentario.getRespostas().stream()
+                .filter(Comentario::isAtivo)
+                .map(resposta -> new ComentarioDTO(resposta, true))
+                .collect(Collectors.toList());
+        } else {
+            this.respostas = new ArrayList<>();
+        }
     }
 
     // Getters and Setters
@@ -77,4 +99,13 @@ public class ComentarioDTO {
 
     public boolean isAtivo() { return ativo; }
     public void setAtivo(boolean ativo) { this.ativo = ativo; }
+
+    public Long getComentarioPaiId() { return comentarioPaiId; }
+    public void setComentarioPaiId(Long comentarioPaiId) { this.comentarioPaiId = comentarioPaiId; }
+
+    public int getNumeroRespostas() { return numeroRespostas; }
+    public void setNumeroRespostas(int numeroRespostas) { this.numeroRespostas = numeroRespostas; }
+
+    public List<ComentarioDTO> getRespostas() { return respostas; }
+    public void setRespostas(List<ComentarioDTO> respostas) { this.respostas = respostas; }
 }

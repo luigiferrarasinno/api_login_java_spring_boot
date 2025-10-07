@@ -2,6 +2,10 @@
 
 Este guia cobre todos os endpoints relacionados ao sistema de comentários dos investimentos.
 
+> 🌳 **NOVO:** Sistema de Árvore de Comentários (Respostas)!  
+> Agora é possível responder comentários criando uma árvore hierárquica, similar ao TikTok.  
+> **📖 Guia completo:** [`arvore-comentarios.md`](./arvore-comentarios.md)
+
 ---
 
 ## 🔐 Autenticação

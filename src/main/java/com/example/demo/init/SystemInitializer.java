@@ -491,10 +491,10 @@ public class SystemInitializer implements CommandLineRunner {
     }
 
     /**
-     * 💬 ETAPA 5: Criar Comentários Iniciais
+     * 💬 ETAPA 5: Criar Comentários Iniciais com Árvore de Respostas
      */
     private void criarComentariosIniciais() {
-        System.out.println("\n💬 Inicializando comentários...");
+        System.out.println("\n💬 Inicializando comentários com árvore de respostas...");
         
         if (comentarioRepository.count() > 0) {
             System.out.println("⏭️  Comentários já existem, pulando criação...");
@@ -512,51 +512,159 @@ public class SystemInitializer implements CommandLineRunner {
                 return;
             }
 
-            // Comentários sobre PETR4
+            // 📈 Comentários sobre PETR4 (com árvore de respostas)
             Investimento petr4 = investimentos.stream()
                 .filter(inv -> "PETR4".equals(inv.getSimbolo()))
                 .findFirst().orElse(null);
             
             if (petr4 != null) {
-                criarComentario(admin, petr4, "Excelente oportunidade com os preços atuais do petróleo! 📈");
-                criarComentario(user, petr4, "Boa para dividendos, mas atenção à volatilidade do setor.");
-                criarComentario(maria, petr4, "Prefiro manter uma posição pequena, muito risco geopolítico.");
+                // Comentário raiz 1
+                Comentario petr4_c1 = criarComentario(admin, petr4, "Excelente oportunidade com os preços atuais do petróleo! 📈", null, 30);
+                
+                // Respostas ao comentário do admin
+                Comentario petr4_c1_r1 = criarComentario(user, petr4, "Concordo! Estou pensando em aumentar minha posição. Qual seria uma boa quantidade?", petr4_c1, 29);
+                Comentario petr4_c1_r2 = criarComentario(maria, petr4, "Cuidado com a volatilidade. Não coloque tudo em uma ação só! 🛡️", petr4_c1, 28);
+                
+                // Resposta à resposta do João
+                criarComentario(admin, petr4, "Sugiro começar com 100-200 ações e ir aumentando conforme o desempenho.", petr4_c1_r1, 28);
+                
+                // Resposta à resposta da Maria
+                criarComentario(user, petr4, "Boa dica! Vou diversificar também em FIIs.", petr4_c1_r2, 27);
+                
+                // Comentário raiz 2
+                Comentario petr4_c2 = criarComentario(user, petr4, "Boa para dividendos, mas atenção à volatilidade do setor.", null, 25);
+                
+                // Resposta ao comentário do João
+                criarComentario(maria, petr4, "Verdade! Os dividendos compensam, mas é importante ter estômago para as oscilações.", petr4_c2, 24);
+                
+                // Comentário raiz 3
+                criarComentario(maria, petr4, "Prefiro manter uma posição pequena, muito risco geopolítico.", null, 20);
             }
 
-            // Comentários sobre VALE3
+            // 💎 Comentários sobre VALE3 (com árvore de respostas)
             Investimento vale3 = investimentos.stream()
                 .filter(inv -> "VALE3".equals(inv.getSimbolo()))
                 .findFirst().orElse(null);
                 
             if (vale3 != null) {
-                criarComentario(maria, vale3, "A demanda por minério está forte, especialmente da China.");
-                criarComentario(admin, vale3, "ESG melhorou muito, mas ainda há trabalho a fazer.");
+                // Comentário raiz 1
+                Comentario vale3_c1 = criarComentario(maria, vale3, "A demanda por minério está forte, especialmente da China. 🇨🇳", null, 22);
+                
+                // Respostas
+                criarComentario(admin, vale3, "Exatamente! E o Brasil está bem posicionado nesse mercado.", vale3_c1, 21);
+                Comentario vale3_c1_r2 = criarComentario(user, vale3, "Mas e os riscos ambientais? Vocês levam isso em conta?", vale3_c1, 20);
+                
+                // Resposta à resposta do João
+                criarComentario(admin, vale3, "Ótima pergunta! A Vale melhorou muito o ESG após Brumadinho. Vale acompanhar de perto.", vale3_c1_r2, 19);
+                
+                // Mais uma camada de resposta
+                criarComentario(maria, vale3, "Concordo. Tenho acompanhado os relatórios de sustentabilidade deles.", vale3_c1_r2, 18);
+                
+                // Comentário raiz 2
+                Comentario vale3_c2 = criarComentario(admin, vale3, "ESG melhorou muito, mas ainda há trabalho a fazer.", null, 15);
+                
+                // Resposta
+                criarComentario(user, vale3, "Bom saber! Vou pesquisar mais sobre isso antes de investir.", vale3_c2, 14);
             }
 
-            // Comentários sobre FII
+            // 🏢 Comentários sobre FII HGLG11 (com árvore de respostas)
             Investimento hglg11 = investimentos.stream()
                 .filter(inv -> "HGLG11".equals(inv.getSimbolo()))
                 .findFirst().orElse(null);
                 
             if (hglg11 != null) {
-                criarComentario(user, hglg11, "Meu primeiro FII! Dividendos mensais são ótimos 💰");
-                criarComentario(maria, hglg11, "Shopping centers estão se recuperando bem pós-pandemia.");
+                // Comentário raiz 1
+                Comentario hglg11_c1 = criarComentario(user, hglg11, "Meu primeiro FII! Dividendos mensais são ótimos 💰", null, 18);
+                
+                // Respostas
+                Comentario hglg11_c1_r1 = criarComentario(maria, hglg11, "Parabéns! FIIs são excelentes para renda passiva.", hglg11_c1, 17);
+                Comentario hglg11_c1_r2 = criarComentario(admin, hglg11, "Ótima escolha para começar! HGLG11 é bem sólido.", hglg11_c1, 16);
+                
+                // Resposta à resposta da Maria
+                criarComentario(user, hglg11, "Obrigado! Estou animado para receber meu primeiro dividendo! 🎉", hglg11_c1_r1, 16);
+                
+                // Resposta à resposta do Admin
+                Comentario hglg11_c1_r2_r1 = criarComentario(user, hglg11, "Valeu! Qual a frequência de pagamento mesmo?", hglg11_c1_r2, 15);
+                
+                // Resposta da resposta da resposta (nível 3!)
+                criarComentario(admin, hglg11, "É mensal! Geralmente cai nos primeiros dias úteis do mês. 📅", hglg11_c1_r2_r1, 14);
+                
+                // Comentário raiz 2
+                Comentario hglg11_c2 = criarComentario(maria, hglg11, "Shopping centers estão se recuperando bem pós-pandemia.", null, 12);
+                
+                // Respostas
+                criarComentario(admin, hglg11, "Sim! O movimento voltou forte. Bom sinal para os FIIs de shoppings.", hglg11_c2, 11);
+                criarComentario(user, hglg11, "Isso me deixa mais confiante na minha escolha! 💪", hglg11_c2, 10);
             }
 
-            System.out.println("✅ " + comentarioRepository.count() + " comentários criados!");
+            // 💰 Comentários sobre Tesouro Selic (investimento conservador)
+            Investimento tesouro = investimentos.stream()
+                .filter(inv -> "TD-SELIC".equals(inv.getSimbolo()))
+                .findFirst().orElse(null);
+                
+            if (tesouro != null) {
+                // Comentário raiz 1
+                Comentario td_c1 = criarComentario(maria, tesouro, "Perfeito para reserva de emergência! Liquidez diária e segurança. 🛡️", null, 15);
+                
+                // Respostas
+                Comentario td_c1_r1 = criarComentario(user, tesouro, "É melhor que a poupança?", td_c1, 14);
+                
+                // Resposta da resposta
+                criarComentario(admin, tesouro, "Muito melhor! Rende 100% da Selic, enquanto poupança rende 70%. 📊", td_c1_r1, 13);
+                criarComentario(maria, tesouro, "Sem dúvida! E você pode resgatar a qualquer momento sem perder rentabilidade.", td_c1_r1, 13);
+                
+                // Comentário raiz 2
+                Comentario td_c2 = criarComentario(admin, tesouro, "Recomendo para todos os perfis. Base sólida de qualquer carteira! 💯", null, 10);
+                
+                // Resposta
+                criarComentario(user, tesouro, "Vou alocar 30% da minha carteira aqui então!", td_c2, 9);
+            }
+
+            // 🏦 Comentários sobre ITUB4
+            Investimento itub4 = investimentos.stream()
+                .filter(inv -> "ITUB4".equals(inv.getSimbolo()))
+                .findFirst().orElse(null);
+                
+            if (itub4 != null) {
+                // Comentário raiz 1
+                Comentario itub_c1 = criarComentario(admin, itub4, "Banco sólido com ótima governança. Dividendos consistentes! 🏦", null, 12);
+                
+                // Respostas
+                Comentario itub_c1_r1 = criarComentario(maria, itub4, "Tenho ITUB4 há anos. Nunca me decepcionou!", itub_c1, 11);
+                
+                // Resposta da resposta
+                criarComentario(user, itub4, "Quantas ações você recomenda para iniciante?", itub_c1_r1, 10);
+                criarComentario(maria, itub4, "Comece com 100-150 ações. É um bom início! 👍", itub_c1_r1, 9);
+            }
+
+            long totalComentarios = comentarioRepository.count();
+            long comentariosRaiz = comentarioRepository.findAll().stream()
+                .filter(c -> c.getComentarioPai() == null)
+                .count();
+            long respostas = totalComentarios - comentariosRaiz;
+            
+            System.out.println("✅ " + totalComentarios + " comentários criados!");
+            System.out.println("   📊 Comentários raiz: " + comentariosRaiz);
+            System.out.println("   💬 Respostas (árvore): " + respostas);
             
         } catch (Exception e) {
             System.err.println("❌ Erro ao criar comentários: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private void criarComentario(Usuario usuario, Investimento investimento, String texto) {
+    /**
+     * Cria um comentário ou resposta
+     */
+    private Comentario criarComentario(Usuario usuario, Investimento investimento, String texto, 
+                                      Comentario comentarioPai, int diasAtras) {
         Comentario comentario = new Comentario();
         comentario.setUsuario(usuario);
         comentario.setInvestimento(investimento);
         comentario.setConteudo(texto);
-        comentario.setDataCriacao(LocalDateTime.now().minusDays((long) (Math.random() * 30)));
-        comentarioRepository.save(comentario);
+        comentario.setComentarioPai(comentarioPai);
+        comentario.setDataCriacao(LocalDateTime.now().minusDays(diasAtras));
+        return comentarioRepository.save(comentario);
     }
 
     /**

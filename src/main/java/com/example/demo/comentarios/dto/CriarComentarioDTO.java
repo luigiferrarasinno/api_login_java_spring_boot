@@ -13,6 +13,9 @@ public class CriarComentarioDTO {
     private String conteudo;
     
     private Long investimentoId;
+    
+    // ID do comentário pai, se for uma resposta (null se for comentário raiz)
+    private Long comentarioPaiId;
 
     public CriarComentarioDTO() {}
 
@@ -21,10 +24,19 @@ public class CriarComentarioDTO {
         this.investimentoId = investimentoId;
     }
 
+    public CriarComentarioDTO(String conteudo, Long investimentoId, Long comentarioPaiId) {
+        this.conteudo = conteudo;
+        this.investimentoId = investimentoId;
+        this.comentarioPaiId = comentarioPaiId;
+    }
+
     // Getters and Setters
     public String getConteudo() { return conteudo; }
     public void setConteudo(String conteudo) { this.conteudo = conteudo; }
 
     public Long getInvestimentoId() { return investimentoId; }
     public void setInvestimentoId(Long investimentoId) { this.investimentoId = investimentoId; }
+
+    public Long getComentarioPaiId() { return comentarioPaiId; }
+    public void setComentarioPaiId(Long comentarioPaiId) { this.comentarioPaiId = comentarioPaiId; }
 }
