@@ -1,0 +1,19 @@
+# Ignorar arquivos desnecessários no build do Docker
+target/
+!target/*.jar
+.mvn/wrapper/maven-wrapper.jar
+.git
+.gitignore
+README.md
+*.md
+.vscode/
+.idea/
+*.iml
+*.log
+*.tmp
+
+# Ignorar backups e arquivos temporários
+backup-*
+*.backup
+*.bak
+~*
