@@ -206,6 +206,14 @@ public class PlaylistService {
         Investimento investimento = buscarInvestimentoPorId(request.getInvestimentoId());
 
         verificarPermissaoColaboracao(playlist, usuario);
+        
+        // Validar se investimento está visível para usuários comuns
+        boolean isAdmin = "ROLE_ADMIN".equals(usuario.getRole());
+        if (!isAdmin && !investimento.isVisivelParaUsuarios()) {
+            throw new IllegalArgumentException(
+                "Este investimento não está disponível para ser adicionado à playlist"
+            );
+        }
 
         if (playlist.getInvestimentos().contains(investimento)) {
             throw new IllegalArgumentException("Investimento já está na playlist");
@@ -474,17 +482,23 @@ public class PlaylistService {
         dto.setCriadorEmail(playlist.getCriador().getEmail());
         dto.setTipo(playlist.getTipo());
         dto.setPermiteColaboracao(playlist.getPermiteColaboracao());
-        dto.setTotalInvestimentos(playlist.getTotalInvestimentos());
-        dto.setTotalSeguidores(playlist.getTotalSeguidores());
         dto.setDataCriacao(playlist.getDataCriacao());
         dto.setDataAtualizacao(playlist.getDataAtualizacao());
         dto.setIsCriador(playlist.isCriador(usuarioAtual));
         dto.setIsFollowing(playlist.isSeguidor(usuarioAtual));
 
-        // Converter investimentos
+        // Verificar se usuário é admin
+        boolean isAdmin = "ROLE_ADMIN".equals(usuarioAtual.getRole());
+
+        // Converter investimentos - filtrar invisíveis para usuários comuns
         dto.setInvestimentos(playlist.getInvestimentos().stream()
+            .filter(inv -> isAdmin || inv.isVisivelParaUsuarios())
             .map(this::converterInvestimentoParaDTO)
             .collect(Collectors.toList()));
+        
+        // Atualizar total de investimentos com base nos visíveis
+        dto.setTotalInvestimentos(dto.getInvestimentos().size());
+        dto.setTotalSeguidores(playlist.getTotalSeguidores());
 
         // Converter seguidores
         dto.setSeguidores(playlist.getSeguidores().stream()

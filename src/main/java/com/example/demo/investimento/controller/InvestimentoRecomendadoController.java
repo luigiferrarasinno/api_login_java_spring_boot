@@ -127,9 +127,14 @@ public class InvestimentoRecomendadoController {
             @Valid @RequestBody AdicionarRecomendacoesRequestDTO request,
             Authentication authentication) {
         
+        boolean isAdmin = authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .anyMatch(auth -> auth.equals("ROLE_ADMIN"));
+        
         List<InvestimentoRecomendadoResponseDTO> recomendados = recomendadoService.adicionarRecomendacoes(
             request.getUsuarioId(),
-            request.getInvestimentoIds()
+            request.getInvestimentoIds(),
+            isAdmin
         );
         
         return ResponseEntity.status(HttpStatus.CREATED).body(recomendados);

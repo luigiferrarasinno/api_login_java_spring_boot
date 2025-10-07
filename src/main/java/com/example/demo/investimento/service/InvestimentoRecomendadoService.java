@@ -52,7 +52,9 @@ public class InvestimentoRecomendadoService {
         
         List<InvestimentoRecomendado> recomendados = recomendadoRepository.findByUsuario(usuario);
         
+        // Filtrar investimentos invisíveis para usuários comuns
         return recomendados.stream()
+            .filter(rec -> isAdmin || rec.getInvestimento().isVisivelParaUsuarios())
             .map(this::converterParaDTO)
             .collect(Collectors.toList());
     }
@@ -61,7 +63,7 @@ public class InvestimentoRecomendadoService {
      * Adiciona múltiplos investimentos recomendados para um usuário
      */
     @Transactional
-    public List<InvestimentoRecomendadoResponseDTO> adicionarRecomendacoes(Long usuarioId, List<Long> investimentoIds) {
+    public List<InvestimentoRecomendadoResponseDTO> adicionarRecomendacoes(Long usuarioId, List<Long> investimentoIds, boolean isAdmin) {
         Usuario usuario = buscarUsuarioPorId(usuarioId);
         
         List<InvestimentoRecomendado> novosRecomendados = investimentoIds.stream()
@@ -74,6 +76,14 @@ public class InvestimentoRecomendadoService {
                 }
                 
                 Investimento investimento = buscarInvestimentoPorId(investimentoId);
+                
+                // Validar que investimento é visível para usuários comuns
+                if (!isAdmin && !investimento.isVisivelParaUsuarios()) {
+                    throw new IllegalArgumentException(
+                        "Investimento ID " + investimentoId + " não está disponível para recomendação"
+                    );
+                }
+                
                 return new InvestimentoRecomendado(usuario, investimento);
             })
             .collect(Collectors.toList());

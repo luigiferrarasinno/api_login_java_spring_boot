@@ -8,9 +8,11 @@ import com.example.demo.extrato.repository.ExtratoRepository;
 import com.example.demo.carteira.model.PosicaoCarteira;
 import com.example.demo.carteira.repository.PosicaoCarteiraRepository;
 import com.example.demo.investimento.model.Investimento;
+import com.example.demo.investimento.model.InvestimentoRecomendado;
 import com.example.demo.investimento.model.Categoria;
 import com.example.demo.investimento.model.Risco;
 import com.example.demo.investimento.repository.InvestimentoRepository;
+import com.example.demo.investimento.repository.InvestimentoRecomendadoRepository;
 import com.example.demo.playlist.model.Playlist;
 import com.example.demo.playlist.model.PlaylistTipo;
 import com.example.demo.playlist.repository.PlaylistRepository;
@@ -30,7 +32,6 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Random;
-import java.util.Random;
 
 /**
  * 🚀 Inicializador Centralizado do Sistema
@@ -42,6 +43,7 @@ import java.util.Random;
  * 4. Comentários iniciais
  * 5. Históricos de investimentos (12 meses)
  * 6. Relacionamentos entre entidades
+ * 7. Investimentos recomendados por perfil
  */
 @Component
 @Order(1) // Executa primeiro
@@ -55,6 +57,9 @@ public class SystemInitializer implements CommandLineRunner {
     
     @Autowired
     private InvestimentoRepository investimentoRepository;
+    
+    @Autowired
+    private InvestimentoRecomendadoRepository investimentoRecomendadoRepository;
     
     @Autowired
     private PlaylistRepository playlistRepository;
@@ -90,6 +95,9 @@ public class SystemInitializer implements CommandLineRunner {
         
         // 6. Criar extratos de investimentos para os últimos 12 meses (precisa de usuários e investimentos)
         criarExtratosIniciais();
+        
+        // 7. Criar investimentos recomendados baseados no perfil do usuário
+        criarInvestimentosRecomendados();
         
         System.out.println("✅ ===== SISTEMA INICIALIZADO COM SUCESSO! ===== ✅\n");
         imprimirResumoInicializacao();
@@ -756,13 +764,90 @@ public class SystemInitializer implements CommandLineRunner {
     }
 
     /**
-     * �📊 Imprimir Resumo da Inicialização
+     * 🎯 ETAPA 7: Criar Investimentos Recomendados baseados no perfil
+     */
+    private void criarInvestimentosRecomendados() {
+        System.out.println("\n🎯 Inicializando investimentos recomendados...");
+        
+        // Buscar usuários
+        Usuario admin = usuarioDAO.findByEmail("admin@admin.com").orElse(null);
+        Usuario joao = usuarioDAO.findByEmail("user@user.com").orElse(null);
+        Usuario maria = usuarioDAO.findByEmail("maria@investidora.com").orElse(null);
+        
+        if (admin == null || joao == null || maria == null) {
+            System.out.println("⚠️ Usuários não encontrados. Pulando criação de recomendações.");
+            return;
+        }
+        
+        // Buscar todos os investimentos visíveis
+        List<Investimento> todosInvestimentos = investimentoRepository.findAll()
+            .stream()
+            .filter(Investimento::isVisivelParaUsuarios)
+            .toList();
+        
+        int totalRecomendacoes = 0;
+        
+        // Admin (PERFIL_ARROJADO): Pode receber todos os tipos de investimento
+        totalRecomendacoes += criarRecomendacoesParaUsuario(admin, todosInvestimentos, "ARROJADO");
+        
+        // João Silva (PERFIL_MODERADO): Apenas baixo e médio risco
+        List<Investimento> investimentosModerado = todosInvestimentos.stream()
+            .filter(inv -> inv.getRisco() == Risco.BAIXO || inv.getRisco() == Risco.MEDIO)
+            .toList();
+        totalRecomendacoes += criarRecomendacoesParaUsuario(joao, investimentosModerado, "MODERADO");
+        
+        // Maria (PERFIL_CONSERVADOR): Apenas baixo risco
+        List<Investimento> investimentosConservador = todosInvestimentos.stream()
+            .filter(inv -> inv.getRisco() == Risco.BAIXO)
+            .toList();
+        totalRecomendacoes += criarRecomendacoesParaUsuario(maria, investimentosConservador, "CONSERVADOR");
+        
+        System.out.println("✅ " + totalRecomendacoes + " investimentos recomendados criados!");
+    }
+    
+    /**
+     * Cria recomendações para um usuário específico
+     */
+    private int criarRecomendacoesParaUsuario(Usuario usuario, List<Investimento> investimentos, String perfil) {
+        int contador = 0;
+        
+        // Determinar quantas recomendações criar baseado no perfil
+        int quantidadeRecomendacoes = switch (perfil) {
+            case "CONSERVADOR" -> Math.min(3, investimentos.size()); // Apenas 3 recomendações
+            case "MODERADO" -> Math.min(5, investimentos.size());     // 5 recomendações
+            case "ARROJADO" -> Math.min(8, investimentos.size());     // 8 recomendações
+            default -> 3;
+        };
+        
+        // Criar recomendações
+        for (int i = 0; i < quantidadeRecomendacoes && i < investimentos.size(); i++) {
+            Investimento investimento = investimentos.get(i);
+            
+            // Verificar se já não está recomendado
+            if (!investimentoRecomendadoRepository.existsByUsuarioIdAndInvestimentoId(
+                    usuario.getId(), investimento.getId())) {
+                
+                InvestimentoRecomendado recomendado = new InvestimentoRecomendado();
+                recomendado.setUsuario(usuario);
+                recomendado.setInvestimento(investimento);
+                investimentoRecomendadoRepository.save(recomendado);
+                contador++;
+            }
+        }
+        
+        System.out.println("   ✅ " + contador + " recomendações criadas para " + usuario.getNomeUsuario() + " (Perfil: " + perfil + ")");
+        return contador;
+    }
+
+    /**
+     * 📊 Imprimir Resumo da Inicialização
      */
     private void imprimirResumoInicializacao() {
         System.out.println("📊 ===== RESUMO DA INICIALIZAÇÃO ===== 📊");
         System.out.println("👥 Usuários: " + ((List<?>) usuarioDAO.findAll()).size());
         System.out.println("💰 Investimentos: " + investimentoRepository.count());
-        System.out.println("🎵 Playlists: " + playlistRepository.count());
+        System.out.println("� Recomendações: " + investimentoRecomendadoRepository.count());
+        System.out.println("�🎵 Playlists: " + playlistRepository.count());
         System.out.println("💬 Comentários: " + comentarioRepository.count());
         System.out.println("� Extratos: " + extratoRepository.count() + " (últimos 12 meses com compras, vendas e dividendos)");
         System.out.println("");
