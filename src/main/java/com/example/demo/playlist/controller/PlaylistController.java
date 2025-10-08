@@ -682,7 +682,7 @@ public class PlaylistController {
             - **Podem controlar** o comportamento via parâmetro `apenasModificaveis`:
               * `apenasModificaveis=true` → Vê apenas modificáveis (simula comportamento de usuário comum)
               * `apenasModificaveis=false` ou **omitir** → Vê todas acessíveis (comportamento padrão admin)
-            - Útil para testar a experiência do usuário comum
+            - Útil para ter a experiência do usuário comum
             
             
             **O que são playlists modificáveis?**
