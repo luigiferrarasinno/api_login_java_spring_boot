@@ -55,7 +55,118 @@ public class PlaylistService {
     }
 
     /**
+     * 🎯 MÉTODO UNIFICADO: Listar playlists com filtros avançados
+     * 
+     * Este método substitui todos os endpoints GET específicos por um único endpoint com filtros.
+     * Suporta filtros rápidos, busca por nome, tipo, ordenação customizada, etc.
+     */
+    public List<PlaylistResumoResponseDTO> listarPlaylistsComFiltros(String emailUsuario, FiltroPlaylistRequestDTO filtros) {
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
+        
+        List<Playlist> playlists;
+        
+        // 1. Aplicar filtro rápido (se especificado)
+        if (filtros.getFiltro() != null) {
+            playlists = aplicarFiltroRapido(filtros.getFiltro(), usuario);
+        } else {
+            // Se não especificou filtro rápido, busca todas que o usuário tem acesso
+            playlists = playlistRepository.findAllAcessiveisPorUsuario(usuario);
+        }
+        
+        // 2. Aplicar filtros adicionais
+        playlists = aplicarFiltrosAdicionais(playlists, filtros, usuario);
+        
+        // 3. Ordenar resultados
+        playlists = ordenarPlaylists(playlists, filtros.getOrdenacao());
+        
+        // 4. Converter para DTO
+        return playlists.stream()
+                       .map(playlist -> converterParaResumoDTO(playlist, usuario))
+                       .collect(Collectors.toList());
+    }
+    
+    /**
+     * Aplica filtro rápido predefinido
+     */
+    private List<Playlist> aplicarFiltroRapido(FiltroPlaylistRequestDTO.FiltroRapido filtro, Usuario usuario) {
+        return switch (filtro) {
+            case MINHAS -> playlistRepository.findByCriadorAndAtivaTrue(usuario);
+            case SEGUINDO -> playlistRepository.findPlaylistsSeguidasPorUsuario(usuario);
+            case PUBLICAS -> playlistRepository.findByTipoPublicaAndAtivaTrue();
+            case COMPARTILHADAS -> playlistRepository.findPlaylistsCompartilhadasPorUsuario(usuario);
+            case TODAS -> playlistRepository.findAllAcessiveisPorUsuario(usuario);
+        };
+    }
+    
+    /**
+     * Aplica filtros adicionais (tipo, nome, colaboração, criador)
+     */
+    private List<Playlist> aplicarFiltrosAdicionais(List<Playlist> playlists, FiltroPlaylistRequestDTO filtros, Usuario usuario) {
+        return playlists.stream()
+            // Filtrar por tipo (PUBLICA, PRIVADA, COMPARTILHADA)
+            .filter(p -> filtros.getTipo() == null || p.getTipo() == filtros.getTipo())
+            
+            // Filtrar por nome (busca parcial, case-insensitive)
+            .filter(p -> filtros.getNome() == null || 
+                        p.getNome().toLowerCase().contains(filtros.getNome().toLowerCase()))
+            
+            // Filtrar por permite colaboração
+            .filter(p -> filtros.getPermiteColaboracao() == null || 
+                        p.getPermiteColaboracao() == filtros.getPermiteColaboracao())
+            
+            // Filtrar por email do criador
+            .filter(p -> filtros.getCriadorEmail() == null || 
+                        p.getCriador().getEmail().equalsIgnoreCase(filtros.getCriadorEmail()))
+            
+            .collect(Collectors.toList());
+    }
+    
+    /**
+     * Ordena playlists conforme critério especificado
+     */
+    private List<Playlist> ordenarPlaylists(List<Playlist> playlists, FiltroPlaylistRequestDTO.OrdenacaoPlaylist ordenacao) {
+        if (ordenacao == null) {
+            ordenacao = FiltroPlaylistRequestDTO.OrdenacaoPlaylist.DATA_CRIACAO_DESC;
+        }
+        
+        return switch (ordenacao) {
+            case DATA_CRIACAO_ASC -> playlists.stream()
+                .sorted((p1, p2) -> p1.getDataCriacao().compareTo(p2.getDataCriacao()))
+                .collect(Collectors.toList());
+                
+            case DATA_CRIACAO_DESC -> playlists.stream()
+                .sorted((p1, p2) -> p2.getDataCriacao().compareTo(p1.getDataCriacao()))
+                .collect(Collectors.toList());
+                
+            case NOME_ASC -> playlists.stream()
+                .sorted((p1, p2) -> p1.getNome().compareToIgnoreCase(p2.getNome()))
+                .collect(Collectors.toList());
+                
+            case NOME_DESC -> playlists.stream()
+                .sorted((p1, p2) -> p2.getNome().compareToIgnoreCase(p1.getNome()))
+                .collect(Collectors.toList());
+                
+            case TOTAL_INVESTIMENTOS_ASC -> playlists.stream()
+                .sorted((p1, p2) -> Integer.compare(p1.getInvestimentos().size(), p2.getInvestimentos().size()))
+                .collect(Collectors.toList());
+                
+            case TOTAL_INVESTIMENTOS_DESC -> playlists.stream()
+                .sorted((p1, p2) -> Integer.compare(p2.getInvestimentos().size(), p1.getInvestimentos().size()))
+                .collect(Collectors.toList());
+                
+            case TOTAL_SEGUIDORES_ASC -> playlists.stream()
+                .sorted((p1, p2) -> Integer.compare(p1.getSeguidores().size(), p2.getSeguidores().size()))
+                .collect(Collectors.toList());
+                
+            case TOTAL_SEGUIDORES_DESC -> playlists.stream()
+                .sorted((p1, p2) -> Integer.compare(p2.getSeguidores().size(), p1.getSeguidores().size()))
+                .collect(Collectors.toList());
+        };
+    }
+
+    /**
      * Listar playlists do usuário (criadas por ele)
+     * @deprecated Use listarPlaylistsComFiltros com filtro=MINHAS
      */
     public List<PlaylistResumoResponseDTO> listarMinhasPlaylists(String emailUsuario) {
         Usuario usuario = buscarUsuarioPorEmail(emailUsuario);

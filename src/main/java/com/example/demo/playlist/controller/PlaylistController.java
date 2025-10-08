@@ -1,6 +1,7 @@
 package com.example.demo.playlist.controller;
 
 import com.example.demo.playlist.service.PlaylistService;
+import com.example.demo.playlist.model.PlaylistTipo;
 import com.example.demo.playlist.dto.request.*;
 import com.example.demo.playlist.dto.response.*;
 import org.springframework.http.ResponseEntity;
@@ -57,11 +58,132 @@ public class PlaylistController {
     }
 
     /**
+     * 🎯 ENDPOINT UNIFICADO: Listar playlists com filtros avançados
+     * 
+     * Este endpoint substitui todos os GET específicos (/minhas, /seguindo, /publicas, /compartilhadas, /buscar)
+     * por um único endpoint poderoso com múltiplos filtros combinados.
+     * 
+     * Exemplos de uso:
+     * - GET /playlists → Lista todas playlists acessíveis
+     * - GET /playlists?filtro=MINHAS → Minhas playlists
+     * - GET /playlists?filtro=SEGUINDO → Playlists que sigo
+     * - GET /playlists?filtro=PUBLICAS → Todas públicas
+     * - GET /playlists?filtro=COMPARTILHADAS → Compartilhadas comigo
+     * - GET /playlists?nome=dividendos → Busca por nome
+     * - GET /playlists?tipo=PUBLICA&nome=tech → Públicas com "tech"
+     * - GET /playlists?filtro=MINHAS&ordenacao=NOME_ASC → Minhas ordenadas por nome
+     * - GET /playlists?criadorEmail=admin@admin.com → Playlists de um criador específico
+     * - GET /playlists?permiteColaboracao=true → Apenas colaborativas
+     */
+    @Operation(
+        summary = "Listar playlists com filtros avançados (ENDPOINT UNIFICADO)",
+        description = """
+            **NOVO ENDPOINT UNIFICADO** que substitui /minhas, /seguindo, /publicas, /compartilhadas e /buscar.
+            
+            Permite combinar múltiplos filtros:
+            
+            **Filtros Rápidos** (query param 'filtro'):
+            - `MINHAS`: Playlists criadas por você
+            - `SEGUINDO`: Playlists que você segue
+            - `PUBLICAS`: Todas as playlists públicas
+            - `COMPARTILHADAS`: Playlists compartilhadas especificamente com você
+            - `TODAS`: Todas que você tem acesso (padrão se não especificar filtro)
+            
+            **Filtros Adicionais Combináveis**:
+            - `tipo`: Filtrar por tipo (PUBLICA, PRIVADA, COMPARTILHADA)
+            - `nome`: Busca parcial case-insensitive no nome
+            - `permiteColaboracao`: true/false
+            - `criadorEmail`: Email do criador
+            
+            **Ordenação** (query param 'ordenacao'):
+            - `DATA_CRIACAO_ASC` / `DATA_CRIACAO_DESC` (padrão: DESC)
+            - `NOME_ASC` / `NOME_DESC`
+            - `TOTAL_INVESTIMENTOS_ASC` / `TOTAL_INVESTIMENTOS_DESC`
+            - `TOTAL_SEGUIDORES_ASC` / `TOTAL_SEGUIDORES_DESC`
+            
+            **Exemplos de Combinações**:
+            - `/playlists?filtro=PUBLICAS&nome=dividendos&ordenacao=TOTAL_SEGUIDORES_DESC`
+              → Busca "dividendos" em públicas, ordena por mais seguidas
+            
+            - `/playlists?filtro=MINHAS&permiteColaboracao=true`
+              → Suas playlists colaborativas
+            
+            - `/playlists?tipo=COMPARTILHADA&criadorEmail=admin@admin.com`
+              → Playlists compartilhadas criadas pelo admin
+            """,
+        tags = { "Playlists" }
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Lista de playlists retornada com sucesso (pode estar vazia se nenhuma corresponder aos filtros)",
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    value = """
+                        [
+                          {
+                            "id": 1,
+                            "nome": "Top Dividendos 2024",
+                            "descricao": "Melhores pagadores",
+                            "criadorNome": "Admin",
+                            "criadorEmail": "admin@admin.com",
+                            "tipo": "PUBLICA",
+                            "permiteColaboracao": true,
+                            "totalInvestimentos": 8,
+                            "totalSeguidores": 23,
+                            "isCriador": false,
+                            "isFollowing": true,
+                            "dataCriacao": "2024-09-15T10:30:00"
+                          }
+                        ]
+                        """
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "401", description = "Usuário não autenticado")
+    })
+    @GetMapping
+    @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<PlaylistResumoResponseDTO>> listarPlaylists(
+            @RequestParam(required = false) FiltroPlaylistRequestDTO.FiltroRapido filtro,
+            @RequestParam(required = false) PlaylistTipo tipo,
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) Boolean permiteColaboracao,
+            @RequestParam(required = false) String criadorEmail,
+            @RequestParam(required = false) FiltroPlaylistRequestDTO.OrdenacaoPlaylist ordenacao,
+            Authentication authentication) {
+        
+        // Construir DTO de filtros a partir dos query params
+        FiltroPlaylistRequestDTO filtros = new FiltroPlaylistRequestDTO();
+        filtros.setFiltro(filtro);
+        filtros.setTipo(tipo);
+        filtros.setNome(nome);
+        filtros.setPermiteColaboracao(permiteColaboracao);
+        filtros.setCriadorEmail(criadorEmail);
+        filtros.setOrdenacao(ordenacao != null ? ordenacao : FiltroPlaylistRequestDTO.OrdenacaoPlaylist.DATA_CRIACAO_DESC);
+        
+        List<PlaylistResumoResponseDTO> playlists = playlistService.listarPlaylistsComFiltros(
+            authentication.getName(), 
+            filtros
+        );
+        
+        return ResponseEntity.ok(playlists);
+    }
+
+    /**
      * 📋 Listar minhas playlists
      */
     @Operation(
         summary = "Listar minhas playlists",
-        description = "Retorna todas as playlists criadas pelo usuário autenticado.",
+        description = """
+            Lista todas as playlists criadas por você.
+            
+            💡 **DICA**: Também pode usar o endpoint unificado mais poderoso:
+            - `GET /playlists?filtro=MINHAS` → Mesmo resultado
+            - `GET /playlists?filtro=MINHAS&ordenacao=NOME_ASC` → Ordenadas por nome
+            - `GET /playlists?filtro=MINHAS&permiteColaboracao=true` → Apenas colaborativas
+            """,
         tags = { "Playlists" }
     )
     @ApiResponses(value = {
@@ -89,7 +211,14 @@ public class PlaylistController {
      */
     @Operation(
         summary = "Listar playlists que sigo",
-        description = "Retorna todas as playlists que o usuário autenticado está seguindo.",
+        description = """
+            Lista todas as playlists que você está seguindo (criadas por outros usuários).
+            
+            💡 **DICA**: Também pode usar o endpoint unificado mais poderoso:
+            - `GET /playlists?filtro=SEGUINDO` → Mesmo resultado
+            - `GET /playlists?filtro=SEGUINDO&nome=dividendos` → Filtra por nome
+            - `GET /playlists?filtro=SEGUINDO&ordenacao=TOTAL_SEGUIDORES_DESC` → Mais populares primeiro
+            """,
         tags = { "Playlists" }
     )
     @ApiResponses(value = {
@@ -117,7 +246,15 @@ public class PlaylistController {
      */
     @Operation(
         summary = "Listar playlists públicas",
-        description = "Retorna todas as playlists públicas disponíveis na plataforma.",
+        description = """
+            Lista todas as playlists públicas disponíveis na plataforma.
+            
+            💡 **DICA**: Também pode usar o endpoint unificado mais poderoso:
+            - `GET /playlists?filtro=PUBLICAS` → Mesmo resultado
+            - `GET /playlists?filtro=PUBLICAS&nome=tech` → Públicas sobre tecnologia
+            - `GET /playlists?filtro=PUBLICAS&criadorEmail=admin@admin.com` → Do admin
+            - `GET /playlists?tipo=PUBLICA&permiteColaboracao=true` → Públicas colaborativas
+            """,
         tags = { "Playlists" }
     )
     @ApiResponses(value = {
@@ -145,7 +282,16 @@ public class PlaylistController {
      */
     @Operation(
         summary = "Buscar playlists por nome",
-        description = "Busca playlists públicas que contenham o termo especificado no nome (busca parcial, case-insensitive).",
+        description = """
+            Busca playlists pelo nome (busca parcial, case-insensitive) entre todas que você tem acesso.
+            
+            💡 **DICA**: Também pode usar o endpoint unificado mais poderoso:
+            - `GET /playlists?nome=dividendos` → Mesmo resultado (busca em todas acessíveis)
+            - `GET /playlists?filtro=MINHAS&nome=tech` → Busca apenas nas suas playlists
+            - `GET /playlists?filtro=PUBLICAS&nome=ações` → Busca apenas nas públicas
+            - `GET /playlists?nome=fiis&ordenacao=TOTAL_SEGUIDORES_DESC` → Ordena por popularidade
+            - `GET /playlists?nome=crypto&tipo=COMPARTILHADA` → Busca em compartilhadas
+            """,
         tags = { "Playlists" }
     )
     @ApiResponses(value = {
@@ -459,10 +605,15 @@ public class PlaylistController {
      */
     @Operation(
         summary = "Listar playlists compartilhadas comigo",
-        description = "Retorna playlists do tipo COMPARTILHADA que OUTROS USUÁRIOS compartilharam especificamente COM VOCÊ. " +
-                     "Essas são playlists privadas que alguém te deu acesso exclusivo. " +
-                     "Diferente das playlists públicas (que todos veem) ou das suas próprias playlists. " +
-                     "Pense nisso como uma 'caixa de entrada' de playlists que pessoas compartilharam com você.",
+        description = """
+            Lista playlists compartilhadas especificamente com você por outros usuários.
+            
+            💡 **DICA**: Também pode usar o endpoint unificado mais poderoso:
+            - `GET /playlists?filtro=COMPARTILHADAS` → Mesmo resultado
+            - `GET /playlists?filtro=COMPARTILHADAS&nome=vip` → Filtra por nome
+            - `GET /playlists?filtro=COMPARTILHADAS&criadorEmail=admin@admin.com` → Do admin
+            - `GET /playlists?tipo=COMPARTILHADA` → Todas compartilhadas (não só com você)
+            """,
         tags = { "Playlists" }
     )
     @ApiResponses(value = {

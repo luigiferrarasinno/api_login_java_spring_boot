@@ -55,4 +55,9 @@ public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
     // Buscar playlists compartilhadas
     @Query("SELECT p FROM Playlist p WHERE p.tipo = 'COMPARTILHADA' AND p.ativa = true AND :usuario MEMBER OF p.seguidores")
     List<Playlist> findPlaylistsCompartilhadasPorUsuario(@Param("usuario") Usuario usuario);
+    
+    // Buscar TODAS as playlists acessíveis por um usuário (criadas por ele, seguindo, públicas)
+    @Query("SELECT DISTINCT p FROM Playlist p WHERE p.ativa = true AND " +
+           "(p.criador = :usuario OR :usuario MEMBER OF p.seguidores OR p.tipo = 'PUBLICA')")
+    List<Playlist> findAllAcessiveisPorUsuario(@Param("usuario") Usuario usuario);
 }
