@@ -9,6 +9,7 @@ Uma API RESTful completa para gestão de investimentos com autenticação JWT, c
 ## ✨ Principais Funcionalidades
 
 - 🔐 **Autenticação JWT** com roles diferenciadas (USER/ADMIN)
+- 🤖 **Feller IA** - Assistente inteligente com chat personalizado e montagem automática de carteira
 - 📈 **Sistema Brasileiro de Ações** (apenas números inteiros, estoque limitado)
 - 🎯 **Investimentos Recomendados** - Sistema personalizado de recomendações por perfil
 - 💼 **Carteira Unificada** com GET consolidado e filtros avançados
@@ -22,7 +23,26 @@ Uma API RESTful completa para gestão de investimentos com autenticação JWT, c
 
 ---
 
-## 🎵 **NOVO! Sistema de Playlists Sociais**
+## 🤖 **NOVO! Feller IA - Assistente Inteligente de Investimentos**
+
+> **"Converse com a IA e deixe ela montar sua carteira automaticamente!"**
+
+### 🌟 Funcionalidades da IA:
+- 💬 **Chat Personalizado** - IA conhece seu perfil (idade, saldo, risco, investimentos)
+- 🎯 **Montagem Automática** - IA analisa seu perfil e cria carteira recomendada
+- 🧠 **Contexto Enriquecido** - Todas as perguntas são enriquecidas com seus dados
+- ✅ **Detecção de Duplicatas** - Sistema inteligente ignora investimentos já recomendados
+
+### 🎯 Exemplos de Uso:
+- "O que você recomenda para mim?" → IA analisa perfil e sugere investimentos
+- "Como devo investir meu saldo?" → Resposta personalizada baseada no seu dinheiro disponível
+- POST `/feller/montar-carteira-recomendada` → IA monta carteira completa automaticamente
+
+📖 **[Ver Guia Completo do Feller IA](guias-de-uso/feller-ia.md)**
+
+---
+
+## 🎵 **Sistema de Playlists Sociais**
 
 > **"Crie, compartilhe e descubra playlists de investimentos como no Spotify!"**
 
@@ -169,9 +189,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 | 👤 **Usuários** | Login, cadastro, alteração de dados, filtros avançados | [usuarios.md](guias-de-uso/usuarios.md) |
 | 📈 **Investimentos** | CRUD, favoritos, filtros, controle de visibilidade | [investimentos.md](guias-de-uso/investimentos.md) |
 | 🎯 **Investimentos Recomendados** | Sistema de recomendações personalizadas, GET/POST/DELETE | [investimentos-recomendados.md](guias-de-uso/investimentos-recomendados.md) |
+| 🤖 **Feller IA** | Chat personalizado + montagem automática de carteira com IA | [feller-ia.md](guias-de-uso/feller-ia.md) |
 | 💬 **Comentários** | Sistema completo com moderação admin | [comentarios.md](guias-de-uso/comentarios.md) |
-| � **Carteira Unificada** | GET consolidado com filtros, resumo e posições | [carteira-unificada.md](guias-de-uso/carteira-unificada.md) |
-| � **Resumo de Investimentos** | Endpoint GET /resumo com métricas consolidadas | [resumo-investimentos.md](guias-de-uso/resumo-investimentos.md) |
+| 💼 **Carteira Unificada** | GET consolidado com filtros, resumo e posições | [carteira-unificada.md](guias-de-uso/carteira-unificada.md) |
+| 📊 **Resumo de Investimentos** | Endpoint GET /resumo com métricas consolidadas | [resumo-investimentos.md](guias-de-uso/resumo-investimentos.md) |
 | 🎵 **Playlists Sociais** | Sistema completo tipo Spotify | [playlist.md](guias-de-uso/playlist.md) |
 | ✨ **Campo recomendadoParaVoce** | Lógica nullable em todos os endpoints | [campo-recomendado-null.md](guias-de-uso/campo-recomendado-null.md) |
 
@@ -217,10 +238,13 @@ src/main/java/com/example/demo
 │       ├── RegisterRequestDTO.java      # DTO de registro de usuário
 │       └── AlterarSenhaComSenhaAntiga.java # DTO para alteração de senha
 ├── 📈 investimento/                      # Módulo de investimentos
-│   ├── controller/InvestimentoController.java # Endpoints CRUD investimentos
+│   ├── controller/                      # Controladores REST
+│   │   ├── InvestimentoController.java  # Endpoints CRUD de investimentos
+│   │   └── InvestimentoRecomendadoController.java # Endpoints de recomendações
 │   ├── service/                         # Serviços de negócio
 │   │   ├── InvestimentoService.java     # Regras de negócio e validações
-│   │   └── CotacaoService.java          # Serviço de cotações e preços
+│   │   ├── CotacaoService.java          # Serviço de cotações e preços
+│   │   └── InvestimentoRecomendadoService.java # Lógica de recomendações (com filtro de duplicatas)
 │   ├── repository/                      # Repositórios de dados
 │   │   ├── InvestimentoRepository.java  # Queries personalizadas de investimentos
 │   │   └── InvestimentoRecomendadoRepository.java # Queries de recomendações
@@ -229,14 +253,18 @@ src/main/java/com/example/demo
 │   │   ├── InvestimentoRecomendado.java # Entidade de recomendações
 │   │   ├── Categoria.java               # Enum de categorias
 │   │   └── Risco.java                   # Enum de níveis de risco
-│   ├── dto/                             # DTOs específicos
-│   │   └── InvestimentoDTO.java         # DTO de investimento (com recomendadoParaVoce)
-│   └── init/                            # Inicialização de dados
-│       └── InvestimentoDataInitializer.java # Cria investimentos base
-├── � investimento_recomendado/          # Sistema de recomendações personalizadas
-│   ├── controller/InvestimentoRecomendadoController.java # Endpoints de recomendações
-│   └── service/InvestimentoRecomendadoService.java # Lógica de recomendações
-├── �🎵 playlist/                          # Módulo de playlists sociais
+│   └── dto/                             # DTOs específicos
+│       ├── InvestimentoDTO.java         # DTO de investimento (com recomendadoParaVoce)
+│       ├── InvestimentoRecomendadoResponseDTO.java # DTO de recomendações
+│       └── AdicionarRecomendacoesRequestDTO.java # DTO para adicionar múltiplas recomendações
+├── 🤖 feller/                            # **NOVO!** Módulo de IA Assistente
+│   ├── controller/FellerController.java # 2 endpoints: chat personalizado + montar carteira automática
+│   ├── service/FellerService.java       # Enriquecimento de contexto, comunicação com API externa
+│   └── dto/                             # DTOs específicos de IA
+│       ├── FellerPromptDTO.java         # DTO de entrada para chat
+│       ├── FellerResponseDTO.java       # DTO de resposta da IA
+│       └── MontarCarteiraRecomendadaResponseDTO.java # DTO com IDs adicionados + duplicatas ignoradas
+├── 🎵 playlist/                          # Módulo de playlists sociais
 │   ├── controller/PlaylistController.java # 13 endpoints REST completos
 │   ├── service/PlaylistService.java     # Lógica social e colaborativa
 │   ├── repository/PlaylistRepository.java # Queries específicas de playlist
@@ -271,16 +299,15 @@ src/main/java/com/example/demo
 │   └── dto/                             # DTOs específicos
 │       ├── ResumoCarteiraResponseDTO.java # DTO principal de resposta
 │       └── PosicaoCarteiraResponseDTO.java # DTO de posição (com recomendadoParaVoce)
-├── 📊 extrato/                           # Sistema de extrato
-│   ├── controller/ExtratoController.java # Consulta de transações
-│   ├── service/ExtratoService.java      # Consolidação de movimentações
-│   ├── repository/ExtratoRepository.java # Queries de histórico
-│   ├── model/                           # Entidades do domínio
-│   │   ├── Extrato.java                 # Histórico de transações
-│   │   └── TipoTransacao.java           # Enum de tipos (COMPRA/VENDA/DIVIDENDO)
-│   └── dto/                             # DTOs específicos
-│       └── ExtratoDTO.java              # DTO de extrato
-└── 💰 dividendo/                         # Sistema de dividendos (REMOVIDO - Funcionalidade descontinuada)
+└── 📊 extrato/                           # Sistema de extrato
+    ├── controller/ExtratoController.java # Consulta de transações
+    ├── service/ExtratoService.java      # Consolidação de movimentações
+    ├── repository/ExtratoRepository.java # Queries de histórico
+    ├── model/                           # Entidades do domínio
+    │   ├── Extrato.java                 # Histórico de transações
+    │   └── TipoTransacao.java           # Enum de tipos (COMPRA/VENDA/DIVIDENDO)
+    └── dto/                             # DTOs específicos
+        └── ExtratoDTO.java              # DTO de extrato
 ```
 
 ### 🏗️ Padrão Arquitetural MVC:
@@ -353,18 +380,3 @@ Desenvolvido por:
 2. **Teste login** no Postman com as credenciais acima
 3. **Explore** no Swagger: `http://localhost:8080/swagger-ui.html`
 
-### 📚 **Para Aprender Específico:**
-1. **Escolha o módulo** na tabela de guias
-2. **Siga os exemplos** completos no guia
-3. **Teste** no Postman ou Swagger
-
-### 🔍 **Para Desenvolver:**
-1. **Analise** a estrutura de pastas acima
-2. **Entenda** o padrão MVC implementado
-3. **Veja** os dados inicializados automaticamente
-
----
-
-**🚀 Sistema completo, documentado e pronto para uso!**
-
-**📖 Consulte os guias específicos para instruções detalhadas de cada funcionalidade.**
