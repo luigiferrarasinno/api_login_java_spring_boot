@@ -671,17 +671,19 @@ public class PlaylistController {
             Retorna playlists acessíveis ao usuário, indicando para cada uma se o investimento
             especificado pertence ou não à playlist.
             
-            **IMPORTANTE - Regra de Segurança**:
-            - **Usuários comuns (ROLE_USER)**: SEMPRE veem apenas playlists que podem modificar
-              (suas próprias + colaborativas que seguem). O parâmetro `apenasModificaveis` é ignorado.
-            - **Administradores (ROLE_ADMIN)**: Podem usar o filtro `apenasModificaveis` livremente:
-              * `true` → Apenas modificáveis
-              * `false` ou omitir → Todas acessíveis
+            **IMPORTANTE - Regra de Segurança por Role**:
             
-            **Útil para**:
-            - Adicionar/remover investimento de múltiplas playlists
-            - Interface de seleção de playlists para um investimento
-            - Visualizar em quais playlists um investimento está presente
+            **👤 Usuários Comuns (ROLE_USER)**:
+            - SEMPRE veem apenas playlists que podem modificar (suas próprias + colaborativas que seguem)
+            - O parâmetro `apenasModificaveis` é **ignorado** (segurança automática)
+            - Não há como ver playlists onde não podem adicionar investimentos
+            
+            **👨‍💼 Administradores (ROLE_ADMIN)**:
+            - **Podem controlar** o comportamento via parâmetro `apenasModificaveis`:
+              * `apenasModificaveis=true` → Vê apenas modificáveis (simula comportamento de usuário comum)
+              * `apenasModificaveis=false` ou **omitir** → Vê todas acessíveis (comportamento padrão admin)
+            - Útil para testar a experiência do usuário comum
+            
             
             **O que são playlists modificáveis?**
             - Playlists que você criou (independente do tipo: privadas, públicas ou compartilhadas)
@@ -691,18 +693,6 @@ public class PlaylistController {
             - `pertenceAPlaylist`: true se o investimento está na playlist, false caso contrário
             - Informações completas de cada playlist (nome, criador, total investimentos, etc.)
             
-            **Exemplos**:
-            
-            **Para usuários comuns**:
-            - `GET /playlists/por-investimento/5` → Apenas suas playlists modificáveis
-            - `GET /playlists/por-investimento/5?apenasModificaveis=false` → Ignorado, sempre modificáveis
-            
-            **Para administradores**:
-            - `GET /playlists/por-investimento/5` → Todas as playlists acessíveis
-            - `GET /playlists/por-investimento/5?apenasModificaveis=true` → Apenas modificáveis
-            
-            **Caso de uso típico**: Endpoint perfeito para tela de adicionar investimento a playlists.
-            Usuários comuns já veem automaticamente apenas onde podem adicionar!
             """,
         tags = { "Playlists" }
     )
