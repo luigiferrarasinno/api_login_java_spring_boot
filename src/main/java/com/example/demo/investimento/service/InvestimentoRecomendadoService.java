@@ -174,4 +174,13 @@ public class InvestimentoRecomendadoService {
         return investimentoRepository.findById(id)
             .orElseThrow(() -> new RecursoNaoEncontradoException("Investimento não encontrado: " + id));
     }
+    
+    /**
+     * Método auxiliar público para obter ID do usuário por email
+     * Usado pelo FellerController para montar carteira recomendada
+     */
+    public Long obterUsuarioIdPorEmail(String email) {
+        Usuario usuario = buscarUsuarioPorEmail(email);
+        return usuario.getId();
+    }
 }
