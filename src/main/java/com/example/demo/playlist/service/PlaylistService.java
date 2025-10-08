@@ -59,18 +59,22 @@ public class PlaylistService {
      * 
      * Este método substitui todos os endpoints GET específicos por um único endpoint com filtros.
      * Suporta filtros rápidos, busca por nome, tipo, ordenação customizada, etc.
+     * 
+     * ADMIN: Quando filtro = TODAS, vê literalmente TODAS (incluindo privadas de outros)
+     * USER: Quando filtro = TODAS, vê apenas as acessíveis (suas + seguindo + públicas)
      */
-    public List<PlaylistResumoResponseDTO> listarPlaylistsComFiltros(String emailUsuario, FiltroPlaylistRequestDTO filtros) {
+    public List<PlaylistResumoResponseDTO> listarPlaylistsComFiltros(String emailUsuario, FiltroPlaylistRequestDTO filtros, boolean isAdmin) {
         Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
         
         List<Playlist> playlists;
         
         // 1. Aplicar filtro rápido (se especificado)
         if (filtros.getFiltro() != null) {
-            playlists = aplicarFiltroRapido(filtros.getFiltro(), usuario);
+            playlists = aplicarFiltroRapido(filtros.getFiltro(), usuario, isAdmin);
         } else {
             // Se não especificou filtro rápido, busca todas que o usuário tem acesso
-            playlists = playlistRepository.findAllAcessiveisPorUsuario(usuario);
+            // ADMIN vê todas, USER vê apenas acessíveis
+            playlists = isAdmin ? playlistRepository.findByAtivaTrue() : playlistRepository.findAllAcessiveisPorUsuario(usuario);
         }
         
         // 2. Aplicar filtros adicionais
@@ -87,14 +91,16 @@ public class PlaylistService {
     
     /**
      * Aplica filtro rápido predefinido
+     * ADMIN com filtro TODAS: vê TODAS as playlists do sistema (incluindo privadas de outros)
+     * USER com filtro TODAS: vê apenas playlists acessíveis (suas + seguindo + públicas)
      */
-    private List<Playlist> aplicarFiltroRapido(FiltroPlaylistRequestDTO.FiltroRapido filtro, Usuario usuario) {
+    private List<Playlist> aplicarFiltroRapido(FiltroPlaylistRequestDTO.FiltroRapido filtro, Usuario usuario, boolean isAdmin) {
         return switch (filtro) {
             case MINHAS -> playlistRepository.findByCriadorAndAtivaTrue(usuario);
             case SEGUINDO -> playlistRepository.findPlaylistsSeguidasPorUsuario(usuario);
             case PUBLICAS -> playlistRepository.findByTipoPublicaAndAtivaTrue();
             case COMPARTILHADAS -> playlistRepository.findPlaylistsCompartilhadasPorUsuario(usuario);
-            case TODAS -> playlistRepository.findAllAcessiveisPorUsuario(usuario);
+            case TODAS -> isAdmin ? playlistRepository.findByAtivaTrue() : playlistRepository.findAllAcessiveisPorUsuario(usuario);
         };
     }
     
@@ -223,6 +229,40 @@ public class PlaylistService {
         return playlists.stream()
                        .map(playlist -> converterParaResumoDTO(playlist, usuario))
                        .collect(Collectors.toList());
+    }
+
+    /**
+     * Listar todas as playlists indicando se um investimento pertence a elas
+     * USUÁRIOS COMUNS: Sempre veem apenas playlists modificáveis (segurança)
+     * ADMIN: Pode usar o filtro livremente
+     */
+    public List<PlaylistInvestimentoStatusResponseDTO> listarPlaylistsComStatusInvestimento(
+            String emailUsuario, 
+            Long investimentoId,
+            Boolean apenasModificaveis,
+            boolean isAdmin) {
+        
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
+        Investimento investimento = investimentoRepository.findById(investimentoId)
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Investimento não encontrado"));
+        
+        // Buscar todas as playlists que o usuário tem acesso
+        List<Playlist> playlistsAcessiveis = playlistRepository.findAllAcessiveisPorUsuario(usuario);
+        
+        // REGRA DE SEGURANÇA: Usuários comuns SEMPRE veem apenas playlists modificáveis
+        // Admin pode controlar via parâmetro
+        boolean aplicarFiltroModificaveis = !isAdmin || (apenasModificaveis != null && apenasModificaveis);
+        
+        if (aplicarFiltroModificaveis) {
+            playlistsAcessiveis = playlistsAcessiveis.stream()
+                .filter(p -> podeModificarPlaylist(usuario, p))
+                .collect(Collectors.toList());
+        }
+        
+        // Converter para DTO com status do investimento
+        return playlistsAcessiveis.stream()
+            .map(playlist -> converterParaStatusInvestimentoDTO(playlist, usuario, investimento))
+            .collect(Collectors.toList());
     }
 
     /**
@@ -569,6 +609,15 @@ public class PlaylistService {
         }
     }
 
+    /**
+     * Verifica se o usuário pode modificar a playlist
+     * (criador OU seguidor de playlist colaborativa)
+     */
+    private boolean podeModificarPlaylist(Usuario usuario, Playlist playlist) {
+        return playlist.isCriador(usuario) || 
+               (playlist.getPermiteColaboracao() && playlist.isSeguidor(usuario));
+    }
+
     private PlaylistResumoResponseDTO converterParaResumoDTO(Playlist playlist, Usuario usuarioAtual) {
         PlaylistResumoResponseDTO dto = new PlaylistResumoResponseDTO();
         dto.setId(playlist.getId());
@@ -729,5 +778,34 @@ public class PlaylistService {
             acao,
             totalAfetados
         );
+    }
+
+    /**
+     * Converter playlist para DTO com status do investimento
+     */
+    private PlaylistInvestimentoStatusResponseDTO converterParaStatusInvestimentoDTO(
+            Playlist playlist, 
+            Usuario usuarioAtual, 
+            Investimento investimento) {
+        
+        // Verificar se o investimento pertence à playlist
+        boolean pertence = playlist.getInvestimentos().contains(investimento);
+        
+        PlaylistInvestimentoStatusResponseDTO dto = new PlaylistInvestimentoStatusResponseDTO();
+        dto.setPlaylistId(playlist.getId());
+        dto.setNomePlaylist(playlist.getNome());
+        dto.setDescricao(playlist.getDescricao());
+        dto.setCriadorNome(playlist.getCriador().getNomeUsuario());
+        dto.setCriadorEmail(playlist.getCriador().getEmail());
+        dto.setTipo(playlist.getTipo().toString());
+        dto.setPermiteColaboracao(playlist.getPermiteColaboracao());
+        dto.setPertenceAPlaylist(pertence);
+        dto.setTotalInvestimentos(playlist.getTotalInvestimentos());
+        dto.setTotalSeguidores(playlist.getTotalSeguidores());
+        dto.setIsCriador(playlist.isCriador(usuarioAtual));
+        dto.setIsFollowing(playlist.isSeguidor(usuarioAtual));
+        dto.setDataCriacao(playlist.getDataCriacao());
+        
+        return dto;
     }
 }

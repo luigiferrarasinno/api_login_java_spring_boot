@@ -87,7 +87,20 @@ public class PlaylistController {
             - `SEGUINDO`: Playlists que você segue
             - `PUBLICAS`: Todas as playlists públicas
             - `COMPARTILHADAS`: Playlists compartilhadas especificamente com você
-            - `TODAS`: Todas que você tem acesso (padrão se não especificar filtro)
+            - `TODAS`: Todas que você tem acesso
+              * **ADMIN**: Vê LITERALMENTE TODAS as playlists do sistema (incluindo privadas de outros usuários)
+              * **USER**: Vê apenas playlists acessíveis (suas + seguindo + públicas)
+            
+            **🔑 IMPORTANTE - Comportamento do Filtro TODAS por Role**:
+            - **Administradores (ROLE_ADMIN)**:
+              * `filtro=TODAS` ou sem filtro → Retorna TODAS as playlists ativas do sistema
+              * Inclui playlists privadas de todos os usuários
+              * Útil para administração e auditoria
+            
+            - **Usuários Comuns (ROLE_USER)**:
+              * `filtro=TODAS` ou sem filtro → Retorna apenas playlists acessíveis
+              * Suas próprias playlists + playlists que segue + playlists públicas
+              * NÃO vê playlists privadas de outros usuários
             
             **Filtros Adicionais Combináveis**:
             - `tipo`: Filtrar por tipo (PUBLICA, PRIVADA, COMPARTILHADA)
@@ -102,6 +115,13 @@ public class PlaylistController {
             - `TOTAL_SEGUIDORES_ASC` / `TOTAL_SEGUIDORES_DESC`
             
             **Exemplos de Combinações**:
+            
+            **Para Administradores**:
+            - `/playlists?filtro=TODAS` → TODAS as playlists do sistema (incluindo privadas)
+            - `/playlists?filtro=TODAS&tipo=PRIVADA` → Todas as playlists privadas do sistema
+            - `/playlists?criadorEmail=user@email.com` → Todas as playlists de um usuário específico
+            
+            **Para Usuários Comuns**:
             - `/playlists?filtro=PUBLICAS&nome=dividendos&ordenacao=TOTAL_SEGUIDORES_DESC`
               → Busca "dividendos" em públicas, ordena por mais seguidas
             
@@ -109,7 +129,7 @@ public class PlaylistController {
               → Suas playlists colaborativas
             
             - `/playlists?tipo=COMPARTILHADA&criadorEmail=admin@admin.com`
-              → Playlists compartilhadas criadas pelo admin
+              → Playlists compartilhadas criadas pelo admin (que você tem acesso)
             """,
         tags = { "Playlists" }
     )
@@ -154,6 +174,10 @@ public class PlaylistController {
             @RequestParam(required = false) FiltroPlaylistRequestDTO.OrdenacaoPlaylist ordenacao,
             Authentication authentication) {
         
+        // Verificar se é admin
+        boolean isAdmin = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        
         // Construir DTO de filtros a partir dos query params
         FiltroPlaylistRequestDTO filtros = new FiltroPlaylistRequestDTO();
         filtros.setFiltro(filtro);
@@ -165,7 +189,8 @@ public class PlaylistController {
         
         List<PlaylistResumoResponseDTO> playlists = playlistService.listarPlaylistsComFiltros(
             authentication.getName(), 
-            filtros
+            filtros,
+            isAdmin
         );
         
         return ResponseEntity.ok(playlists);
@@ -638,7 +663,111 @@ public class PlaylistController {
     }
 
     /**
-     * 🔄 Tornar playlist compartilhada
+     * � Listar playlists com status de um investimento
+     */
+    @Operation(
+        summary = "Listar playlists indicando se um investimento pertence a elas",
+        description = """
+            Retorna playlists acessíveis ao usuário, indicando para cada uma se o investimento
+            especificado pertence ou não à playlist.
+            
+            **IMPORTANTE - Regra de Segurança**:
+            - **Usuários comuns (ROLE_USER)**: SEMPRE veem apenas playlists que podem modificar
+              (suas próprias + colaborativas que seguem). O parâmetro `apenasModificaveis` é ignorado.
+            - **Administradores (ROLE_ADMIN)**: Podem usar o filtro `apenasModificaveis` livremente:
+              * `true` → Apenas modificáveis
+              * `false` ou omitir → Todas acessíveis
+            
+            **Útil para**:
+            - Adicionar/remover investimento de múltiplas playlists
+            - Interface de seleção de playlists para um investimento
+            - Visualizar em quais playlists um investimento está presente
+            
+            **O que são playlists modificáveis?**
+            - Playlists que você criou (independente do tipo: privadas, públicas ou compartilhadas)
+            - Playlists colaborativas que você está seguindo (onde `permiteColaboracao = true`)
+            
+            **Retorna**:
+            - `pertenceAPlaylist`: true se o investimento está na playlist, false caso contrário
+            - Informações completas de cada playlist (nome, criador, total investimentos, etc.)
+            
+            **Exemplos**:
+            
+            **Para usuários comuns**:
+            - `GET /playlists/por-investimento/5` → Apenas suas playlists modificáveis
+            - `GET /playlists/por-investimento/5?apenasModificaveis=false` → Ignorado, sempre modificáveis
+            
+            **Para administradores**:
+            - `GET /playlists/por-investimento/5` → Todas as playlists acessíveis
+            - `GET /playlists/por-investimento/5?apenasModificaveis=true` → Apenas modificáveis
+            
+            **Caso de uso típico**: Endpoint perfeito para tela de adicionar investimento a playlists.
+            Usuários comuns já veem automaticamente apenas onde podem adicionar!
+            """,
+        tags = { "Playlists" }
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Lista de playlists com status do investimento",
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    value = """
+                        [
+                          {
+                            "playlistId": 1,
+                            "nomePlaylist": "Ações Brasileiras",
+                            "descricao": "Minhas ações BR",
+                            "criadorNome": "João Silva",
+                            "criadorEmail": "joao@email.com",
+                            "tipo": "PRIVADA",
+                            "permiteColaboracao": false,
+                            "pertenceAPlaylist": true,
+                            "totalInvestimentos": 8,
+                            "totalSeguidores": 0,
+                            "isCriador": true,
+                            "isFollowing": false,
+                            "dataCriacao": "2024-09-15T10:30:00"
+                          },
+                          {
+                            "playlistId": 2,
+                            "nomePlaylist": "Top Dividendos",
+                            "pertenceAPlaylist": false,
+                            "totalInvestimentos": 12
+                          }
+                        ]
+                        """
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Investimento não encontrado"),
+        @ApiResponse(responseCode = "401", description = "Usuário não autenticado")
+    })
+    @GetMapping("/por-investimento/{investimentoId}")
+    @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<PlaylistInvestimentoStatusResponseDTO>> listarPlaylistsPorInvestimento(
+            @PathVariable Long investimentoId,
+            @RequestParam(required = false) Boolean apenasModificaveis,
+            Authentication authentication) {
+        
+        // Verificar se é admin
+        boolean isAdmin = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        
+        List<PlaylistInvestimentoStatusResponseDTO> playlists = 
+            playlistService.listarPlaylistsComStatusInvestimento(
+                authentication.getName(), 
+                investimentoId, 
+                apenasModificaveis,
+                isAdmin
+            );
+        
+        return ResponseEntity.ok(playlists);
+    }
+
+    /**
+     * �🔄 Tornar playlist compartilhada
      */
     @Operation(
         summary = "Tornar playlist compartilhada",

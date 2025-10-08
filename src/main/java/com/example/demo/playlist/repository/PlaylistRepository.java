@@ -60,4 +60,7 @@ public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
     @Query("SELECT DISTINCT p FROM Playlist p WHERE p.ativa = true AND " +
            "(p.criador = :usuario OR :usuario MEMBER OF p.seguidores OR p.tipo = 'PUBLICA')")
     List<Playlist> findAllAcessiveisPorUsuario(@Param("usuario") Usuario usuario);
+    
+    // Buscar TODAS as playlists do sistema (ADMIN ONLY - inclui privadas de todos)
+    List<Playlist> findByAtivaTrue();
 }
