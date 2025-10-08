@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,20 +64,19 @@ public class InvestimentoRecomendadoService {
     
     /**
      * Adiciona múltiplos investimentos recomendados para um usuário
+     * Ignora silenciosamente investimentos já recomendados (sem lançar exceção)
      */
     @Transactional
     public List<InvestimentoRecomendadoResponseDTO> adicionarRecomendacoes(Long usuarioId, List<Long> investimentoIds, boolean isAdmin) {
         Usuario usuario = buscarUsuarioPorId(usuarioId);
         
         List<InvestimentoRecomendado> novosRecomendados = investimentoIds.stream()
+            .filter(investimentoId -> {
+                // IGNORA silenciosamente investimentos já recomendados
+                boolean jaExiste = recomendadoRepository.existsByUsuarioIdAndInvestimentoId(usuarioId, investimentoId);
+                return !jaExiste; // Retorna true apenas se NÃO existe ainda
+            })
             .map(investimentoId -> {
-                // Verifica se já existe
-                if (recomendadoRepository.existsByUsuarioIdAndInvestimentoId(usuarioId, investimentoId)) {
-                    throw new IllegalArgumentException(
-                        "Investimento ID " + investimentoId + " já está recomendado para este usuário"
-                    );
-                }
-                
                 Investimento investimento = buscarInvestimentoPorId(investimentoId);
                 
                 // Validar que investimento é visível para usuários comuns
@@ -88,11 +90,60 @@ public class InvestimentoRecomendadoService {
             })
             .collect(Collectors.toList());
         
+        // Salvar apenas os novos (que não eram duplicatas)
         List<InvestimentoRecomendado> salvos = recomendadoRepository.saveAll(novosRecomendados);
         
         return salvos.stream()
             .map(this::converterParaDTO)
             .collect(Collectors.toList());
+    }
+    
+    /**
+     * Adiciona múltiplos investimentos recomendados com detalhamento de duplicatas
+     * Retorna Map com: "adicionados" (novos) e "jaExistentes" (duplicatas ignoradas)
+     */
+    @Transactional
+    public Map<String, List<Long>> adicionarRecomendacoesComDetalhes(Long usuarioId, List<Long> investimentoIds, boolean isAdmin) {
+        Usuario usuario = buscarUsuarioPorId(usuarioId);
+        
+        // Separar IDs em duas listas: novos vs já existentes
+        List<Long> idsJaExistentes = new ArrayList<>();
+        List<Long> idsNovos = new ArrayList<>();
+        
+        for (Long investimentoId : investimentoIds) {
+            boolean jaExiste = recomendadoRepository.existsByUsuarioIdAndInvestimentoId(usuarioId, investimentoId);
+            if (jaExiste) {
+                idsJaExistentes.add(investimentoId);
+            } else {
+                idsNovos.add(investimentoId);
+            }
+        }
+        
+        // Processar apenas os IDs novos
+        List<InvestimentoRecomendado> novosRecomendados = idsNovos.stream()
+            .map(investimentoId -> {
+                Investimento investimento = buscarInvestimentoPorId(investimentoId);
+                
+                // Validar que investimento é visível para usuários comuns
+                if (!isAdmin && !investimento.isVisivelParaUsuarios()) {
+                    throw new IllegalArgumentException(
+                        "Investimento ID " + investimentoId + " não está disponível para recomendação"
+                    );
+                }
+                
+                return new InvestimentoRecomendado(usuario, investimento);
+            })
+            .collect(Collectors.toList());
+        
+        // Salvar apenas os novos
+        recomendadoRepository.saveAll(novosRecomendados);
+        
+        // Retornar ambas as listas
+        Map<String, List<Long>> resultado = new HashMap<>();
+        resultado.put("adicionados", idsNovos);
+        resultado.put("jaExistentes", idsJaExistentes);
+        
+        return resultado;
     }
     
     /**

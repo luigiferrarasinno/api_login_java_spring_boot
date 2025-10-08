@@ -204,12 +204,14 @@ public class FellerService {
             if (idsRecomendados.isEmpty()) {
                 return new MontarCarteiraRecomendadaResponseDTO(
                     new ArrayList<>(),
+                    new ArrayList<>(),
                     "A IA não conseguiu gerar recomendações válidas. Por favor, tente novamente."
                 );
             }
 
             return new MontarCarteiraRecomendadaResponseDTO(
                 idsRecomendados,
+                new ArrayList<>(),  // Ainda não sabemos quais são duplicatas (controller vai descobrir)
                 "Carteira recomendada montada com sucesso! " + idsRecomendados.size() + " investimentos selecionados pela IA Feller."
             );
 
@@ -217,6 +219,7 @@ public class FellerService {
             throw e;
         } catch (Exception e) {
             return new MontarCarteiraRecomendadaResponseDTO(
+                new ArrayList<>(),
                 new ArrayList<>(),
                 "Erro ao montar carteira recomendada: " + e.getMessage()
             );

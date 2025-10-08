@@ -7,26 +7,42 @@ import java.util.List;
  */
 public class MontarCarteiraRecomendadaResponseDTO {
 
-    private List<Long> investimentosRecomendados;
+    private List<Long> investimentosAdicionados;      // IDs que foram ADICIONADOS agora
+    private List<Long> investimentosJaExistentes;     // IDs que JÁ EXISTIAM (duplicatas ignoradas)
     private String mensagem;
-    private Integer quantidadeRecomendacoes;
+    private Integer quantidadeAdicionados;
+    private Integer quantidadeJaExistentes;
 
     public MontarCarteiraRecomendadaResponseDTO() {
     }
 
-    public MontarCarteiraRecomendadaResponseDTO(List<Long> investimentosRecomendados, String mensagem) {
-        this.investimentosRecomendados = investimentosRecomendados;
+    public MontarCarteiraRecomendadaResponseDTO(
+            List<Long> investimentosAdicionados, 
+            List<Long> investimentosJaExistentes, 
+            String mensagem) {
+        this.investimentosAdicionados = investimentosAdicionados;
+        this.investimentosJaExistentes = investimentosJaExistentes;
         this.mensagem = mensagem;
-        this.quantidadeRecomendacoes = investimentosRecomendados != null ? investimentosRecomendados.size() : 0;
+        this.quantidadeAdicionados = investimentosAdicionados != null ? investimentosAdicionados.size() : 0;
+        this.quantidadeJaExistentes = investimentosJaExistentes != null ? investimentosJaExistentes.size() : 0;
     }
 
-    public List<Long> getInvestimentosRecomendados() {
-        return investimentosRecomendados;
+    public List<Long> getInvestimentosAdicionados() {
+        return investimentosAdicionados;
     }
 
-    public void setInvestimentosRecomendados(List<Long> investimentosRecomendados) {
-        this.investimentosRecomendados = investimentosRecomendados;
-        this.quantidadeRecomendacoes = investimentosRecomendados != null ? investimentosRecomendados.size() : 0;
+    public void setInvestimentosAdicionados(List<Long> investimentosAdicionados) {
+        this.investimentosAdicionados = investimentosAdicionados;
+        this.quantidadeAdicionados = investimentosAdicionados != null ? investimentosAdicionados.size() : 0;
+    }
+
+    public List<Long> getInvestimentosJaExistentes() {
+        return investimentosJaExistentes;
+    }
+
+    public void setInvestimentosJaExistentes(List<Long> investimentosJaExistentes) {
+        this.investimentosJaExistentes = investimentosJaExistentes;
+        this.quantidadeJaExistentes = investimentosJaExistentes != null ? investimentosJaExistentes.size() : 0;
     }
 
     public String getMensagem() {
@@ -37,11 +53,19 @@ public class MontarCarteiraRecomendadaResponseDTO {
         this.mensagem = mensagem;
     }
 
-    public Integer getQuantidadeRecomendacoes() {
-        return quantidadeRecomendacoes;
+    public Integer getQuantidadeAdicionados() {
+        return quantidadeAdicionados;
     }
 
-    public void setQuantidadeRecomendacoes(Integer quantidadeRecomendacoes) {
-        this.quantidadeRecomendacoes = quantidadeRecomendacoes;
+    public void setQuantidadeAdicionados(Integer quantidadeAdicionados) {
+        this.quantidadeAdicionados = quantidadeAdicionados;
+    }
+
+    public Integer getQuantidadeJaExistentes() {
+        return quantidadeJaExistentes;
+    }
+
+    public void setQuantidadeJaExistentes(Integer quantidadeJaExistentes) {
+        this.quantidadeJaExistentes = quantidadeJaExistentes;
     }
 }

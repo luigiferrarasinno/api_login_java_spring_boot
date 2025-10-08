@@ -4,7 +4,6 @@ import com.example.demo.feller.dto.FellerPromptDTO;
 import com.example.demo.feller.dto.FellerResponseDTO;
 import com.example.demo.feller.dto.MontarCarteiraRecomendadaResponseDTO;
 import com.example.demo.feller.service.FellerService;
-import com.example.demo.investimento.dto.AdicionarRecomendacoesRequestDTO;
 import com.example.demo.investimento.dto.InvestimentoRecomendadoResponseDTO;
 import com.example.demo.investimento.service.InvestimentoRecomendadoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -177,7 +176,7 @@ public class FellerController {
         );
 
         // 2. Verificar se a IA retornou investimentos válidos
-        if (carteiraIA.getInvestimentosRecomendados().isEmpty()) {
+        if (carteiraIA.getInvestimentosAdicionados() == null || carteiraIA.getInvestimentosAdicionados().isEmpty()) {
             return ResponseEntity.badRequest().body(java.util.Map.of(
                     "erro", carteiraIA.getMensagem(),
                     "investimentosRecomendados", java.util.List.of()
@@ -192,25 +191,42 @@ public class FellerController {
 
         // 4. Buscar o usuário para pegar o ID
         try {
-            // Usar o service de investimentos recomendados para adicionar
-            // Primeiro precisamos do usuarioId - vamos usar um método auxiliar
             Long usuarioId = investimentoRecomendadoService.obterUsuarioIdPorEmail(email);
 
-            // 5. Adicionar os investimentos recomendados pela IA
-            java.util.List<InvestimentoRecomendadoResponseDTO> recomendados = 
-                    investimentoRecomendadoService.adicionarRecomendacoes(
+            // 5. Adicionar os investimentos recomendados pela IA COM DETALHAMENTO
+            java.util.Map<String, java.util.List<Long>> resultado = 
+                    investimentoRecomendadoService.adicionarRecomendacoesComDetalhes(
                             usuarioId,
-                            carteiraIA.getInvestimentosRecomendados(),
+                            carteiraIA.getInvestimentosAdicionados(),
                             isAdmin
                     );
 
-            // 6. Retornar os investimentos adicionados
-            return ResponseEntity.status(HttpStatus.CREATED).body(recomendados);
+            // 6. Criar resposta detalhada
+            String mensagem;
+            int quantidadeAdicionados = resultado.get("adicionados").size();
+            int quantidadeJaExistentes = resultado.get("jaExistentes").size();
+            
+            if (quantidadeJaExistentes == 0) {
+                mensagem = String.format("Carteira montada com sucesso! %d investimento(s) adicionado(s).", 
+                        quantidadeAdicionados);
+            } else {
+                mensagem = String.format(
+                        "Carteira montada! %d investimento(s) adicionado(s), %d já existia(m) nas suas recomendações.",
+                        quantidadeAdicionados, quantidadeJaExistentes);
+            }
+            
+            MontarCarteiraRecomendadaResponseDTO response = new MontarCarteiraRecomendadaResponseDTO(
+                    resultado.get("adicionados"),
+                    resultado.get("jaExistentes"),
+                    mensagem
+            );
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(java.util.Map.of(
                     "erro", "Erro ao adicionar investimentos recomendados: " + e.getMessage(),
-                    "investimentosSugeridosPelaIA", carteiraIA.getInvestimentosRecomendados()
+                    "investimentosSugeridosPelaIA", carteiraIA.getInvestimentosAdicionados()
             ));
         }
     }
