@@ -172,4 +172,55 @@ public class InvestimentoRecomendadoController {
         
         return ResponseEntity.noContent().build();
     }
+    
+    /**
+     * 🗑️ Remover TODAS as recomendações de um usuário
+     */
+    @Operation(
+        summary = "Remover todas as recomendações de um usuário",
+        description = "Remove todos os investimentos recomendados de um usuário. Usuários podem remover apenas suas próprias recomendações, admins podem remover de qualquer usuário.",
+        tags = { "Investimentos Recomendados" }
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Todas as recomendações removidas com sucesso",
+            content = @io.swagger.v3.oas.annotations.media.Content(
+                mediaType = "application/json",
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    value = """
+                        {
+                          "mensagem": "5 recomendações removidas com sucesso",
+                          "quantidadeRemovida": 5
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "401", description = "Usuário não autenticado"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado - tentou remover recomendações de outro usuário"),
+        @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    })
+    @DeleteMapping("/usuario/{usuarioId}/todas")
+    @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> removerTodasRecomendacoes(
+            @Parameter(description = "ID do usuário cujas recomendações serão removidas")
+            @PathVariable Long usuarioId,
+            Authentication authentication) {
+        
+        boolean isAdmin = authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .anyMatch(auth -> auth.equals("ROLE_ADMIN"));
+        
+        int quantidadeRemovida = recomendadoService.removerTodasRecomendacoes(
+            usuarioId, 
+            authentication.getName(), 
+            isAdmin
+        );
+        
+        return ResponseEntity.ok(new java.util.HashMap<String, Object>() {{
+            put("mensagem", quantidadeRemovida + " recomendações removidas com sucesso");
+            put("quantidadeRemovida", quantidadeRemovida);
+        }});
+    }
 }

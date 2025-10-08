@@ -116,6 +116,31 @@ public class InvestimentoRecomendadoService {
     }
     
     /**
+     * Remove TODAS as recomendações de um usuário
+     */
+    @Transactional
+    public int removerTodasRecomendacoes(Long usuarioId, String emailUsuarioLogado, boolean isAdmin) {
+        Usuario usuarioAlvo = buscarUsuarioPorId(usuarioId);
+        Usuario usuarioLogado = buscarUsuarioPorEmail(emailUsuarioLogado);
+        
+        // Validar permissões: usuário só pode remover suas próprias recomendações
+        if (!isAdmin && !usuarioAlvo.getId().equals(usuarioLogado.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                "Você não tem permissão para remover recomendações de outro usuário"
+            );
+        }
+        
+        // Buscar todas as recomendações do usuário
+        List<InvestimentoRecomendado> recomendacoes = recomendadoRepository.findByUsuario(usuarioAlvo);
+        int quantidadeRemovida = recomendacoes.size();
+        
+        // Deletar todas
+        recomendadoRepository.deleteAll(recomendacoes);
+        
+        return quantidadeRemovida;
+    }
+    
+    /**
      * Converte entidade para DTO
      */
     private InvestimentoRecomendadoResponseDTO converterParaDTO(InvestimentoRecomendado recomendado) {
