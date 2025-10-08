@@ -5,7 +5,8 @@ import java.time.LocalDateTime;
 
 public class PosicaoCarteiraResponseDTO {
     
-    private Long id;
+    private Long id; // ID da posição na carteira
+    private Long investimentoId; // ID do investimento (FK para tabela INVESTIMENTO)
     private String nomeInvestimento;
     private String simboloInvestimento;
     private String categoria;
@@ -28,6 +29,9 @@ public class PosicaoCarteiraResponseDTO {
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public Long getInvestimentoId() { return investimentoId; }
+    public void setInvestimentoId(Long investimentoId) { this.investimentoId = investimentoId; }
 
     public String getNomeInvestimento() { return nomeInvestimento; }
     public void setNomeInvestimento(String nomeInvestimento) { this.nomeInvestimento = nomeInvestimento; }

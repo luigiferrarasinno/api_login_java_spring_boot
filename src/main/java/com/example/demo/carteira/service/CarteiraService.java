@@ -112,6 +112,7 @@ public class CarteiraService {
         
         PosicaoCarteiraResponseDTO dto = new PosicaoCarteiraResponseDTO();
         dto.setId(posicao.getId());
+        dto.setInvestimentoId(investimento.getId()); // ✅ ID do investimento
         dto.setNomeInvestimento(investimento.getNome());
         dto.setSimboloInvestimento(investimento.getSimbolo());
         dto.setCategoria(investimento.getCategoria() != null ? investimento.getCategoria().getDescricao() : "N/A");
