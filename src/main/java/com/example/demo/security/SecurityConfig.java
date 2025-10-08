@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableMethodSecurity
@@ -17,16 +18,19 @@ public class SecurityConfig {
 
     private final UsuarioDAO usuarioDAO;
     private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final CorsConfigurationSource corsConfigurationSource;
 
-    // Injetando o handler no construtor
-    public SecurityConfig(UsuarioDAO usuarioDAO, CustomAccessDeniedHandler accessDeniedHandler) {
+    // Injetando o handler e o CORS no construtor
+    public SecurityConfig(UsuarioDAO usuarioDAO, CustomAccessDeniedHandler accessDeniedHandler, CorsConfigurationSource corsConfigurationSource) {
         this.usuarioDAO = usuarioDAO;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.corsConfigurationSource = corsConfigurationSource;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**").disable())
             .headers(headers -> headers.frameOptions().disable()) // Habilita o uso do H2 Console
             .authorizeHttpRequests(auth -> auth
