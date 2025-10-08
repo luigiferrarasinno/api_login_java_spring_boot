@@ -1,5 +1,6 @@
 package com.example.demo.comentarios.service;
 
+import com.example.demo.comentarios.dto.request.FiltroComentarioRequestDTO;
 import com.example.demo.comentarios.model.Comentario;
 import com.example.demo.comentarios.repository.ComentarioRepository;
 import com.example.demo.investimento.model.Investimento;
@@ -11,7 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ComentarioService {
@@ -209,5 +212,175 @@ public class ComentarioService {
         } catch (EntityNotFoundException e) {
             return false;
         }
+    }
+
+    /**
+     * 🎯 MÉTODO UNIFICADO: Buscar comentários com filtros avançados
+     * 
+     * Este método centraliza todas as buscas de comentários, aplicando filtros
+     * e ordenação de forma combinada.
+     */
+    public List<Comentario> buscarComentariosComFiltros(
+            String emailUsuario, 
+            FiltroComentarioRequestDTO filtros,
+            boolean ehAdmin) {
+        
+        List<Comentario> comentarios;
+        
+        // Aplicar filtro rápido
+        if (filtros.getFiltro() != null) {
+            comentarios = aplicarFiltroRapido(filtros.getFiltro(), emailUsuario, filtros, ehAdmin);
+        } else {
+            // Sem filtro rápido, usar filtros específicos
+            comentarios = aplicarFiltrosEspecificos(emailUsuario, filtros, ehAdmin);
+        }
+        
+        // Aplicar filtros adicionais
+        comentarios = aplicarFiltrosAdicionais(comentarios, filtros, ehAdmin);
+        
+        // Aplicar ordenação
+        return ordenarComentarios(comentarios, filtros.getOrdenacao());
+    }
+
+    /**
+     * Aplicar filtro rápido
+     */
+    private List<Comentario> aplicarFiltroRapido(
+            FiltroComentarioRequestDTO.FiltroRapido filtro, 
+            String emailUsuario,
+            FiltroComentarioRequestDTO filtros,
+            boolean ehAdmin) {
+        
+        return switch (filtro) {
+            case MEUS -> buscarComentariosDoUsuario(emailUsuario);
+            
+            case INVESTIMENTO -> {
+                if (filtros.getInvestimentoId() == null) {
+                    throw new IllegalArgumentException("investimentoId é obrigatório para filtro INVESTIMENTO");
+                }
+                yield filtros.getApenasRaiz() != null && filtros.getApenasRaiz()
+                    ? buscarComentariosRaizPorInvestimento(filtros.getInvestimentoId())
+                    : buscarComentariosPorInvestimento(filtros.getInvestimentoId());
+            }
+            
+            case RESPOSTAS -> {
+                if (filtros.getComentarioPaiId() == null) {
+                    throw new IllegalArgumentException("comentarioPaiId é obrigatório para filtro RESPOSTAS");
+                }
+                yield buscarRespostasDoComentario(filtros.getComentarioPaiId());
+            }
+            
+            case TODOS -> {
+                if (!ehAdmin) {
+                    throw new SecurityException("Acesso negado: apenas administradores podem usar filtro TODOS");
+                }
+                yield comentarioRepository.findAll();
+            }
+            
+            case TODOS_PUBLICOS -> comentarioRepository.findByAtivoTrue();
+        };
+    }
+
+    /**
+     * Aplicar filtros específicos quando não há filtro rápido
+     */
+    private List<Comentario> aplicarFiltrosEspecificos(
+            String emailUsuario,
+            FiltroComentarioRequestDTO filtros,
+            boolean ehAdmin) {
+        
+        // Se tem investimentoId, buscar por investimento
+        if (filtros.getInvestimentoId() != null) {
+            return filtros.getApenasRaiz() != null && filtros.getApenasRaiz()
+                ? buscarComentariosRaizPorInvestimento(filtros.getInvestimentoId())
+                : buscarComentariosPorInvestimento(filtros.getInvestimentoId());
+        }
+        
+        // Se tem comentarioPaiId, buscar respostas
+        if (filtros.getComentarioPaiId() != null) {
+            return buscarRespostasDoComentario(filtros.getComentarioPaiId());
+        }
+        
+        // Se tem usuarioEmail e é admin, buscar por usuário
+        if (filtros.getUsuarioEmail() != null && ehAdmin) {
+            return buscarComentariosDoUsuario(filtros.getUsuarioEmail());
+        }
+        
+        // Padrão: comentários do próprio usuário
+        return buscarComentariosDoUsuario(emailUsuario);
+    }
+
+    /**
+     * Aplicar filtros adicionais (admin apenas para alguns)
+     */
+    private List<Comentario> aplicarFiltrosAdicionais(
+            List<Comentario> comentarios,
+            FiltroComentarioRequestDTO filtros,
+            boolean ehAdmin) {
+        
+        // Filtro por conteúdo (admin apenas)
+        if (filtros.getConteudo() != null && !filtros.getConteudo().isBlank()) {
+            if (!ehAdmin) {
+                throw new SecurityException("Acesso negado: apenas administradores podem filtrar por conteúdo");
+            }
+            String conteudoBusca = filtros.getConteudo().toLowerCase();
+            comentarios = comentarios.stream()
+                .filter(c -> c.getConteudo().toLowerCase().contains(conteudoBusca))
+                .collect(Collectors.toList());
+        }
+        
+        // Filtro por data início (admin apenas)
+        if (filtros.getDataInicio() != null && !filtros.getDataInicio().isBlank()) {
+            if (!ehAdmin) {
+                throw new SecurityException("Acesso negado: apenas administradores podem filtrar por data");
+            }
+            LocalDateTime dataInicio = LocalDateTime.parse(filtros.getDataInicio());
+            comentarios = comentarios.stream()
+                .filter(c -> !c.getDataCriacao().isBefore(dataInicio))
+                .collect(Collectors.toList());
+        }
+        
+        // Filtro por data fim (admin apenas)
+        if (filtros.getDataFim() != null && !filtros.getDataFim().isBlank()) {
+            if (!ehAdmin) {
+                throw new SecurityException("Acesso negado: apenas administradores podem filtrar por data");
+            }
+            LocalDateTime dataFim = LocalDateTime.parse(filtros.getDataFim());
+            comentarios = comentarios.stream()
+                .filter(c -> !c.getDataCriacao().isAfter(dataFim))
+                .collect(Collectors.toList());
+        }
+        
+        // Filtro apenasRaiz (se ainda não foi aplicado)
+        if (filtros.getApenasRaiz() != null && filtros.getApenasRaiz() 
+            && filtros.getFiltro() != FiltroComentarioRequestDTO.FiltroRapido.INVESTIMENTO) {
+            comentarios = comentarios.stream()
+                .filter(c -> c.getComentarioPai() == null)
+                .collect(Collectors.toList());
+        }
+        
+        return comentarios;
+    }
+
+    /**
+     * Ordenar comentários
+     */
+    private List<Comentario> ordenarComentarios(
+            List<Comentario> comentarios,
+            FiltroComentarioRequestDTO.OrdenacaoComentario ordenacao) {
+        
+        if (ordenacao == null) {
+            ordenacao = FiltroComentarioRequestDTO.OrdenacaoComentario.MAIS_RECENTES;
+        }
+        
+        return switch (ordenacao) {
+            case DATA_CRIACAO_ASC, MAIS_ANTIGOS -> comentarios.stream()
+                .sorted(Comparator.comparing(Comentario::getDataCriacao))
+                .collect(Collectors.toList());
+                
+            case DATA_CRIACAO_DESC, MAIS_RECENTES -> comentarios.stream()
+                .sorted(Comparator.comparing(Comentario::getDataCriacao).reversed())
+                .collect(Collectors.toList());
+        };
     }
 }

@@ -3,6 +3,7 @@ package com.example.demo.comentarios.controller;
 import com.example.demo.comentarios.dto.ComentarioDTO;
 import com.example.demo.comentarios.dto.CriarComentarioDTO;
 import com.example.demo.comentarios.dto.EditarComentarioDTO;
+import com.example.demo.comentarios.dto.request.*;
 import com.example.demo.comentarios.dto.response.*;
 import com.example.demo.comentarios.model.Comentario;
 import com.example.demo.comentarios.service.ComentarioService;
@@ -74,8 +75,113 @@ public class ComentarioController {
         }
     }
 
+    /**
+     * 🎯 ENDPOINT UNIFICADO: Buscar comentários com filtros avançados
+     */
+    @Operation(
+        summary = "Buscar comentários com filtros avançados (ENDPOINT UNIFICADO)",
+        description = """
+            **NOVO ENDPOINT UNIFICADO** que substitui /investimento/{id}, /meus, /{id}/respostas e /admin.
+            
+            Permite combinar múltiplos filtros:
+            
+            **Filtros Rápidos** (query param 'filtro'):
+            - `MEUS`: Seus comentários
+            - `INVESTIMENTO`: Comentários de um investimento (requer investimentoId)
+            - `RESPOSTAS`: Respostas de um comentário (requer comentarioPaiId)
+            - `TODOS`: Todos os comentários (**admin apenas**)
+            - `TODOS_PUBLICOS`: Todos os comentários ativos
+            
+            **Filtros Adicionais Combináveis**:
+            - `investimentoId`: ID do investimento
+            - `comentarioPaiId`: ID do comentário pai (para respostas)
+            - `usuarioEmail`: Email do usuário (**admin apenas**)
+            - `conteudo`: Busca parcial no conteúdo (**admin apenas**)
+            - `dataInicio`: Data início (formato ISO) (**admin apenas**)
+            - `dataFim`: Data fim (formato ISO) (**admin apenas**)
+            - `apenasRaiz`: true para apenas comentários raiz (não respostas)
+            
+            **Ordenação** (query param 'ordenacao'):
+            - `MAIS_RECENTES` / `DATA_CRIACAO_DESC` (padrão)
+            - `MAIS_ANTIGOS` / `DATA_CRIACAO_ASC`
+            
+            **Exemplos de Uso**:
+            - `/comentarios?filtro=MEUS` → Seus comentários
+            - `/comentarios?filtro=INVESTIMENTO&investimentoId=1` → Comentários do investimento 1
+            - `/comentarios?filtro=RESPOSTAS&comentarioPaiId=5` → Respostas do comentário 5
+            - `/comentarios?investimentoId=1&apenasRaiz=true` → Apenas comentários raiz do investimento 1
+            - `/comentarios?filtro=TODOS&conteudo=excelente` → Busca "excelente" (admin)
+            """,
+        tags = { " Comentários" }
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Lista de comentários filtrada retornada com sucesso",
+            content = @Content(mediaType = "application/json",
+            examples = @ExampleObject(value = "[{\"id\": 1, \"conteudo\": \"Comentário exemplo\", \"autor\": \"user@email.com\", \"dataCriacao\": \"2024-01-01T10:00:00\"}]"))
+        ),
+        @ApiResponse(responseCode = "403", description = "Acesso negado a filtros restritos (admin apenas)"),
+        @ApiResponse(responseCode = "400", description = "Parâmetros inválidos")
+    })
+    @GetMapping
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> buscarComentarios(
+            @RequestParam(required = false) FiltroComentarioRequestDTO.FiltroRapido filtro,
+            @RequestParam(required = false) Long investimentoId,
+            @RequestParam(required = false) Long comentarioPaiId,
+            @RequestParam(required = false) String usuarioEmail,
+            @RequestParam(required = false) String conteudo,
+            @RequestParam(required = false) String dataInicio,
+            @RequestParam(required = false) String dataFim,
+            @RequestParam(required = false) Boolean apenasRaiz,
+            @RequestParam(required = false) FiltroComentarioRequestDTO.OrdenacaoComentario ordenacao,
+            Authentication auth) {
+        try {
+            boolean ehAdmin = isAdmin(auth);
+            
+            // Construir DTO de filtros
+            FiltroComentarioRequestDTO filtros = new FiltroComentarioRequestDTO();
+            filtros.setFiltro(filtro);
+            filtros.setInvestimentoId(investimentoId);
+            filtros.setComentarioPaiId(comentarioPaiId);
+            filtros.setUsuarioEmail(usuarioEmail);
+            filtros.setConteudo(conteudo);
+            filtros.setDataInicio(dataInicio);
+            filtros.setDataFim(dataFim);
+            filtros.setApenasRaiz(apenasRaiz);
+            filtros.setOrdenacao(ordenacao != null ? ordenacao : FiltroComentarioRequestDTO.OrdenacaoComentario.MAIS_RECENTES);
+            
+            List<Comentario> comentarios = comentarioService.buscarComentariosComFiltros(
+                auth.getName(),
+                filtros,
+                ehAdmin
+            );
+            
+            List<ComentarioDTO> comentariosDTO = comentarios.stream()
+                .map(c -> new ComentarioDTO(c, true))
+                .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(comentariosDTO);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body("Erro: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 📋 Buscar comentários por investimento
+     */
     @Operation(summary = "Buscar comentários por investimento", 
-               description = "Lista todos os comentários de um investimento específico (acesso público)")
+               description = """
+                   Lista todos os comentários de um investimento específico (acesso público).
+                   
+                   💡 **DICA**: Também pode usar o endpoint unificado mais poderoso:
+                   - `GET /comentarios?filtro=INVESTIMENTO&investimentoId=1` → Mesmo resultado
+                   - `GET /comentarios?investimentoId=1&apenasRaiz=true` → Apenas comentários raiz
+                   - `GET /comentarios?investimentoId=1&ordenacao=MAIS_ANTIGOS` → Ordenados por data
+                   """)
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista de comentários do investimento",
             content = @Content(mediaType = "application/json",
@@ -100,8 +206,17 @@ public class ComentarioController {
         }
     }
 
+    /**
+     * 💬 Buscar respostas de um comentário
+     */
     @Operation(summary = "Buscar respostas de um comentário", 
-               description = "Lista todas as respostas de um comentário específico (acesso público)")
+               description = """
+                   Lista todas as respostas de um comentário específico (acesso público).
+                   
+                   💡 **DICA**: Também pode usar o endpoint unificado mais poderoso:
+                   - `GET /comentarios?filtro=RESPOSTAS&comentarioPaiId=1` → Mesmo resultado
+                   - `GET /comentarios?comentarioPaiId=1&ordenacao=MAIS_ANTIGOS` → Ordenadas por data
+                   """)
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista de respostas do comentário"),
         @ApiResponse(responseCode = "400", description = "Erro ao buscar respostas")
@@ -125,8 +240,18 @@ public class ComentarioController {
         }
     }
 
+    /**
+     * 📝 Buscar meus comentários
+     */
     @Operation(summary = "Buscar meus comentários", 
-               description = "Lista todos os comentários do usuário logado")
+               description = """
+                   Lista todos os comentários do usuário logado.
+                   
+                   💡 **DICA**: Também pode usar o endpoint unificado mais poderoso:
+                   - `GET /comentarios?filtro=MEUS` → Mesmo resultado
+                   - `GET /comentarios?filtro=MEUS&ordenacao=MAIS_ANTIGOS` → Ordenados por data
+                   - `GET /comentarios?filtro=MEUS&apenasRaiz=true` → Apenas comentários raiz (não respostas)
+                   """)
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista dos comentários do usuário",
             content = @Content(mediaType = "application/json",
@@ -152,8 +277,21 @@ public class ComentarioController {
         }
     }
 
+    /**
+     * 🔐 [ADMIN] Buscar todos os comentários
+     */
     @Operation(summary = "[ADMIN] Buscar todos os comentários", 
-               description = "Lista todos os comentários com filtros avançados (apenas admin)")
+               description = """
+                   Lista todos os comentários com filtros avançados (apenas admin).
+                   
+                   💡 **DICA**: Também pode usar o endpoint unificado mais poderoso:
+                   - `GET /comentarios?filtro=TODOS` → Todos os comentários (admin)
+                   - `GET /comentarios?filtro=TODOS&conteudo=excelente` → Busca por conteúdo
+                   - `GET /comentarios?usuarioEmail=user@email.com` → Comentários de um usuário
+                   - `GET /comentarios?investimentoId=1&dataInicio=2024-01-01T00:00:00` → Com filtros combinados
+                   
+                   ⚠️ **NOTA**: Filtros admin (conteudo, dataInicio, dataFim, usuarioEmail) só funcionam para administradores.
+                   """)
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista filtrada de comentários",
             content = @Content(mediaType = "application/json",

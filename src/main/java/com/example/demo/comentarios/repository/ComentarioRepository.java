@@ -39,6 +39,9 @@ public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
     // Contar comentários de um usuário
     long countByUsuarioIdAndAtivoTrue(Long usuarioId);
     
+    // Buscar todos os comentários ativos
+    List<Comentario> findByAtivoTrue();
+    
     // Buscar comentários com filtros combinados
     @Query("SELECT c FROM Comentario c WHERE c.ativo = true " +
            "AND (:investimentoId IS NULL OR c.investimento.id = :investimentoId) " +
