@@ -54,7 +54,8 @@ public class FiltroPlaylistRequestDTO {
         SEGUINDO,        // Playlists que estou seguindo
         PUBLICAS,        // Todas as playlists públicas
         COMPARTILHADAS,  // Playlists compartilhadas comigo (tipo COMPARTILHADA)
-        TODAS            // Todas as playlists que tenho acesso (minhas + seguindo)
+        TODAS,           // Todas as playlists que tenho acesso (minhas + seguindo + públicas)
+        TODAS_ADMIN      // ADMIN ONLY: Literalmente TODAS as playlists do sistema (incluindo privadas de outros)
     }
     
     public enum OrdenacaoPlaylist {

@@ -87,20 +87,26 @@ public class PlaylistController {
             - `SEGUINDO`: Playlists que você segue
             - `PUBLICAS`: Todas as playlists públicas
             - `COMPARTILHADAS`: Playlists compartilhadas especificamente com você
-            - `TODAS`: Todas que você tem acesso
-              * **ADMIN**: Vê LITERALMENTE TODAS as playlists do sistema (incluindo privadas de outros usuários)
-              * **USER**: Vê apenas playlists acessíveis (suas + seguindo + públicas)
-            
-            **🔑 IMPORTANTE - Comportamento do Filtro TODAS por Role**:
-            - **Administradores (ROLE_ADMIN)**:
-              * `filtro=TODAS` ou sem filtro → Retorna TODAS as playlists ativas do sistema
-              * Inclui playlists privadas de todos os usuários
+            - `TODAS`: Todas que você tem acesso (suas + seguindo + públicas)
+              * **Comportamento igual para TODOS** (admin e usuário comum)
+              * Retorna apenas playlists acessíveis ao usuário
+            - `TODAS_ADMIN`: **🔒 EXCLUSIVO ADMIN** - Literalmente TODAS as playlists do sistema
+              * Inclui playlists PRIVADAS de outros usuários
+              * Se usuário comum tentar usar, retorna erro 403
               * Útil para administração e auditoria
             
-            - **Usuários Comuns (ROLE_USER)**:
-              * `filtro=TODAS` ou sem filtro → Retorna apenas playlists acessíveis
-              * Suas próprias playlists + playlists que segue + playlists públicas
-              * NÃO vê playlists privadas de outros usuários
+            **🔑 IMPORTANTE - Filtros por Role**:
+            
+            **Usuários Comuns (ROLE_USER)**:
+            - Podem usar: MINHAS, SEGUINDO, PUBLICAS, COMPARTILHADAS, TODAS
+            - ❌ NÃO podem usar: TODAS_ADMIN (retorna SecurityException)
+            - `filtro=TODAS` ou sem filtro → Veem apenas acessíveis (suas + seguindo + públicas)
+            
+            **Administradores (ROLE_ADMIN)**:
+            - Podem usar: TODOS os filtros (incluindo TODAS_ADMIN)
+            - `filtro=TODAS` → Veem apenas acessíveis (igual usuário comum) ✅
+            - `filtro=TODAS_ADMIN` → Veem LITERALMENTE TODAS do sistema (incluindo privadas) 🔓
+            - Sem filtro → Comportamento padrão (apenas acessíveis)
             
             **Filtros Adicionais Combináveis**:
             - `tipo`: Filtrar por tipo (PUBLICA, PRIVADA, COMPARTILHADA)
@@ -113,23 +119,7 @@ public class PlaylistController {
             - `NOME_ASC` / `NOME_DESC`
             - `TOTAL_INVESTIMENTOS_ASC` / `TOTAL_INVESTIMENTOS_DESC`
             - `TOTAL_SEGUIDORES_ASC` / `TOTAL_SEGUIDORES_DESC`
-            
-            **Exemplos de Combinações**:
-            
-            **Para Administradores**:
-            - `/playlists?filtro=TODAS` → TODAS as playlists do sistema (incluindo privadas)
-            - `/playlists?filtro=TODAS&tipo=PRIVADA` → Todas as playlists privadas do sistema
-            - `/playlists?criadorEmail=user@email.com` → Todas as playlists de um usuário específico
-            
-            **Para Usuários Comuns**:
-            - `/playlists?filtro=PUBLICAS&nome=dividendos&ordenacao=TOTAL_SEGUIDORES_DESC`
-              → Busca "dividendos" em públicas, ordena por mais seguidas
-            
-            - `/playlists?filtro=MINHAS&permiteColaboracao=true`
-              → Suas playlists colaborativas
-            
-            - `/playlists?tipo=COMPARTILHADA&criadorEmail=admin@admin.com`
-              → Playlists compartilhadas criadas pelo admin (que você tem acesso)
+
             """,
         tags = { "Playlists" }
     )

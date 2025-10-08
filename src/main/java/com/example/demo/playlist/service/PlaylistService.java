@@ -60,8 +60,8 @@ public class PlaylistService {
      * Este método substitui todos os endpoints GET específicos por um único endpoint com filtros.
      * Suporta filtros rápidos, busca por nome, tipo, ordenação customizada, etc.
      * 
-     * ADMIN: Quando filtro = TODAS, vê literalmente TODAS (incluindo privadas de outros)
-     * USER: Quando filtro = TODAS, vê apenas as acessíveis (suas + seguindo + públicas)
+     * TODAS: Comportamento igual para todos (apenas acessíveis - como usuário comum)
+     * TODAS_ADMIN: Exclusivo para admin (literalmente todas do sistema)
      */
     public List<PlaylistResumoResponseDTO> listarPlaylistsComFiltros(String emailUsuario, FiltroPlaylistRequestDTO filtros, boolean isAdmin) {
         Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
@@ -73,8 +73,8 @@ public class PlaylistService {
             playlists = aplicarFiltroRapido(filtros.getFiltro(), usuario, isAdmin);
         } else {
             // Se não especificou filtro rápido, busca todas que o usuário tem acesso
-            // ADMIN vê todas, USER vê apenas acessíveis
-            playlists = isAdmin ? playlistRepository.findByAtivaTrue() : playlistRepository.findAllAcessiveisPorUsuario(usuario);
+            // Comportamento igual para todos (admin e user veem apenas acessíveis)
+            playlists = playlistRepository.findAllAcessiveisPorUsuario(usuario);
         }
         
         // 2. Aplicar filtros adicionais
@@ -91,16 +91,22 @@ public class PlaylistService {
     
     /**
      * Aplica filtro rápido predefinido
-     * ADMIN com filtro TODAS: vê TODAS as playlists do sistema (incluindo privadas de outros)
-     * USER com filtro TODAS: vê apenas playlists acessíveis (suas + seguindo + públicas)
+     * TODAS: Comportamento igual para todos (apenas acessíveis)
+     * TODAS_ADMIN: Exclusivo para admin (literalmente todas do sistema)
      */
     private List<Playlist> aplicarFiltroRapido(FiltroPlaylistRequestDTO.FiltroRapido filtro, Usuario usuario, boolean isAdmin) {
+        // Validação de segurança: TODAS_ADMIN só pode ser usado por admin
+        if (filtro == FiltroPlaylistRequestDTO.FiltroRapido.TODAS_ADMIN && !isAdmin) {
+            throw new SecurityException("O filtro TODAS_ADMIN é exclusivo para administradores");
+        }
+        
         return switch (filtro) {
             case MINHAS -> playlistRepository.findByCriadorAndAtivaTrue(usuario);
             case SEGUINDO -> playlistRepository.findPlaylistsSeguidasPorUsuario(usuario);
             case PUBLICAS -> playlistRepository.findByTipoPublicaAndAtivaTrue();
             case COMPARTILHADAS -> playlistRepository.findPlaylistsCompartilhadasPorUsuario(usuario);
-            case TODAS -> isAdmin ? playlistRepository.findByAtivaTrue() : playlistRepository.findAllAcessiveisPorUsuario(usuario);
+            case TODAS -> playlistRepository.findAllAcessiveisPorUsuario(usuario); // Sempre apenas acessíveis
+            case TODAS_ADMIN -> playlistRepository.findByAtivaTrue(); // ADMIN: todas do sistema
         };
     }
     
